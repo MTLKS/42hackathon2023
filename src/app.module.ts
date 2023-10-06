@@ -4,6 +4,7 @@ import { AppService } from './app.service';
 import { NecordModule } from 'necord';
 import { IntentsBitField } from 'discord.js';
 import { LoginService } from './commands/login.service';
+import { PingService } from './commands/ping.service';
 
 @Module({
   imports: [
@@ -16,6 +17,6 @@ import { LoginService } from './commands/login.service';
     }),
   ],
   controllers: [AppController],
-  providers: [AppService, LoginService],
+  providers: [AppService, LoginService, PingService],
 })
 export class AppModule {}
