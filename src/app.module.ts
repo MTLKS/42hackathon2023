@@ -9,6 +9,8 @@ import { RushEvalCadetCommand, RushEvalCadetStringSelectComponent } from './comm
 import { RushEvalPiscinersCommand } from './commands/rusheval/pisciners.command';
 import { RushEvalInfoCommand } from './commands/rusheval/info.command';
 import { RushEvalMatchCommand } from './commands/rusheval/match.command';
+import { HttpModule } from '@nestjs/axios';
+import { Api42Service } from './api42/api42.service'
 
 @Module({
   imports: [
@@ -19,8 +21,9 @@ import { RushEvalMatchCommand } from './commands/rusheval/match.command';
       ],
       development: [process.env.DISCORD_DEVELOPMENT_GUILD_ID]
     }),
+    HttpModule,
   ],
   controllers: [AppController],
-  providers: [AppService, PingCommand, LoginCommand, RushEvalCadetCommand, RushEvalCadetStringSelectComponent, RushEvalPiscinersCommand, RushEvalInfoCommand, RushEvalMatchCommand ],
+  providers: [AppService, Api42Service, PingCommand, LoginCommand, RushEvalCadetCommand, RushEvalCadetStringSelectComponent, RushEvalPiscinersCommand, RushEvalInfoCommand, RushEvalMatchCommand ],
 })
 export class AppModule {}
