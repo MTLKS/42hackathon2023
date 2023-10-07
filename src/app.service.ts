@@ -2,10 +2,13 @@ import { Injectable, Logger, Request } from '@nestjs/common';
 import { Once, Context, ContextOf } from 'necord';
 import { HttpService } from '@nestjs/axios';
 import { firstValueFrom } from 'rxjs';
+import { InjectModel } from '@nestjs/mongoose';
+import { Student } from './schema/student.schema';
+import { Model } from 'mongoose';
 
 @Injectable()
 export class AppService {
-  constructor(private httpService: HttpService) {}
+  constructor(private httpService: HttpService, @InjectModel(Student.name) private readonly studentModel: Model<Student>) {}
   private readonly logger = new Logger(AppService.name);
 
   @Once('ready')
@@ -13,17 +16,11 @@ export class AppService {
     this.logger.log(`Bot logged in as ${client.user.username}`);
   }
 
-  getHello() {
-    return 'Hi!'
-  }
-
   async getCode(@Request() request: any): Promise<string> {
     if (request.query.code == null) {
       return 'No code provided';
     }
 
-    console.log(request.query.code);
-    console.log(request.cookies['id']);
     let { data } = await firstValueFrom(this.httpService.post('https://api.intra.42.fr/oauth/token', {
       'grant_type': 'authorization_code',
       'client_id': process.env.API_UID,
@@ -31,15 +28,19 @@ export class AppService {
       'code': request.query.code,
       'redirect_uri': 'http://hack.mtlks.com:3000'
     }));
-    console.log(data.access_token);
     let userResponse = await firstValueFrom(this.httpService.get('https://api.intra.42.fr/v2/me', { headers: { Authorization: `Bearer ${data.access_token}` } }));
-    console.log(userResponse.data.id);
-    let coalitionResponse = await firstValueFrom(this.httpService.get(`https://api.intra.42.fr/v2/users/${userResponse.data.id}/coalitions`, { headers: { Authorization: `Bearer ${data.access_token}` } }));
-    console.log(coalitionResponse.data[0].name);
-    // this.server.emit('addRole', {
-    //   'id': request.cookies['id'],
-    //   'coalition': coalitionResponse.data[0].name
-    // });
+    let student = await this.studentModel.findOne({ intraId: userResponse.data.id });
+    console.log(student);
+    if (student == null) {
+      student = new this.studentModel({
+        intraId: userResponse.data.id,
+        discordId: request.cookies['id'],
+      });
+      await student.save();
+    }
+    var a = await this.studentModel.find();
+    console.log(a);
+
     return 'All set!';
   }
 }

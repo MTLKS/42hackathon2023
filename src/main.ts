@@ -79,8 +79,8 @@ async function api42_use_example() {
 async function bootstrap() {
   const app = await NestFactory.create(AppModule);
   app.use(cookieParser());
-  await app.listen(3001);
-  api42_use_example()
+  await app.listen(process.env.PORT || 3000);
+  // api42_use_example()
 }
 
 bootstrap();
