@@ -16,6 +16,7 @@ import { Student, StudentSchema } from './schema/student.schema';
 import { Timeslot, TimeslotSchema } from './schema/timeslot.schema';
 import { Evaluator, EvaluatorSchema } from './schema/evaluator.schema';
 import { Team, TeamSchema } from './schema/team.schema';
+import { RushEvalFeedbackCommand } from './commands/rusheval/feedback.command';
 
 @Module({
   imports: [
@@ -36,6 +37,17 @@ import { Team, TeamSchema } from './schema/team.schema';
     ]) 
   ],
   controllers: [AppController],
-  providers: [AppService, Api42Service, PingCommand, LoginCommand, RushEvalCadetCommand, RushEvalCadetStringSelectComponent, RushEvalPiscinersCommand, RushEvalInfoCommand, RushEvalMatchCommand ],
+  providers: [
+    AppService,
+    Api42Service,
+    PingCommand,
+    LoginCommand,
+    RushEvalCadetCommand,
+    RushEvalCadetStringSelectComponent,
+    RushEvalPiscinersCommand,
+    RushEvalInfoCommand,
+    RushEvalMatchCommand,
+    RushEvalFeedbackCommand
+  ],
 })
 export class AppModule {}
