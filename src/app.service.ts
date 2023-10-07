@@ -5,10 +5,10 @@ import { Once, Context, ContextOf } from 'necord';
 export class AppService {
   private readonly logger = new Logger(AppService.name);
 
-	@Once('ready')
-	public onReady(@Context() [client]: ContextOf<'ready'>) {
-		this.logger.log(`Bot logged in as ${client.user.username}`);
-	}
+  @Once('ready')
+  public onReady(@Context() [client]: ContextOf<'ready'>) {
+    this.logger.log(`Bot logged in as ${client.user.username}`);
+  }
 
   getHello() {
     return 'Hi!'

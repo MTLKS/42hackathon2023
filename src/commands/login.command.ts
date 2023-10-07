@@ -2,7 +2,7 @@ import { Injectable } from '@nestjs/common';
 import { SlashCommand, SlashCommandContext, Context } from 'necord';
 
 @Injectable()
-export class LoginService {
+export class LoginCommand {
 	@SlashCommand({
 		name: 'login',
 		description: 'Login to 42 API',

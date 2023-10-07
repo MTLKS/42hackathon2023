@@ -2,7 +2,7 @@ import { Injectable } from '@nestjs/common';
 import { SlashCommand, SlashCommandContext, Context } from 'necord';
 
 @Injectable()
-export class PingService {
+export class PingCommand {
 	@SlashCommand({
 		name: 'ping',
 		description: 'Ping!',
