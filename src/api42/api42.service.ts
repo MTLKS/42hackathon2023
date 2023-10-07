@@ -14,9 +14,10 @@ export class Api42Service {
       return axios.get(url)
     }
   
-    async getProjectTeams(projectId: string | number, ...args: string[]) {
+    async getProjectTeams(project_id: string | number, ...args: string[]) {
       args.push(`access_token=${this.access_token}`)
-      const url = `${Api42Service.API_URL}/v2/projects/${projectId}/teams?${args.join('&')}`
+      const url = `${Api42Service.API_URL}/v2/projects/${project_id}/teams?${args.join('&')}`
       return axios.get(url)
     }
+
 }

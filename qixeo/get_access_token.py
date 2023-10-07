@@ -4,7 +4,7 @@ import os
 DOMAIN = "https://api.intra.42.fr"
 
 
-def get_access_token():
+def get_access_token() -> str:
     UID = os.environ['API_UID']
     SECRET = os.environ['API_SECRET']
 
