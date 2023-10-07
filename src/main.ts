@@ -8,6 +8,7 @@ import { Api42Service } from './api42/api42.service';
 import axios, { Axios, AxiosError } from 'axios'
 import { exit } from 'process';
 import { writeFile } from 'fs';
+import { User } from 'discord.js';
 const { DateTime } = require('luxon');
 
 async function initAccessToken()
@@ -32,8 +33,8 @@ async function initAccessToken()
 
 
 async function api42_use_example() {
-  let service: Api42Service;
-  const CAMPUS_ID = 34;
+  const throwerr = (err) => { if (err) throw err }
+  let service: Api42Service
 
   try {
     service = new Api42Service((await initAccessToken()).data.access_token)
@@ -41,37 +42,52 @@ async function api42_use_example() {
     console.error(error)
     exit(1)
   }
-  const logerr = function(err) {
-    if (err) {
-      return console.error(err)
-    }
-    else {
-      console.log('ok')
-    }
-  }
   try {
-    {
-      const login: string  = 'hqixeo'
+    /** fetching user with login */
+    // {
+    //   const login: string  = 'hqixeo'
   
-      let info = await service.getUserInfo(login)
+    //   let info = await service.getUserInfo(login)
     
-      // console.log(info)
-      // console.log(typeof info)
-      // console.log(typeof info.data)
-      writeFile(`${login}.json`, JSON.stringify(info.data, null, '\t'), logerr)
-    }
+    //   // console.log(info)
+    //   // console.log(typeof info)
+    //   // console.log(typeof info.data)
+    //   writeFile(`${login}.json`, JSON.stringify(info.data, null, '\t'), throwerr)
+    // }
+    // /** fetching project with slug */
+    // {
+    //   const ID_42KL = 34;
+    //   const project_id = 'c-piscine-rush-01'
+    //   const now = DateTime.now().toFormat('yyyy-MM-dd');
+    //   const start = DateTime.now().minus({ weeks: 4 }).toFormat('yyyy-MM-dd');
+    //   let   info = await service.getProjectTeams(project_id,
+    //     `filter[campus]=${ID_42KL}`,
+    //     `range[created_at]=${start},${now}`)
+
+    //   writeFile(`${ID_42KL} ${project_id}.json`, JSON.stringify(info.data, null, '\t'), throwerr)
+    // }
+    /** fetching ongoing rush and filter data */
     {
-      const project_id = 'c-piscine-rush-01'
-      const now = DateTime.now().toFormat('yyyy-MM-dd');
-      const start = DateTime.now().minus({ weeks: 4 }).toFormat('yyyy-MM-dd');
-      let   info = await service.getProjectTeams(project_id,
-        `filter[campus]=${CAMPUS_ID}`,
-        `range[created_at]=${start},${now}`)
-  
-      writeFile(`${project_id}.json`, JSON.stringify(info.data, null, '\t'), logerr)
+      const ID_42WOLFSBURG = 44;
+      const project_id = 'c-piscine-rush-02'
+      const info = await service.getProjectTeams(project_id,
+        'filter[status]=in_progress,waiting_for_evaluation',
+        `filter[campus]=${ID_42WOLFSBURG}`
+        )
+      const arr = JSON.parse(JSON.stringify(info.data)).map(group => {
+          const data  = {
+            id: group['id'],
+            name: group['name'],
+            users: group['users'].map(user => { return user['login'] }),
+            leader: group['users'].find(user => { return (user['leader']) })['login']
+          }
+
+          return (data)
+        })
+
+      writeFile(`${ID_42WOLFSBURG} ${project_id}.json`, JSON.stringify(arr, null, '\t'), throwerr)
     }
   } catch (error) {
-    console.log(typeof error)
     console.error(error)
   }
 }
