@@ -5,7 +5,7 @@ import { NecordModule } from 'necord';
 import { IntentsBitField } from 'discord.js';
 import { LoginCommand } from './commands/login.command';
 import { PingCommand } from './commands/ping.command';
-import { RushEvalCadetCommand } from './commands/rusheval/cadet.command';
+import { RushEvalCadetCommand, RushEvalCadetStringSelectComponent } from './commands/rusheval/cadet.command';
 import { RushEvalPiscinersCommand } from './commands/rusheval/pisciners.command';
 import { RushEvalInfoCommand } from './commands/rusheval/info.command';
 import { RushEvalMatchCommand } from './commands/rusheval/match.command';
@@ -21,6 +21,6 @@ import { RushEvalMatchCommand } from './commands/rusheval/match.command';
     }),
   ],
   controllers: [AppController],
-  providers: [AppService, PingCommand, LoginCommand, RushEvalCadetCommand, RushEvalPiscinersCommand, RushEvalInfoCommand, RushEvalMatchCommand ],
+  providers: [AppService, PingCommand, LoginCommand, RushEvalCadetCommand, RushEvalCadetStringSelectComponent, RushEvalPiscinersCommand, RushEvalInfoCommand, RushEvalMatchCommand ],
 })
 export class AppModule {}
