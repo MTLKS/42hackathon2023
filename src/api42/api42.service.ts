@@ -1,20 +1,22 @@
-import { Injectable } from '@nestjs/common';
-import { HttpService } from '@nestjs/axios';
+import axios from 'axios';
 
-@Injectable()
 export class Api42Service {
-  API_URL = 'https://api.intra.42.fr';
-  API_UID = process.env.API_UID;
-  API_SECRET = process.env.API_SECRET;
-  ACCESS_TOKEN = '';
+  static readonly API_URL = 'https://api.intra.42.fr';
+  static readonly API_UID = process.env.API_UID;
+  static readonly API_SECRET = process.env.API_SECRET;
 
-  constructor(private readonly httpService: HttpService) {
-    this.httpService.post(`${this.API_URL}/oauth/token`, {
-      grant_type: 'client_credentials',
-      client_id: this.API_UID,
-      client_secret: this.API_SECRET,
-    }).subscribe(response => {
-      this.ACCESS_TOKEN = response.data.access_token;
-    });
+  constructor(private readonly access_token: string) {
   }
+
+    async getUserInfo(login: string, ...args: string[]) {
+      args.push(`access_token=${this.access_token}`)
+      const url = `${Api42Service.API_URL}/v2/users/${login}?${args.join('&')}`
+      return axios.get(url)
+    }
+  
+    async getProjectTeams(projectId: string | number, ...args: string[]) {
+      args.push(`access_token=${this.access_token}`)
+      const url = `${Api42Service.API_URL}/v2/projects/${projectId}/teams?${args.join('&')}`
+      return axios.get(url)
+    }
 }
