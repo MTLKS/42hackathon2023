@@ -27,6 +27,7 @@
     "axios": "^1.5.1",
     "cookie-parser": "^1.4.6",
     "discord.js": "^14.13.0",
+    "luxon": "^3.4.3",
     "necord": "^6.1.7",
     "reflect-metadata": "^0.1.13",
     "rxjs": "^7.8.1"

@@ -4,7 +4,6 @@ import requests
 import sys
 import os
 import json
-import pandas as pd
 
 
 # 34 is the id referring to 42 Kuala Lumpur
