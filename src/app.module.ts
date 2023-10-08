@@ -6,7 +6,7 @@ import { IntentsBitField } from 'discord.js';
 import { LoginCommand } from './commands/login.command';
 import { PingCommand } from './commands/ping.command';
 import { RushEvalCadetCommand, RushEvalCadetStringSelectComponent } from './commands/rusheval/cadet.command';
-import { RushEvalPiscinersCommand } from './commands/rusheval/pisciners.command';
+import { RushEvalPiscinersCommand, RushEvalPiscinersButtonComponent, RushEvalPiscinersStringSelectComponent } from './commands/rusheval/pisciners.command';
 import { RushEvalInfoCommand } from './commands/rusheval/info.command';
 import { RushEvalMatchCommand } from './commands/rusheval/match.command';
 import { HttpModule } from '@nestjs/axios';
@@ -45,6 +45,8 @@ import { RushEvalFeedbackCommand } from './commands/rusheval/feedback.command';
     RushEvalCadetCommand,
     RushEvalCadetStringSelectComponent,
     RushEvalPiscinersCommand,
+    RushEvalPiscinersButtonComponent,
+    RushEvalPiscinersStringSelectComponent,
     RushEvalInfoCommand,
     RushEvalMatchCommand,
     RushEvalFeedbackCommand
