@@ -17,6 +17,7 @@ import { Timeslot, TimeslotSchema } from './schema/timeslot.schema';
 import { Evaluator, EvaluatorSchema } from './schema/evaluator.schema';
 import { Team, TeamSchema } from './schema/team.schema';
 import { RushEvalFeedbackCommand, RushEvalFeedbackFormCommand } from './commands/rusheval/feedback.command';
+import { UpdateRolesCommand } from './commands/updateroles.command';
 
 @Module({
   imports: [
@@ -50,7 +51,8 @@ import { RushEvalFeedbackCommand, RushEvalFeedbackFormCommand } from './commands
     RushEvalInfoCommand,
     RushEvalMatchCommand,
     RushEvalFeedbackCommand,
-    RushEvalFeedbackFormCommand
+    RushEvalFeedbackFormCommand,
+    UpdateRolesCommand
   ],
 })
 export class AppModule {}

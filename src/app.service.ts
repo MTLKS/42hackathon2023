@@ -30,14 +30,22 @@ export class AppService {
     }));
     let userResponse = await firstValueFrom(this.httpService.get('https://api.intra.42.fr/v2/me', { headers: { Authorization: `Bearer ${data.access_token}` } }));
     let student = await this.studentModel.findOne({ intraId: userResponse.data.id });
-
     let role = '';
-    if (userResponse.data.cursus_users[1].grade == 'Member') {
+    if (userResponse.data.cursus_users.length == 1) {
+      if (new Date(userResponse.data.cursus_users[0].end_at).getTime() < Date.now())
+        role = 'FLOATY';
+      else
+        role = 'PISCINER';
+    }
+    else if (userResponse.data.cursus_users[1].grade == 'Member') {
       role = 'SPECIALIZATION';
     } else if (userResponse.data.cursus_users[1].grade == 'Learner') {
-      role = 'CADET';
-    } else {
-      role = 'PISCINER';
+      if (new Date(userResponse.data.cursus_users[1].blackholed_at).getTime() < Date.now())
+        role = 'BLACKHOLED';
+      else if (new Date(userResponse.data.cursus_users[1].begin_at).getTime() < Date.now())
+        role = 'CADET';
+      else
+        role = 'RESERVISTS';
     }
 
     let coalition = '';
