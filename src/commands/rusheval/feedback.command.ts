@@ -66,7 +66,7 @@ export class RushEvalFeedbackFormCommand {
     // for each member in team
     const member1 = new TextInputBuilder()
       .setStyle(TextInputStyle.Paragraph)
-      .setCustomId('student {login2}')
+      .setCustomId('student {login1}')
       .setLabel('An introduction of {login1}')
     ;
     const member2 = new TextInputBuilder()
