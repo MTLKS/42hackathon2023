@@ -31,22 +31,15 @@ export class RushEvalInfoCommand {
     description: 'Get current info about rush eval',
   })
   public async onExecute(@Context() [interaction]: SlashCommandContext, @Options() { timeslot }: TimeslotDto) {
-    console.log(timeslot);
-    console.log(timeslot == '10:00AM');
     if (['10:00AM', '11:00AM', '2:00PM', '3:00PM', '4:00PM', '5:00PM'].includes(timeslot)) {
-      console.log('Entered timeslot');
       const evaluators = await this.evaluatorModel.find({ 'timeslots.timeslot': timeslot }).exec();
       const teams = await this.teamModel.find({ 'timeslot.timeslot': timeslot }).exec();
-
-      console.log(evaluators);
-      console.log(teams);
 
       let evaluatorsValue = evaluators.map((evaluator) => evaluator.student.intraName).join('\n');
       evaluatorsValue = evaluatorsValue == '' ? 'None' : evaluatorsValue;
 
       let teamsValue = teams.map((team) => team.teamLeader.intraName).join('\n');
       teamsValue = teamsValue == '' ? 'None' : teamsValue;
-
 
       const newEmbed = new EmbedBuilder()
         .setColor('#0099ff')

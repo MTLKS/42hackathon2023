@@ -4,6 +4,7 @@ import { InjectModel } from '@nestjs/mongoose';
 import { Team } from 'src/schema/team.schema';
 import { Model } from 'mongoose';
 import { Evaluator } from 'src/schema/evaluator.schema';
+import { EmbedBuilder } from 'discord.js';
 
 @RushEvalCommandDecorator()
 export class RushEvalMatchCommand {
@@ -35,22 +36,24 @@ export class RushEvalMatchCommand {
       })
     })
 
-    let sessionMap = new Map<string, Array<{team: string, cadet: string}>>()
+    let info = ''
+    console.log(teams)
     teams.forEach(team => {
       const evaluatorName = team.evaluator.intraName
-      const groupName = `${team.teamLeader.intraName}'s group`
+      const groupName = team.teamLeader.intraName
       const time = team.timeslot.timeslot
 
-      sessionMap[time] = {
-        team: groupName,
-        cadet: evaluatorName
-      }
+      info += `${evaluatorName} | ${groupName} | ${time}\n`
     })
 
-    let text_content = []
-    for (const time in sessionMap) {
-      text_content.push(`${time}: ${JSON.stringify(sessionMap[time])}`)
-    }
-    return interaction.reply(text_content.join('\n'))
+    const newEmbed = new EmbedBuilder()
+      .setColor('#0099ff')
+      .setTitle('Rush eval match info')
+      .setDescription('Current rush eval match info')
+      .addFields(
+        { name: 'Evaluator | Team Leader | Time', value: info || 'None' },
+      );
+
+    return interaction.reply({ content: '', ephemeral: true, embeds: [newEmbed]})
   }
 }

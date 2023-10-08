@@ -44,9 +44,10 @@ export class RushEvalFeedbackFormCommand {
     // tryTeam.evaluator = evaluator;
     // await tryTeam.save();
 
-    const team = await this.teamModel.findOne({ 'evaluator.intraName': 'maliew' }).exec();
+    const student = await this.studentModel.findOne({ discordId: interaction.user.id }).exec();
+    const team = await this.teamModel.findOne({ evaluator: student }).exec();
 
-    if (team === null) {
+    if (team == null) {
       return interaction.reply({
         content: 'There are no teams assigned to you.',
         ephemeral: true
