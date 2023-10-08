@@ -9,10 +9,16 @@ export class Student {
   intraId: string;
 
   @Prop()
+  intraName: string;
+
+  @Prop()
   discordId: string;
 
   @Prop()
-  role: string;
+  progressRole: string;
+
+  @Prop()
+  coalitionRole: string;
 
 }
 

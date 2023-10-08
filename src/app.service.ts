@@ -30,16 +30,37 @@ export class AppService {
     }));
     let userResponse = await firstValueFrom(this.httpService.get('https://api.intra.42.fr/v2/me', { headers: { Authorization: `Bearer ${data.access_token}` } }));
     let student = await this.studentModel.findOne({ intraId: userResponse.data.id });
-    console.log(student);
+
+    let role = '';
+    if (userResponse.data.cursus_users[1].grade == 'Member') {
+      role = 'SPECIALIZATION';
+    } else if (userResponse.data.cursus_users[1].grade == 'Learner') {
+      role = 'CADET';
+    } else {
+      role = 'PISCINER';
+    }
+
+    let coalition = '';
+    if (role == 'SPECIALIZATION' || role == 'CADET') {
+      let coalitionResponse = await firstValueFrom(this.httpService.get(`https://api.intra.42.fr/v2/users/${userResponse.data.id}/coalitions`, { headers: { Authorization: `Bearer ${data.access_token}` } }));
+      coalition = coalitionResponse.data[0].name;
+    }
+
     if (student == null) {
       student = new this.studentModel({
         intraId: userResponse.data.id,
+        intraName: userResponse.data.login,
         discordId: request.cookies['id'],
+        progressRole: role,
+        coalitionRole: coalition
       });
       await student.save();
+    } else {
+      student.discordId = request.cookies['id'];
+      student.progressRole = role;
+      student.coalitionRole = coalition;
+      await student.save();
     }
-    var a = await this.studentModel.find();
-    console.log(a);
 
     return 'All set!';
   }
