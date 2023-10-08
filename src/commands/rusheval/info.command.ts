@@ -33,7 +33,7 @@ export class RushEvalInfoCommand {
   public async onExecute(@Context() [interaction]: SlashCommandContext, @Options() { timeslot }: TimeslotDto) {
     console.log(timeslot);
     console.log(timeslot == '10:00AM');
-    if (['10:00AM', '11:00AM', '12:00PM', '3:00PM', '4:00PM', '5:00PM'].includes(timeslot)) {
+    if (['10:00AM', '11:00AM', '2:00PM', '3:00PM', '4:00PM', '5:00PM'].includes(timeslot)) {
       console.log('Entered timeslot');
       const evaluators = await this.evaluatorModel.find({ 'timeslots.timeslot': timeslot }).exec();
       const teams = await this.teamModel.find({ 'timeslot.timeslot': timeslot }).exec();
