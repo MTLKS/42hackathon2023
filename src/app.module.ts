@@ -24,7 +24,8 @@ import { UpdateRolesCommand } from './commands/updateroles.command';
     NecordModule.forRoot({
       token: process.env.DISCORD_TOKEN,
       intents: [
-        IntentsBitField.Flags.Guilds
+        IntentsBitField.Flags.Guilds,
+        IntentsBitField.Flags.GuildMembers
       ],
       development: [process.env.DISCORD_DEVELOPMENT_GUILD_ID]
     }),
