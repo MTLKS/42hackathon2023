@@ -8,16 +8,16 @@ export class Api42Service {
   constructor(private readonly access_token: string) {
   }
 
-    async getUserInfo(login: string, ...args: string[]) {
-      args.push(`access_token=${this.access_token}`)
-      const url = `${Api42Service.API_URL}/v2/users/${login}?${args.join('&')}`
-      return axios.get(url)
-    }
-  
-    async getProjectTeams(project_id: string | number, ...args: string[]) {
-      args.push(`access_token=${this.access_token}`)
-      const url = `${Api42Service.API_URL}/v2/projects/${project_id}/teams?${args.join('&')}`
-      return axios.get(url)
-    }
+  async getUserInfo(login: string, ...args: string[]) {
+    args.push(`access_token=${this.access_token}`)
+    const url = `${Api42Service.API_URL}/v2/users/${login}?${args.join('&')}`
+    return axios.get(url)
+  }
+
+  async getProjectTeams(project_id: string | number, ...args: string[]) {
+    args.push(`access_token=${this.access_token}`)
+    const url = `${Api42Service.API_URL}/v2/projects/${project_id}/teams?${args.join('&')}`
+    return axios.get(url)
+  }
 
 }

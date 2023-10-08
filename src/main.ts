@@ -1,15 +1,11 @@
 import { NestFactory } from '@nestjs/core';
 import { AppModule } from './app.module';
 import * as cookieParser from 'cookie-parser';
-
-import { HttpService } from '@nestjs/axios';
 import { Api42Service } from './api42/api42.service';
-
-import axios, { Axios, AxiosError } from 'axios'
+import axios from 'axios'
 import { exit } from 'process';
-import { writeFile } from 'fs';
-import { User } from 'discord.js';
-const { DateTime } = require('luxon');
+import { writeFile, writeFileSync } from 'fs';
+import { DateTime } from 'luxon';
 
 async function initAccessToken()
 {
@@ -71,8 +67,8 @@ async function api42_use_example() {
       const ID_42WOLFSBURG = 44;
       const project_id = 'c-piscine-rush-02'
       const info = await service.getProjectTeams(project_id,
-        'filter[status]=in_progress,waiting_for_evaluation',
-        `filter[campus]=${ID_42WOLFSBURG}`
+          'filter[status]=in_progress,waiting_for_evaluation',
+          `filter[campus]=${ID_42WOLFSBURG}`
         )
       const arr = JSON.parse(JSON.stringify(info.data)).map(group => {
           const data  = {
