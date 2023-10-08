@@ -6,6 +6,7 @@ import { Inject, Injectable } from '@nestjs/common';
 import { InjectModel } from '@nestjs/mongoose';
 import { Model } from 'mongoose';
 import { Team } from 'src/schema/team.schema';
+import { Student } from 'src/schema/student.schema';
 
 @RushEvalCommandDecorator()
 export class RushEvalFeedbackCommand {
@@ -33,18 +34,24 @@ export class RushEvalFeedbackCommand {
 export class RushEvalFeedbackFormCommand {
   constructor(
     @InjectModel(Team.name) private readonly teamModel: Model<Team>,
+    @InjectModel(Student.name) private readonly studentModel: Model<Student>,
   ) {}
 
   @Button('feedback-button')
   public async onClick(@Context() [interaction]: ButtonContext) {
-    // const team = await this.teamModel.findOne({'evaluator.discordId': interaction.user.id})
+    // const tryTeam = await this.teamModel.findOne({})
+    // const evaluator = await this.studentModel.findOne({ intraName: 'maliew' }).exec();
+    // tryTeam.evaluator = evaluator;
+    // await tryTeam.save();
 
-    // if (team === null) {
-    //   return interaction.reply({
-    //     content: 'You do not have permission do write feedback',
-    //     ephemeral: true
-    //   })
-    // }
+    const team = await this.teamModel.findOne({ 'evaluator.intraName': 'maliew' }).exec();
+
+    if (team === null) {
+      return interaction.reply({
+        content: 'There are no teams assigned to you.',
+        ephemeral: true
+      })
+    }
     // console.log(team)
     /** Q: what to do if multiple choice? (cadet with multiple slots)
      * prompt options?
@@ -54,26 +61,25 @@ export class RushEvalFeedbackFormCommand {
      */
     const modal = new ModalBuilder()
       .setCustomId('feedback')
-      .setTitle('Evaluation notes for {team name}');
-    ;
-
-    const general = new TextInputBuilder()
-      .setStyle(TextInputStyle.Paragraph)
-      .setCustomId('general')
-      .setLabel('General impression')
+      .setTitle(`Evaluation notes for ${team.teamLeader.intraName}'s group`);
     ;
 
     // for each member in team
-    const member1 = new TextInputBuilder()
+    const leaderInput = new TextInputBuilder()
       .setStyle(TextInputStyle.Paragraph)
-      .setCustomId('student {login1}')
-      .setLabel('An introduction of {login1}')
+      .setCustomId(team.teamLeader.intraName)
+      .setLabel(`Overview of ${team.teamLeader.intraName}`)
     ;
-    const member2 = new TextInputBuilder()
-      .setStyle(TextInputStyle.Paragraph)
-      .setCustomId('student {login2}')
-      .setLabel('An introduction of {login2}')
-    ;
+
+    let memberInputs = [];
+    team.teamMembers.forEach(member => {
+      const memberInput = new TextInputBuilder()
+        .setStyle(TextInputStyle.Paragraph)
+        .setCustomId(member.intraName)
+        .setLabel(`Overview of ${member.intraName}`)
+      ;
+      memberInputs.push(memberInput);
+    });
       /** Commented out due to 100 characters limitation for placeholder */
       //     .setPlaceholder(`Example:
   // <Name> <background and coding experience>.
@@ -86,13 +92,12 @@ export class RushEvalFeedbackFormCommand {
     const notes = new TextInputBuilder()
       .setStyle(TextInputStyle.Paragraph)
       .setCustomId('notes')
-      .setLabel('Additional notes and thoughts')
+      .setLabel('Additional notes')
     ;
 
     const components: any[] = [
-      new ActionRowBuilder().addComponents(general),
-      new ActionRowBuilder().addComponents(member1),
-      new ActionRowBuilder().addComponents(member2),
+      new ActionRowBuilder().addComponents(leaderInput),
+      new ActionRowBuilder().addComponents(memberInputs),
       new ActionRowBuilder().addComponents(notes)
     ]
 
@@ -112,7 +117,7 @@ export class RushEvalFeedbackFormCommand {
      */
     console.log(interaction.fields.fields)
     return interaction.reply({
-      content: 'submission completed',
+      content: 'Thanks for submitting your feedback!',
       ephemeral: true
     })
   }
