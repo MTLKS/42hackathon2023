@@ -39,16 +39,17 @@ export class RushEvalMatchCommand {
     teams.forEach(team => {
       const evaluatorName = team.evaluator.intraName
       const groupName = `${team.teamLeader.intraName}'s group`
-      const session = team.timeslot.timeslot
-      sessionMap[session] = {
+      const time = team.timeslot.timeslot
+
+      sessionMap[time] = {
         team: groupName,
         cadet: evaluatorName
       }
     })
 
     let text_content = []
-    for (let session in sessionMap) {
-      text_content.push(`${session}: ${JSON.stringify(sessionMap[session])}`)
+    for (const time in sessionMap) {
+      text_content.push(`${time}: ${JSON.stringify(sessionMap[time])}`)
     }
     return interaction.reply(text_content.join('\n'))
   }
