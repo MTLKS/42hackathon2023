@@ -15,10 +15,11 @@ export class UpdateRolesCommand {
     description: 'Update user roles!',
   })
   public async onExecute(@Context() [interaction]: SlashCommandContext) {
-    const pisciner = interaction.guild.roles.cache.find((r) => r.name === 'PISCINER');
-    const floaty = interaction.guild.roles.cache.find((r) => r.name === 'FLOATY');
-    const cadet = interaction.guild.roles.cache.find((r) => r.name === 'CADET');
-    const specialization = interaction.guild.roles.cache.find((r) => r.name === 'SPECIALIZATION');
+    const getRole = (role: string) => interaction.guild.roles.cache.find((r) => r.name === role);
+    const pisciner = getRole('PISCINER');
+    const floaty = getRole('FLOATY');
+    const cadet = getRole('CADET');
+    const specialization = getRole('SPECIALIZATION');
 
     await interaction.deferReply({ ephemeral: true });
 
