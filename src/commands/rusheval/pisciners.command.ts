@@ -42,7 +42,7 @@ export class RushEvalPiscinersCommand {
     return interaction.reply(
       {
         content: '<@&1160129648437493800> Please select your timeslot for the next rush defense',
-        ephemeral: true, 
+        ephemeral: false, 
         components: [row],
       }
     );
