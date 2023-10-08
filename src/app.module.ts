@@ -10,7 +10,6 @@ import { RushEvalPiscinersCommand, RushEvalPiscinersButtonComponent, RushEvalPis
 import { RushEvalInfoCommand } from './commands/rusheval/info.command';
 import { RushEvalMatchCommand } from './commands/rusheval/match.command';
 import { HttpModule } from '@nestjs/axios';
-import { Api42Service } from './api42/api42.service'
 import { MongooseModule } from '@nestjs/mongoose';
 import { Student, StudentSchema } from './schema/student.schema';
 import { Timeslot, TimeslotSchema } from './schema/timeslot.schema';
@@ -41,7 +40,6 @@ import { UpdateRolesCommand } from './commands/updateroles.command';
   controllers: [AppController],
   providers: [
     AppService,
-    Api42Service,
     PingCommand,
     LoginCommand,
     RushEvalCadetCommand,
