@@ -1,4 +1,3 @@
 # source run.sh
-
-export $(cat .env | xargs)
-npm run start:dev
+source venv/bin/activate
+export $(cat .env | xargs) && npm run start:dev
