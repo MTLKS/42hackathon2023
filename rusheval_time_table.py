@@ -3,6 +3,10 @@ import json
 from matplotlib import pyplot as plt
 from matplotlib import colors as pltcolor
 from matplotlib import table as plttable
+import pymongo as mongo
+
+
+database = mongo.MongoClient('mongodb://127.0.0.1:27017/nest').get_database('nest')
 
 
 def create_figure():
@@ -20,7 +24,8 @@ def create_figure():
 
 
 def get_data_map(sessions: list) -> dict[str, list[str]]:
-    data = {time: [] for time in ('10:00AM', '11:00AM', '2:00PM', '3:00PM', '4:00PM', '5:00PM')}
+    timeslots = [slot['timeslot'] for slot in database.get_collection('timeslots').find()]
+    data = {time: [] for time in timeslots}
     for session in sessions:
         team = f"$\\bf Team: {session['leader']}$"
         cadet = f"$\\bf Cadet:$ {session['evaluator']}"
@@ -70,7 +75,7 @@ def draw_session(sessions: list):
     set_fonts(table)
 
 
-def get_session(filename: str):
+def get_session(teams: list):
     get_login = lambda user: user['intraName']
     def get_eval_data(team):
         return {
@@ -79,18 +84,22 @@ def get_session(filename: str):
             'time': team['timeslot']['timeslot']
         }
 
-    teams = json.load(open(filename))
     return [get_eval_data(team) for team in teams]
+
+
+def get_session_file(filename: str):
+    return get_session(json.load(open(filename)))
 
 
 def main():
     try:
-        if len(sys.argv) != 3:
-            raise RuntimeError(f"Usage: {sys.argv[0]} <src json> <dst image>")
-        plt.savefig(sys.argv[2])
-        # draw_session(get_session("testmatch.json"))
-        draw_session(get_session(sys.argv[1]))
-        plt.savefig(sys.argv[2])
+        teams = list(database.get_collection('teams').find())
+        if len(sys.argv) != 2:
+            raise RuntimeError(f"Usage: {sys.argv[0]} <dst image>")
+        outfile = sys.argv[1]
+        # draw_session(get_session_file("testmatch.json"))
+        draw_session(get_session(teams))
+        plt.savefig(outfile)
     except KeyboardInterrupt:
         exit(130)
     except Exception as e:

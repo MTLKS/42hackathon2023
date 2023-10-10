@@ -4,7 +4,7 @@ import { InjectModel } from '@nestjs/mongoose';
 import { Team } from 'src/schema/team.schema';
 import { Model } from 'mongoose';
 import { Evaluator } from 'src/schema/evaluator.schema';
-import { writeFile, unlink } from 'fs';
+import { unlink } from 'fs';
 import { exec } from 'child_process';
 
 @RushEvalCommandDecorator()
@@ -37,12 +37,10 @@ export class RushEvalMatchCommand {
         }
       })
     })
-    const datafile = 'match.json'
     const outfile = 'time_table.jpg'
 
-    writeFile(datafile, JSON.stringify(teams, null, '\t'), ()=>{})
     const generate_time_table = async() => {
-      return exec(`python3 rusheval_time_table.py ${datafile} ${outfile}`,
+      return exec(`python3 rusheval_time_table.py ${outfile}`,
         (error, stdout, stderr) => {
           if (stdout) {
             console.log(stdout)
@@ -57,9 +55,8 @@ export class RushEvalMatchCommand {
     const child = await generate_time_table()
 
     child.on('exit', async(code, signal) => {
-      unlink(datafile, ()=>{})
       if (code === 0) {
-        const res = await interaction.editReply({content:"", files: [outfile]})
+        const res = await interaction.editReply({files: [outfile]})
 
         unlink(outfile, ()=>{})
         return res
