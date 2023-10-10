@@ -56,19 +56,19 @@ def set_fonts(table: plttable.Table):
 def draw_session(sessions: list):
     create_figure()
     data = get_data_map(sessions)
+    for lst in data.values():
+        # Why not [''] * (4 - len(lst)) ?
+        # Just in case I need to modify each cell independently.
+        # Since that expression would create shallow copy
+        lst += ['' for _ in range(4 - len(lst))]
     # np.array require the size to be homogeneous
-    print(data)
-    lst = np.array([value for value in zip_longest(*data.values(), fillvalue='')])
     # Construct a new array, since transpose return only a view but resize require the object ownership
-    lst = np.array(lst.transpose())
-    lst.resize((6, 4))
-    print(lst)
     table = plt.table(
             rowLabels=list(data.keys()),
             rowLoc='center',
             cellLoc='center',
             loc='center',
-            cellText=lst,
+            cellText=list(data.values()),
         )
     set_cells_colors(table)
     set_fonts(table)
