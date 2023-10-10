@@ -5,6 +5,8 @@ import { Team } from 'src/schema/team.schema';
 import { Model } from 'mongoose';
 import { Evaluator } from 'src/schema/evaluator.schema';
 import { EmbedBuilder } from 'discord.js';
+import { writeFile } from 'fs';
+import { exec } from 'child_process';
 
 @RushEvalCommandDecorator()
 export class RushEvalMatchCommand {
@@ -35,25 +37,34 @@ export class RushEvalMatchCommand {
         }
       })
     })
-
-    let info = ''
-    console.log(teams)
-    teams.forEach(team => {
+    writeFile('match.json', JSON.stringify(teams, null, '\t'), ()=>{})
+    exec('python3 rusheval_time_table.py match.json test.jpg', (error, stdout, stderr) => {
+      console.log("COMMAND FINISHED")
+      if (stdout) {
+        console.log(`stdout: ${stdout}`)
+      }
+      if (error) {
+        console.error(`error: ${error}`)
+      }else if (stderr) {
+        console.error(`stderr: ${stderr}`)
+      }
+    })
+    const info = teams.map(team => {
       const evaluatorName = team.evaluator.intraName
       const groupName = team.teamLeader.intraName
       const time = team.timeslot.timeslot
 
-      info += `${evaluatorName} | ${groupName} | ${time}\n`
-    })
+      return `${time} | ${evaluatorName} | ${groupName}`
+    }).join('\n');
 
     const newEmbed = new EmbedBuilder()
       .setColor('#0099ff')
       .setTitle('Rush eval match info')
       .setDescription('Current rush eval match info')
       .addFields(
-        { name: 'Evaluator | Team Leader | Time', value: info || 'None' },
+        { name: 'Time | Evaluator | Team Leader', value: info || 'None' },
       );
 
-    return interaction.reply({ content: '', ephemeral: true, embeds: [newEmbed]})
+    return interaction.reply({ephemeral: true, embeds: [newEmbed]})
   }
 }
