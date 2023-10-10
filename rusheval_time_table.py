@@ -1,10 +1,8 @@
-import numpy as np
 import sys
 import json
 from matplotlib import pyplot as plt
 from matplotlib import colors as pltcolor
 from matplotlib import table as plttable
-from itertools import zip_longest
 
 
 def create_figure():
@@ -61,8 +59,6 @@ def draw_session(sessions: list):
         # Just in case I need to modify each cell independently.
         # Since that expression would create shallow copy
         lst += ['' for _ in range(4 - len(lst))]
-    # np.array require the size to be homogeneous
-    # Construct a new array, since transpose return only a view but resize require the object ownership
     table = plt.table(
             rowLabels=list(data.keys()),
             rowLoc='center',
@@ -97,9 +93,9 @@ def main():
         plt.savefig(sys.argv[2])
     except KeyboardInterrupt:
         exit(130)
-    # except Exception as e:
-    #     print('Error:', e, file=sys.stderr)
-    #     exit(1)
+    except Exception as e:
+        print('Error:', e, file=sys.stderr)
+        exit(1)
 
 
 if __name__ == "__main__":
