@@ -12,7 +12,7 @@ export class PingCommand {
 		
     		// Create a MessageEmbed for your response
 		const newEmbed = new EmbedBuilder()
-      .setColor('#0099ff')
+      .setColor('#00FFFF')
       .setTitle(':ping_pong:   Pong!')
 
     return interaction.reply({ content: '', ephemeral: true, embeds: [newEmbed]});
