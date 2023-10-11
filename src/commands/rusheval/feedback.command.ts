@@ -1,8 +1,8 @@
 import { Subcommand, Context, SlashCommandContext, SelectedStrings, StringSelect, StringSelectContext, ButtonContext, Button, ModalContext, Modal } from 'necord';
 import { RushEvalCommandDecorator } from './rusheval.command';
 import { ActionRowBuilder, ModalBuilder, TextInputBuilder } from '@discordjs/builders';
-import { ButtonBuilder, ButtonStyle, CommandInteractionOptionResolver, TextInputStyle } from 'discord.js';
-import { Inject, Injectable } from '@nestjs/common';
+import { ButtonBuilder, ButtonStyle, TextInputStyle } from 'discord.js';
+import { Injectable } from '@nestjs/common';
 import { InjectModel } from '@nestjs/mongoose';
 import { Model } from 'mongoose';
 import { Team } from 'src/schema/team.schema';
@@ -14,7 +14,7 @@ export class RushEvalFeedbackCommand {
     name: 'feedback',
     description: 'Get feedback from rush evaluators',
   })
-  
+
   public async onPing(@Context() [interaction]: SlashCommandContext) {
     const button = new ButtonBuilder()
       .setCustomId('feedback-button')
@@ -31,55 +31,78 @@ export class RushEvalFeedbackCommand {
 }
 
 @Injectable()
-export class RushEvalFeedbackFormCommand {
+export class RushEvalFeedbackTeamSelectButton {
   constructor(
     @InjectModel(Team.name) private readonly teamModel: Model<Team>,
     @InjectModel(Student.name) private readonly studentModel: Model<Student>,
   ) {}
 
   @Button('feedback-button')
-  public async onClick(@Context() [interaction]: ButtonContext) {
-    // const tryTeam = await this.teamModel.findOne({})
-    // const evaluator = await this.studentModel.findOne({ intraName: 'maliew' }).exec();
-    // tryTeam.evaluator = evaluator;
-    // await tryTeam.save();
-
+  public async onPress(@Context() [interaction]: ButtonContext) {
     const student = await this.studentModel.findOne({ discordId: interaction.user.id }).exec();
-    const team = await this.teamModel.findOne({ evaluator: student }).exec();
+    const team = await this.teamModel.find({ evaluator: student }).exec();
 
-    if (team == null) {
+    if (team.length === 0) {
       return interaction.reply({
         content: 'There are no teams assigned to you.',
         ephemeral: true
       })
     }
-    // console.log(team)
-    /** Q: what to do if multiple choice? (cadet with multiple slots)
-     * prompt options?
-     * fetch evaluator name and it's associate group from database,
-     * verify it's identity as one of the registered rush evaluators,
-     * construct a modal with CustomId=Your impression of {login}
-     */
+    const buttons = team.map(team => {
+      const groupName = team.teamLeader.intraName + "'s group"
+      const button = new ButtonBuilder()
+        .setCustomId('feedback-team-select-button')
+        .setLabel(groupName)
+        .setStyle(ButtonStyle.Secondary)
+
+      return button
+    })
+    const row = new ActionRowBuilder<ButtonBuilder>()
+      .addComponents(buttons)
+
+    return interaction.reply({
+      content: 'Select team',
+      components: [row],
+      ephemeral: true
+    })
+  }
+}
+
+@Injectable()
+export class RushEvalFeedbackFormCommand {
+  constructor(
+    @InjectModel(Team.name) private readonly teamModel: Model<Team>,
+    @InjectModel(Student.name) private readonly studentModel: Model<Student>,
+  ) {}
+
+  @Button('feedback-team-select-button')
+  public async onSelection(@Context() [interaction]: ButtonContext) {
+    // const tryTeam = await this.teamModel.findOne({})
+    // const evaluator = await this.studentModel.findOne({ intraName: 'maliew' }).exec();
+    // tryTeam.evaluator = evaluator;
+    // await tryTeam.save();
+
+    const cadet = await this.studentModel.findOne({ discordId: interaction.user.id }).exec();
+    const team = await this.teamModel.findOne({ evaluator: cadet }).exec();
+
     const modal = new ModalBuilder()
       .setCustomId('feedback')
       .setTitle(`Evaluation notes for ${team.teamLeader.intraName}'s group`);
     ;
 
-    // for each member in team
     const leaderInput = new TextInputBuilder()
       .setStyle(TextInputStyle.Paragraph)
       .setCustomId(team.teamLeader.intraName)
       .setLabel(`Overview of ${team.teamLeader.intraName}`)
     ;
 
-    let memberInputs = [];
-    team.teamMembers.forEach(member => {
+    const memberInputs = team.teamMembers.map(member => {
       const memberInput = new TextInputBuilder()
         .setStyle(TextInputStyle.Paragraph)
         .setCustomId(member.intraName)
         .setLabel(`Overview of ${member.intraName}`)
       ;
-      memberInputs.push(memberInput);
+      return memberInput;
     });
       /** Commented out due to 100 characters limitation for placeholder */
       //     .setPlaceholder(`Example:
@@ -109,8 +132,6 @@ export class RushEvalFeedbackFormCommand {
   @Modal('feedback')
   public async onSubmit(@Context() [interaction]: ModalContext) {
     /** Post data to database
-     * Under the case which is given the Post access to 42 api,
-     * should be able to post it there directly?
      * 
      * After post, send a ephemeral response to the user,
      * saying that the feedback has been successfully recorded,

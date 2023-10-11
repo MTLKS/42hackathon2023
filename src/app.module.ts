@@ -16,7 +16,7 @@ import { Student, StudentSchema } from './schema/student.schema';
 import { Timeslot, TimeslotSchema } from './schema/timeslot.schema';
 import { Evaluator, EvaluatorSchema } from './schema/evaluator.schema';
 import { Team, TeamSchema } from './schema/team.schema';
-import { RushEvalFeedbackCommand, RushEvalFeedbackFormCommand } from './commands/rusheval/feedback.command';
+import { RushEvalFeedbackCommand, RushEvalFeedbackFormCommand, RushEvalFeedbackTeamSelectButton } from './commands/rusheval/feedback.command';
 import { UpdateRolesCommand } from './commands/updateroles.command';
 
 @Module({
@@ -52,6 +52,7 @@ import { UpdateRolesCommand } from './commands/updateroles.command';
     RushEvalInfoCommand,
     RushEvalMatchCommand,
     RushEvalFeedbackCommand,
+    RushEvalFeedbackTeamSelectButton,
     RushEvalFeedbackFormCommand,
     UpdateRolesCommand
   ],
