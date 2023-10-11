@@ -1,6 +1,7 @@
 import { Injectable } from '@nestjs/common';
 import { ActionRowBuilder, ButtonBuilder, ButtonStyle } from 'discord.js';
 import { SlashCommand, SlashCommandContext, Context } from 'necord';
+import { Embed, EmbedBuilder, embedLength } from 'discord.js';
 
 @Injectable()
 export class LoginCommand {
@@ -9,6 +10,14 @@ export class LoginCommand {
     description: 'Login to 42 intra',
   })
   public async onLogin(@Context() [interaction]: SlashCommandContext) {
+    
+    const newEmbed = new EmbedBuilder()
+      .setColor('#eb4675')
+      .setTitle('Login to 42 intra')
+      .setDescription('Click on the button below to login to 42 intra')
+      .setURL(`http://hack.mtlks.com:${process.env.PORT}/login/${interaction.user.id}`)
+    ;
+
     const button = new ButtonBuilder()
       .setStyle(ButtonStyle.Link)
       .setLabel('Login')
@@ -17,6 +26,9 @@ export class LoginCommand {
     const row = new ActionRowBuilder<ButtonBuilder>()
       .addComponents(button);
 
-    return interaction.reply({ content: `Please login to 42 intra`, ephemeral: true, components: [row] });
+    return interaction.reply({
+      ephemeral: true,
+      embeds: [newEmbed],
+      components: [row] });
   }
 }
