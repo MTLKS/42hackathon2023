@@ -17,7 +17,7 @@ import { RushEvalCadetCommand, RushEvalCadetFetchSlotsComponent, RushEvalCadetSt
 import { RushEvalPiscinersCommand, RushEvalPiscinersButtonComponent, RushEvalPiscinersStringSelectComponent } from './commands/rusheval/pisciners.command';
 import { RushEvalInfoCommand } from './commands/rusheval/info.command';
 import { RushEvalMatchCommand } from './commands/rusheval/match.command';
-import { RushEvalFeedbackCommand, RushEvalFeedbackFormCommand, RushEvalFeedbackTeamSelectButton } from './commands/rusheval/feedback.command';
+import { RushEvalFeedbackCommand, RushEvalFeedbackForm, RushEvalFeedbackTeamSelectButton } from './commands/rusheval/feedback.command';
 import { UpdateRolesCommand } from './commands/updateroles.command';
 
 @Module({
@@ -58,7 +58,7 @@ import { UpdateRolesCommand } from './commands/updateroles.command';
     RushEvalMatchCommand,
     RushEvalFeedbackCommand,
     RushEvalFeedbackTeamSelectButton,
-    RushEvalFeedbackFormCommand,
+    RushEvalFeedbackForm,
     UpdateRolesCommand
   ],
 })

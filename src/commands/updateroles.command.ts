@@ -22,37 +22,37 @@ export class UpdateRolesCommand {
     defaultMemberPermissions: ['Administrator']
   })
   public async onExecute(@Context() [interaction]: SlashCommandContext) {
-    const role_map = new Map<string, Role>([
+    const roleMap = new Map<string, Role>([
         'PISCINER',
         'FLOATY',
         'CADET',
         'SPECIALIZATION'
       ].map(value => [value, getRole(interaction.guild, value)])
     );
-    const coalition_map = new Map<string, Role>([
+    const coalitionMap = new Map<string, Role>([
         'Segmentation Slayers',
         'Bug Busters',
         'Kernel Kamikazes',
         'Unix Unicorns'
       ].map(value => [value, getRole(interaction.guild, value)])
     );
-    const everyRoles = [...role_map.values(), ...coalition_map.values()];
+    const everyRoles = [...roleMap.values(), ...coalitionMap.values()];
 
-    await interaction.deferReply({ ephemeral: true });
+    interaction.deferReply({ ephemeral: true });
     const members = await interaction.guild.members.fetch();
     const getMemberRoles = (student: Student) => {
-      let roles_add: Role[] = [];
+      let rolesAdd: Role[] = [];
 
       if (student.progressRole === 'SPECIALIZATION') {
-        roles_add.push(role_map.get('CADET'));
+        rolesAdd.push(roleMap.get('CADET'));
       } 
-      if (role_map.has(student.progressRole)) {
-        roles_add.push(role_map.get(student.progressRole));
+      if (roleMap.has(student.progressRole)) {
+        rolesAdd.push(roleMap.get(student.progressRole));
       }
-      if (coalition_map.has(student.coalitionRole)) {
-        roles_add.push(coalition_map.get(student.coalitionRole));
+      if (coalitionMap.has(student.coalitionRole)) {
+        rolesAdd.push(coalitionMap.get(student.coalitionRole));
       }
-      return roles_add;
+      return rolesAdd;
     };
 
     /** This edit the roles in sequence

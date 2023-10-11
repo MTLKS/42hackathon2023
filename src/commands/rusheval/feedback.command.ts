@@ -80,7 +80,7 @@ export class RushEvalFeedbackTeamSelectButton {
 }
 
 @Injectable()
-export class RushEvalFeedbackFormCommand {
+export class RushEvalFeedbackForm {
   constructor(
     @InjectModel(Team.name) private readonly teamModel: Model<Team>,
     @InjectModel(Student.name) private readonly studentModel: Model<Student>,
