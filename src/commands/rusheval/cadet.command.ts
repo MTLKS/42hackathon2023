@@ -14,7 +14,7 @@ import { getRole } from '../updateroles.command';
 /**
  * Has to do what has to be done because we couldn't refactor the code in time confidently
  */
-function rearrange_timeslot(timeslots: Array<Timeslot>, evaluators: Array<Evaluator>) {
+function rearrangeTimeslot(timeslots: Array<Timeslot>, evaluators: Array<Evaluator>) {
   let table = new Map<string, Student[]>();
 
   timeslots.forEach(timeslot =>
@@ -26,6 +26,15 @@ function rearrange_timeslot(timeslots: Array<Timeslot>, evaluators: Array<Evalua
   return table;
 }
 
+function getUnderBookedSessions(timeslots: Timeslot[], evaluators: Evaluator[]) {
+  const timeTable = rearrangeTimeslot(timeslots, evaluators);
+  const underBookedSessions = [...timeTable.entries()]
+    .filter(([time, evaluators]) => evaluators.length < 3)
+    .map(([time, evaluators]) => time)
+  ;
+
+  return underBookedSessions;
+}
 
 @RushEvalCommandDecorator()
 export class RushEvalCadetCommand {
@@ -74,20 +83,14 @@ export class RushEvalCadetFetchSlotsComponent {
   public async onExecute(@Context() [interaction]: ButtonContext) {
     const timeslots = await this.timeslotModel.find().exec();
     const evaluators = await this.evaluatorModel.find().exec();
-    const time_table = rearrange_timeslot(timeslots, evaluators);
-    const underbooked_session = [...time_table.entries()]
-      .filter(([time, evaluators]) => evaluators.length < 3)
-      .map(([time, evaluators]) => time)
-    ;
-    const selectMap = (time: string) => {
-      return { label: time, value: time };
-    }
-    const availableOptions = (underbooked_session.length
-        ? underbooked_session.map(selectMap)
+    const underBookedSessions = getUnderBookedSessions(timeslots, evaluators);
+    const selectMap = (time: string) => {return {label: time, value: time}};
+    const availableOptions = (underBookedSessions.length
+        ? underBookedSessions.map(selectMap)
         : timeslots.map(timeslot => selectMap(timeslot.timeslot)))
     ;
     const stringSelect = new StringSelectMenuBuilder()
-      .setCustomId('cadet')
+      .setCustomId('cadet-session-select')
       .setPlaceholder('Select your timeslots')
       .setMinValues(0)
       .setMaxValues(availableOptions.length)
@@ -113,25 +116,41 @@ export class RushEvalCadetStringSelectComponent {
     @InjectModel(Evaluator.name) private readonly evaluatorModel: Model<Evaluator>,
   ) { }
 
-  @StringSelect('cadet')
+  @StringSelect('cadet-session-select')
   public async onStringSelect(@Context() [interaction]: StringSelectContext, @SelectedStrings() selected: string[]) {
     const timeslots = await this.timeslotModel.find().exec();
+    const evaluators = await this.evaluatorModel.find().exec();
+    const underBookedSessions = getUnderBookedSessions(timeslots, evaluators);
     const selectedTimeslots: any[] = timeslots.filter(timeslot => selected.includes(timeslot.timeslot));
     const student = await this.studentModel.findOne({ discordId: interaction.user.id }).exec();
     const evaluator = await this.evaluatorModel.findOne({ student: student }).exec();
 
+    if (underBookedSessions.length) {
+      /** Check if the chosen slots contain any overbooked sessions */
+      const overBooked = selected.filter(session => !underBookedSessions.includes(session));
+      if (overBooked.length) {
+        return interaction.reply({
+            content: `**${overBooked}** are currently filled.
+Please regenerate your selection by clicking on the \`Open slots\` button one more time`,
+            ephemeral: true
+          });
+      }
+    }
+
     if (evaluator) {
-      evaluator.timeslots = <[Timeslot]>selectedTimeslots;
+      evaluator.timeslots = selectedTimeslots;
       await evaluator.save();
     } else {
       const newEvaluator = new this.evaluatorModel({ student: student, timeslots: selectedTimeslots });
       await newEvaluator.save();
     }
 
-    if (selected.length == 0) {
-      return interaction.reply({ content: 'You have not selected any timeslots', ephemeral: true });
-    }
-    return interaction.reply({ content: `You have selected ${selected}`, ephemeral: true });
+    return interaction.reply({
+        content: ((selected.length === 0)
+            ? 'You have not selected any timeslots'
+            : `You have selected ${selected}`),
+        ephemeral: true
+      });
   }
 }
 
@@ -148,7 +167,7 @@ export class RushEvalCadetFetchSpecialSlotsComponent {
     const availableOptions = timeslots.map(timeslot => ({ label: timeslot.timeslot, value: timeslot.timeslot }));
 
     const stringSelect = new StringSelectMenuBuilder()
-      .setCustomId('cadet-special')
+      .setCustomId('cadet-session-select-special')
       .setPlaceholder('Select your timeslots')
       .setMinValues(0)
       .setMaxValues(availableOptions.length)
@@ -174,7 +193,7 @@ export class RushEvalCadetSpecialStringSelectComponent {
     @InjectModel(Specialslot.name) private readonly specialslotModel: Model<Specialslot>,
   ) { }
 
-  @StringSelect('cadet-special')
+  @StringSelect('cadet-session-select-special')
   public async onStringSelect(@Context() [interaction]: StringSelectContext, @SelectedStrings() selected: string[]) {
     const timeslots = await this.specialslotModel.find().exec();
     const selectedTimeslots: any[] = timeslots.filter(timeslot => selected.includes(timeslot.timeslot));
