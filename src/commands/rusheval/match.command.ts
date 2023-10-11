@@ -20,49 +20,51 @@ export class RushEvalMatchCommand {
     description: 'Lock in cadet and pisciner timeslots',
   })
   public async onPing(@Context() [interaction]: SlashCommandContext) {
-    let teams = await this.teamModel.find().exec()
-    let evaluators = await this.evaluatorModel.find().exec()
+    let teams = await this.teamModel.find().exec();
+    let evaluators = await this.evaluatorModel.find().exec();
 
-    await interaction.deferReply({ephemeral: true})
+    interaction.deferReply({ephemeral: true});
     teams.forEach(team => {
       evaluators.find(evaluator => {
         const matchedSlot = evaluator.timeslots.find(slot =>
-          slot.timeslot === team.timeslot.timeslot)
+          slot.timeslot === team.timeslot.timeslot);
 
         if (matchedSlot) {
-          team.timeslot = matchedSlot
-          team.evaluator = evaluator.student
-          team.save()
-          return true
+          team.timeslot = matchedSlot;
+          team.evaluator = evaluator.student;
+          team.save();
+          return true;
         }
-      })
-    })
-    const outfile = 'time_table.jpg'
-
-    const generate_time_table = async() => {
-      return exec(`python3 rusheval_time_table.py ${outfile}`,
-        (error, stdout, stderr) => {
-          if (stdout) {
-            console.log(stdout)
-          }
-          if (error) {
-            console.error(error)
-          } else if (stderr) {
-            console.error(stderr)
-          }
-      })
-    }
-    const child = await generate_time_table()
+      });
+    });
+    const outfile = 'rush_evaluation_time_table.jpg';
+    const child = exec(`python3 rusheval_time_table.py ${outfile}`,
+      (error, stdout, stderr) => {
+        if (stdout) {
+          console.log(stdout);
+        }
+        if (error) {
+          console.error(error);
+        } else if (stderr) {
+          console.error(stderr);
+        }
+      });
+    const matchedEvaluatorsDc = await interaction.guild.members.fetch({
+        user: teams.map(team => team.evaluator.discordId)
+      });
 
     child.on('exit', async(code, signal) => {
       if (code === 0) {
-        const res = await interaction.editReply({files: [outfile]})
-
-        unlink(outfile, ()=>{})
-        return res
+        interaction.deleteReply();
+        return interaction.channel.send({
+            /** Ideal way is to assign a role for rush evaluators.
+             * As I heard that there's problem with explicit individual ping.
+             */
+            content: `Rush evaluation time table for dear evaluators: ||${matchedEvaluatorsDc.toJSON()}||`,
+            files: [outfile]
+          }).then(()=> unlink(outfile, ()=>{}));
       } else {
-        /** Likely because something went wrong in generating time table */
-        return interaction.editReply({content: `Internal Server Error`})
+        return interaction.editReply({content: `Internal Server Error`});
       }
     })
   }

@@ -22,21 +22,19 @@ export class UpdateRolesCommand {
     defaultMemberPermissions: ['Administrator']
   })
   public async onExecute(@Context() [interaction]: SlashCommandContext) {
-    const getRole = (role: string) =>
-      interaction.guild.roles.cache.find((r) => r.name === role);
     const role_map = new Map<string, Role>([
         'PISCINER',
         'FLOATY',
         'CADET',
         'SPECIALIZATION'
-      ].map(value => [value, getRole(value)])
+      ].map(value => [value, getRole(interaction.guild, value)])
     );
     const coalition_map = new Map<string, Role>([
         'Segmentation Slayers',
         'Bug Busters',
         'Kernel Kamikazes',
         'Unix Unicorns'
-      ].map(value => [value, getRole(value)])
+      ].map(value => [value, getRole(interaction.guild, value)])
     );
     const everyRoles = [...role_map.values(), ...coalition_map.values()];
 

@@ -9,7 +9,7 @@ import { ButtonBuilder, ActionRowBuilder, ButtonStyle, StringSelectMenuBuilder }
 import { Injectable } from '@nestjs/common';
 import { Team } from 'src/schema/team.schema';
 import { getRole } from '../updateroles.command';
-import { Embed, EmbedBuilder, embedLength } from 'discord.js';
+import { EmbedBuilder } from 'discord.js';
 
 @RushEvalCommandDecorator()
 export class RushEvalPiscinersCommand {
@@ -48,7 +48,6 @@ export class RushEvalPiscinersCommand {
     return interaction.reply(
       {
         content: `Dear ${getRole(interaction.guild, "PISCINER")}s`,
-        ephemeral: false,
         embeds: [embed],
         components: [row],
       }
@@ -100,7 +99,7 @@ export class RushEvalPiscinersButtonComponent {
       {
         content: 'Please select your timeslot for the next rush defense',
         ephemeral: true,
-        components: [row],
+        components: [row]
       }
     );
   }

@@ -55,9 +55,11 @@ export class RushEvalCadetCommand {
 
     await interaction.deferReply({ ephemeral: true });
     await interaction.deleteReply();
+    interaction.deferReply({ ephemeral: true });
+    interaction.deleteReply();
     return interaction.channel.send({
-        embeds: [embed],
         content: `Dear ${getRole(interaction.guild, "CADET")}s`,
+        embeds: [embed],
         components: [row]
       });
   }
