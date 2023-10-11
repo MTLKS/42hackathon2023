@@ -12,14 +12,14 @@ export class HelpCommand {
 
     let commands = new Map<string, string>()
 
-    commands.set('**/ping**', '*Pong (for testing)*');
-    commands.set('**/login**', '*Login to 42 intra *');
-    commands.set('**/rusheval info**', '*Get current info about rush eval*');
-    commands.set('**/rusheval cadet**', '*Get cadets to create timeslots*');
-    commands.set('**/rusheval pisciners**', '*Get pisciners to choose timeslots*');
-    commands.set('**/rusheval match**', '*Lock in cadet and pisciner timeslots*');
-    commands.set('**/rusheval feedback**', '*Get feedback from rush evaluators*');
-    commands.set('**/updateroles**', '*Update user roles*');
+    commands.set('`/ping`', 'Pong (for testing)');
+    commands.set('``/login``', 'Login to 42 intra');
+    commands.set('``/rusheval info``', 'Get current info about rush eval');
+    commands.set('``/rusheval cadet``', 'Get cadets to create timeslots');
+    commands.set('``/rusheval pisciners``', 'Get pisciners to choose timeslots');
+    commands.set('``/rusheval match``', 'Lock in cadet and pisciner timeslots');
+    commands.set('``/rusheval feedback``', 'Get feedback from rush evaluators');
+    commands.set('``/updateroles``', 'Update user roles');
     const newEmbed = new EmbedBuilder()
       .setColor('#00FFFF')
       .setTitle('__Available Commands__')
