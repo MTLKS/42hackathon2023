@@ -3,7 +3,11 @@ import { SlashCommand, SlashCommandContext, Context } from 'necord';
 import { InjectModel } from '@nestjs/mongoose';
 import { Model } from 'mongoose';
 import { Student } from '../schema/student.schema';
-import { Role } from 'discord.js';
+import { Guild, Role } from 'discord.js';
+
+export function getRole(guild: Guild, roleName: string) {
+  return guild.roles.cache.find((r) => r.name === roleName);
+}
 
 @Injectable()
 export class UpdateRolesCommand {
