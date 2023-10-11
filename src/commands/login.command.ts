@@ -12,7 +12,7 @@ export class LoginCommand {
   public async onLogin(@Context() [interaction]: SlashCommandContext) {
     
     const newEmbed = new EmbedBuilder()
-      .setColor('#eb4675')
+      .setColor('#00FFFF')
       .setTitle('Login to 42 intra')
       .setDescription('Click on the button below to login to 42 intra')
       .setURL(`http://hack.mtlks.com:${process.env.PORT}/login/${interaction.user.id}`)
