@@ -36,16 +36,21 @@ export class RushEvalPiscinersCommand {
     const button = new ButtonBuilder()
       .setCustomId('piscinersButton')
       .setLabel('Get timeslots')
-      .setStyle(ButtonStyle.Primary);
+      .setStyle(ButtonStyle.Primary)
+    ;
 
     const row = new ActionRowBuilder<ButtonBuilder>()
-      .addComponents(button);
+      .addComponents(button)
+    ;
 
     const embed = new EmbedBuilder()
       .setTitle("Please select your timeslot for the next rush defense")
       .setColor('#00FFFF')
+    ;
 
-    return interaction.reply(
+    interaction.deferReply({ephemeral: true});
+    await interaction.deleteReply();
+    return interaction.channel.send(
       {
         content: `Dear ${getRole(interaction.guild, "PISCINER")}s`,
         embeds: [embed],
