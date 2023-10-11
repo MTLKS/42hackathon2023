@@ -52,6 +52,10 @@ export class UpdateRolesCommand {
       return roles_add;
     };
 
+    /** This edit the roles in sequence
+     * An alternative approach if performance is a concern:
+     * await Promise.all(members.map(async() => ...))
+     */
     for (let [id, member] of members) {
       const student = await this.studentModel.findOne({ discordId: id });
       if (student === null)
