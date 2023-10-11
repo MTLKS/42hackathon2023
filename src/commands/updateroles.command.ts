@@ -4,6 +4,7 @@ import { InjectModel } from '@nestjs/mongoose';
 import { Model } from 'mongoose';
 import { Student } from '../schema/student.schema';
 import { Guild, Role } from 'discord.js';
+import { EmbedBuilder } from 'discord.js';
 
 export function getRole(guild: Guild, roleName: string) {
   return guild.roles.cache.find((r) => r.name === roleName);
@@ -70,6 +71,11 @@ export class UpdateRolesCommand {
       await member.roles.remove(everyRoles);
       await member.roles.add(roles);
     }
-    return interaction.editReply({ content: 'All member roles have been updated!' });
+
+    const newEmbed = new EmbedBuilder()
+    .setColor('#00FFFF')
+    .setTitle('All member roles have been updated!');
+
+    return interaction.editReply({ content: '', embeds: [newEmbed] });
   }
 }
