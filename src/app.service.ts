@@ -28,21 +28,24 @@ export class AppService {
       'code': request.query.code,
       'redirect_uri': 'http://hack.mtlks.com:3000'
     }));
-    let userResponse = await firstValueFrom(this.httpService.get('https://api.intra.42.fr/v2/me', { headers: { Authorization: `Bearer ${data.access_token}` } }));
-    let student = await this.studentModel.findOne({ intraId: userResponse.data.id });
+
+    const intraUserData = await firstValueFrom(this.httpService.get('https://api.intra.42.fr/v2/me', { headers: { Authorization: `Bearer ${data.access_token}` } }));
+    const discordId = request.cookies['id'];
+    const intraId = intraUserData.data.id;
+    let student = await this.studentModel.findOne({ intraId: intraUserData.data.id });
     let role = '';
-    if (userResponse.data.cursus_users.length == 1) {
-      if (new Date(userResponse.data.cursus_users[0].end_at).getTime() < Date.now())
+    if (intraUserData.data.cursus_users.length == 1) {
+      if (new Date(intraUserData.data.cursus_users[0].end_at).getTime() < Date.now())
         role = 'FLOATY';
       else
         role = 'PISCINER';
     }
-    else if (userResponse.data.cursus_users[1].grade == 'Member') {
+    else if (intraUserData.data.cursus_users[1].grade == 'Member') {
       role = 'SPECIALIZATION';
-    } else if (userResponse.data.cursus_users[1].grade == 'Learner') {
-      if (new Date(userResponse.data.cursus_users[1].blackholed_at).getTime() < Date.now())
+    } else if (intraUserData.data.cursus_users[1].grade == 'Learner') {
+      if (new Date(intraUserData.data.cursus_users[1].blackholed_at).getTime() < Date.now())
         role = 'BLACKHOLED';
-      else if (new Date(userResponse.data.cursus_users[1].begin_at).getTime() < Date.now())
+      else if (new Date(intraUserData.data.cursus_users[1].begin_at).getTime() < Date.now())
         role = 'CADET';
       else
         role = 'RESERVISTS';
@@ -50,14 +53,14 @@ export class AppService {
 
     let coalition = '';
     if (role == 'SPECIALIZATION' || role == 'CADET') {
-      let coalitionResponse = await firstValueFrom(this.httpService.get(`https://api.intra.42.fr/v2/users/${userResponse.data.id}/coalitions`, { headers: { Authorization: `Bearer ${data.access_token}` } }));
+      let coalitionResponse = await firstValueFrom(this.httpService.get(`https://api.intra.42.fr/v2/users/${intraUserData.data.id}/coalitions`, { headers: { Authorization: `Bearer ${data.access_token}` } }));
       coalition = coalitionResponse.data[0].name;
     }
 
     if (student == null) {
       student = new this.studentModel({
-        intraId: userResponse.data.id,
-        intraName: userResponse.data.login,
+        intraId: intraUserData.data.id,
+        intraName: intraUserData.data.login,
         discordId: request.cookies['id'],
         progressRole: role,
         coalitionRole: coalition
@@ -70,6 +73,42 @@ export class AppService {
       await student.save();
     }
 
-    return 'All set!';
+
+    const discordUserData = await firstValueFrom(this.httpService.get(`https://discord.com/api/v10/users/${discordId}`, {
+      headers: {
+        Authorization: `Bot ${process.env.DISCORD_TOKEN}`,
+      },
+    }));
+
+    return `
+      <html>
+        <head>
+          <title>THILA Bot</title>
+        </head>
+        <body>
+        <style>
+          body {
+            background-color: #222222;
+            display: flex;
+            flex-wrap: wrap;
+            justify-content: center;
+            align-items: center;
+            align-content: center;
+            font-family: Arial, Helvetica, sans-serif;
+          }
+          .break {
+            flex-basis: 100%;
+            height: 0;
+          }
+        </style>
+          <h1 style="color: #FFFFFF">You are now logged in to THILA Bot</h1>
+          <div class="break"></div>
+          <img src="https://64.media.tumblr.com/58a920b1da6459ad18274328dfe55784/tumblr_n2ykjx27uE1tqptlzo1_r1_500.gif" height="200px"></img>
+          <div class="break"></div>
+          <img src="https://cdn.discordapp.com/avatars/${discordUserData.data.id}/${discordUserData.data.avatar}.png" height="200px" padding="20px"></img>
+          <img src="${intraUserData.data.image.link}" height="200px" padding="20px"></img>
+        </body>
+      </html>
+      `;
   }
 }
