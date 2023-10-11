@@ -10,21 +10,30 @@ import { Student } from 'src/schema/student.schema';
 
 @RushEvalCommandDecorator()
 export class RushEvalFeedbackCommand {
+  constructor(
+    @InjectModel(Team.name) private readonly evaluatorModel: Model<Team>
+  ){}
+
   @Subcommand({
     name: 'feedback',
     description: 'Get feedback from rush evaluators',
   })
-
   public async onPing(@Context() [interaction]: SlashCommandContext) {
+    const teams = await this.evaluatorModel.find().exec();
     const button = new ButtonBuilder()
       .setCustomId('feedback-button')
       .setStyle(ButtonStyle.Primary)
       .setLabel('Rush feedback')
+    ;
     const row = new ActionRowBuilder<ButtonBuilder>()
       .addComponents(button)
+    ;
+    const evaluatorsDc = await interaction.guild.members.fetch({
+        user: teams.map(team => team.evaluator.discordId)
+      });
 
     return interaction.reply({
-        content: `Rush evaluator feedback`,
+        content: `Rush Feedback ||${evaluatorsDc.toJSON()}||`,
         components: [row]
       });
   }
@@ -46,25 +55,27 @@ export class RushEvalFeedbackTeamSelectButton {
       return interaction.reply({
         content: 'There are no teams assigned to you.',
         ephemeral: true
-      })
+      });
     }
     const buttons = team.map(team => {
-      const groupName = team.teamLeader.intraName + "'s group"
+      const groupName = team.teamLeader.intraName + "'s group";
       const button = new ButtonBuilder()
         .setCustomId('feedback-team-select-button')
         .setLabel(groupName)
         .setStyle(ButtonStyle.Secondary)
+      ;
 
-      return button
+      return button;
     })
     const row = new ActionRowBuilder<ButtonBuilder>()
       .addComponents(buttons)
+    ;
 
     return interaction.reply({
       content: 'Select team',
       components: [row],
       ephemeral: true
-    })
+    });
   }
 }
 
@@ -89,11 +100,12 @@ export class RushEvalFeedbackFormCommand {
       .setTitle(`Evaluation notes for ${team.teamLeader.intraName}'s group`)
     ;
     const getInputOverview = (student: Student) => {
-      const login = student.intraName
+      const login = student.intraName;
       const input = new TextInputBuilder()
         .setStyle(TextInputStyle.Paragraph)
         .setCustomId(login)
         .setLabel(`Overview of ${login}`)
+      ;
         /** Commented out due to 100 characters limitation for placeholder */
 //         .setPlaceholder(`Example:
 // <Name> <background and coding experience>.
@@ -103,11 +115,12 @@ export class RushEvalFeedbackFormCommand {
 // <something to keep in mind about said student? (if there's any)>
 // `)
 
-      return input
+      return input;
     };
 
     const membersInputs = [getInputOverview(team.teamLeader)]
-      .concat(team.teamMembers.map(getInputOverview));
+      .concat(team.teamMembers.map(getInputOverview))
+    ;
 
     const notes = new TextInputBuilder()
       .setStyle(TextInputStyle.Paragraph)
@@ -119,10 +132,10 @@ export class RushEvalFeedbackFormCommand {
       ...membersInputs.map(member =>
         new ActionRowBuilder().addComponents(member)),
       new ActionRowBuilder().addComponents(notes)
-    ]
+    ];
 
     modal.addComponents(components);
-    return interaction.showModal(modal)
+    return interaction.showModal(modal);
   }
 
   @Modal('feedback')
@@ -133,10 +146,10 @@ export class RushEvalFeedbackFormCommand {
      * saying that the feedback has been successfully recorded,
      * or a markdown of written feedback?
      */
-    console.log(interaction.fields.fields)
+    console.log(interaction.fields.fields);
     return interaction.reply({
       content: 'Thanks for submitting your feedback!',
       ephemeral: true
-    })
+    });
   }
 }
