@@ -73,13 +73,15 @@ export class RushEvalInfoCommand {
           finalCount = currentOpen.count;
         }
         
-        timeslotsData.push({ name: timeslot.timeslot, value: `Opened: ${currentOpenCount}\nTaken: ${currentClosedCount}\nAvailable: ${finalCount}`, inline: true });
+        timeslotsData.push({ name: `|  __${timeslot.timeslot}__ \n| Opened:                          ${currentOpenCount}\n| Taken:                              ${currentClosedCount}\n| Available:                       ${finalCount}\n\u200b\u200b\n\n`,
+                              value: '\n',
+                              inline: true });
       });
 
       const newEmbed = new EmbedBuilder()
         .setColor('#0099ff')
-        .setTitle('Rush eval info')
-        .setDescription('Current rush eval info')
+        .setTitle('__Current Rush Eval Info__')
+        // .setDescription('Current rush eval info')
         .addFields(
           ...timeslotsData,
         );

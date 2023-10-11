@@ -14,6 +14,7 @@ export class HelpCommand {
       .setColor('#0099ff')
       .setTitle('__Available Commands__')
       .addFields(
+        { name: '__Commands__                                  __Descriptions__', value: '\n'},
         { name: "`/login`                                  :      Login to 42 intra ", value: '\n'},
         { name: '`/ping`                                    :      Pong', value: '\n'},
         { name: '`/rusheval cadet`             :      Get cadets to create timeslots', value: '\n'},
