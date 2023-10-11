@@ -5,6 +5,7 @@ import { NecordModule } from 'necord';
 import { IntentsBitField } from 'discord.js';
 import { LoginCommand } from './commands/login.command';
 import { PingCommand } from './commands/ping.command';
+import { HelpCommand } from './commands/help.command';
 import { RushEvalCadetCommand, RushEvalCadetStringSelectComponent } from './commands/rusheval/cadet.command';
 import { RushEvalPiscinersCommand, RushEvalPiscinersButtonComponent, RushEvalPiscinersStringSelectComponent } from './commands/rusheval/pisciners.command';
 import { RushEvalInfoCommand } from './commands/rusheval/info.command';
@@ -42,6 +43,7 @@ import { UpdateRolesCommand } from './commands/updateroles.command';
     AppService,
     PingCommand,
     LoginCommand,
+    HelpCommand,
     RushEvalCadetCommand,
     RushEvalCadetStringSelectComponent,
     RushEvalPiscinersCommand,
