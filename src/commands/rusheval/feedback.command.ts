@@ -84,49 +84,43 @@ export class RushEvalFeedbackFormCommand {
 
     const cadet = await this.studentModel.findOne({ discordId: interaction.user.id }).exec();
     const team = await this.teamModel.findOne({ evaluator: cadet }).exec();
-
     const modal = new ModalBuilder()
       .setCustomId('feedback')
-      .setTitle(`Evaluation notes for ${team.teamLeader.intraName}'s group`);
+      .setTitle(`Evaluation notes for ${team.teamLeader.intraName}'s group`)
     ;
-
-    const leaderInput = new TextInputBuilder()
-      .setStyle(TextInputStyle.Paragraph)
-      .setCustomId(team.teamLeader.intraName)
-      .setLabel(`Overview of ${team.teamLeader.intraName}`)
-    ;
-
-    const memberInputs = team.teamMembers.map(member => {
-      const memberInput = new TextInputBuilder()
+    const getInputOverview = (student: Student) => {
+      const login = student.intraName
+      const input = new TextInputBuilder()
         .setStyle(TextInputStyle.Paragraph)
-        .setCustomId(member.intraName)
-        .setLabel(`Overview of ${member.intraName}`)
-      ;
-      return memberInput;
-    });
-      /** Commented out due to 100 characters limitation for placeholder */
-      //     .setPlaceholder(`Example:
-  // <Name> <background and coding experience>.
-  // <impression>
-  // <contribution to the projects>
-  // <actions during evaluation>
-  // <something to keep in mind about said student? (if there's any)>
-  // `)
-  
+        .setCustomId(login)
+        .setLabel(`Overview of ${login}`)
+        /** Commented out due to 100 characters limitation for placeholder */
+//         .setPlaceholder(`Example:
+// <Name> <background and coding experience>.
+// <impression>
+// <contribution to the projects>
+// <actions during evaluation>
+// <something to keep in mind about said student? (if there's any)>
+// `)
+
+      return input
+    };
+
+    const membersInputs = [getInputOverview(team.teamLeader)]
+      .concat(team.teamMembers.map(getInputOverview));
+
     const notes = new TextInputBuilder()
       .setStyle(TextInputStyle.Paragraph)
       .setCustomId('notes')
       .setLabel('Additional notes')
     ;
 
-    let components: any[] = [
-      new ActionRowBuilder().addComponents(leaderInput),
+    const components: any[] = [
+      ...membersInputs.map(member =>
+        new ActionRowBuilder().addComponents(member)),
+      new ActionRowBuilder().addComponents(notes)
     ]
 
-    if (memberInputs.length !== 0) {
-      components.push(new ActionRowBuilder().addComponents(memberInputs))
-    }
-    components.push(new ActionRowBuilder().addComponents(notes))
     modal.addComponents(components);
     return interaction.showModal(modal)
   }
