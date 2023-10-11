@@ -1,6 +1,6 @@
 import { Subcommand, Context, SlashCommandContext, StringSelectContext, SelectedStrings, StringSelect, Button, ButtonContext } from 'necord';
 import { RushEvalCommandDecorator } from './rusheval.command';
-import { StringSelectMenuBuilder, ActionRowBuilder, ButtonBuilder, ButtonStyle, roleMention } from 'discord.js';
+import { StringSelectMenuBuilder, ActionRowBuilder, ButtonBuilder, ButtonStyle, roleMention, EmbedBuilder } from 'discord.js';
 import { Injectable } from '@nestjs/common';
 import { InjectModel } from '@nestjs/mongoose';
 import { Model } from 'mongoose';
@@ -8,6 +8,7 @@ import { Student } from '../../schema/student.schema';
 import { Timeslot } from 'src/schema/timeslot.schema';
 import { Evaluator } from 'src/schema/evaluator.schema';
 import { Specialslot } from 'src/schema/specialslot.schema';
+import { getRole } from '../updateroles.command';
 
 
 /**
@@ -48,10 +49,15 @@ export class RushEvalCadetCommand {
       .addComponents([slotsButton, specialButton])
     ;
 
+    const embed = new EmbedBuilder()
+      .setTitle("For those who are able to volunteer for tomorrow's RUSH00 evaluations, please choose your slots. You will be getting eval points / blackholes ya!")
+      .setColor('#00FFFF')
+
     await interaction.deferReply({ ephemeral: true });
     await interaction.deleteReply();
     return interaction.channel.send({
-        content: "Dear <@&1160129265115873321>s, for those who are able to volunteer for tomorrow's RUSH00 evaluations, please choose your slots. You will be getting eval points / blackholes ya!",
+        embeds: [embed],
+        content: `Dear ${getRole(interaction.guild, "CADET")}s`,
         components: [row]
       });
   }
