@@ -8,6 +8,11 @@ import pymongo as mongo
 
 database = mongo.MongoClient('mongodb://127.0.0.1:27017/nest').get_database('nest')
 
+CELL_WIDTH = .2
+CELL_HEIGHT = .14
+MAX_SLOTS = 4
+TIMESLOTS_AMOUNT = 6
+
 def create_figure():
     plt.figure(
         facecolor=(.831, .831, .831),
@@ -26,11 +31,12 @@ def create_figure():
 
 
 def get_data_map(sessions: list) -> dict[str, list[str]]:
-    timeslots = [slot['timeslot'] for slot in database.get_collection('timeslots').find()]
+    slots = list(database.get_collection('timeslots').find())
+    timeslots = [slot['timeslot'] for slot in slots]
     data = {time: [] for time in timeslots}
     for session in sessions:
         team = f"$\\bf Team: {session['leader']}$"
-        cadet = f"$\\bf Cadet:$ {session['evaluator']}"
+        cadet = f"$\\bf Cadet:$ {session['evaluator']}" 
         data[session['time']].append(f"{team}\n{cadet}")
     return data
 
@@ -51,21 +57,21 @@ def set_cells_colors(table: plttable.Table):
         cell.set_facecolor(pltcolor.to_rgba(facecolor))
 
 
-def set_fonts(table: plttable.Table):
+def set_cells_size(table: plttable.Table):
     table.auto_set_font_size(False)
     for cell in table.get_celld().values():
-        cell.set_width(.2)
-        cell.set_height(cell.get_height() * 2.5)
+        cell.set_width(CELL_WIDTH)
+        cell.set_height(CELL_HEIGHT)
 
 
 def draw_session(sessions: list):
     create_figure()
     data = get_data_map(sessions)
     for lst in data.values():
-        # Why not [''] * (4 - len(lst)) ?
+        # Why not [''] * (MAX_SLOTS - len(lst)) ?
         # Just in case I need to modify each cell independently.
         # Since that expression would create shallow copy
-        lst += ['' for _ in range(4 - len(lst))]
+        lst += ['' for _ in range(MAX_SLOTS - len(lst))]
     table = plt.table(
             rowLabels=list(data.keys()),
             rowLoc='center',
@@ -74,12 +80,11 @@ def draw_session(sessions: list):
             cellText=list(data.values()),
         )
     set_cells_colors(table)
-    set_fonts(table)
-
-    # Make the time text bold
-    for i, cell in enumerate(table.get_celld().values()):
-        # if i % 2 == 0:  # Assuming the time cells are even-numbered
-        cell.get_text().set_fontweight('bold')
+    set_cells_size(table)
+    for pos, cell in table.get_celld().items():
+        y, x = pos
+        if x == -1:
+            cell.get_text().set_fontweight('bold')
 
 
 def get_session(teams: list):
@@ -110,7 +115,7 @@ def main():
     except KeyboardInterrupt:
         exit(130)
     except Exception as e:
-        print('Error:', e, file=sys.stderr)
+        print(f'{e.__class__.__name__}: {e}', file=sys.stderr)
         exit(1)
 
 
