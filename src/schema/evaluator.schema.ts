@@ -11,7 +11,7 @@ export class Evaluator {
   student: Student;
 
   @Prop()
-  timeslots: [Timeslot];
+  timeslots: Timeslot[];
 
 }
 
