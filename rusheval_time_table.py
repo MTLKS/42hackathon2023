@@ -8,7 +8,6 @@ import pymongo as mongo
 
 database = mongo.MongoClient('mongodb://127.0.0.1:27017/nest').get_database('nest')
 
-
 def create_figure():
     plt.figure(
         facecolor=(.831, .831, .831),
@@ -23,8 +22,6 @@ def create_figure():
     title_text = plt.suptitle("Evaluation Time Table")
     title_text.set_fontsize(20)
     title_text.set_fontweight('bold')
-    title_text.set_ha('center')
-    title_text.set_x(0.5)
     title_text.set_y(0.9)
 
 
@@ -78,6 +75,11 @@ def draw_session(sessions: list):
         )
     set_cells_colors(table)
     set_fonts(table)
+
+    # Make the time text bold
+    for i, cell in enumerate(table.get_celld().values()):
+        # if i % 2 == 0:  # Assuming the time cells are even-numbered
+        cell.get_text().set_fontweight('bold')
 
 
 def get_session(teams: list):
