@@ -20,7 +20,12 @@ def create_figure():
     plt.gca().get_xaxis().set_visible(False)
     plt.gca().get_yaxis().set_visible(False)
     plt.box(on=None)
-    plt.suptitle("Evaluation Time Table")
+    title_text = plt.suptitle("Evaluation Time Table")
+    title_text.set_fontsize(20)
+    title_text.set_fontweight('bold')
+    title_text.set_ha('center')
+    title_text.set_x(0.5)
+    title_text.set_y(0.9)
 
 
 def get_data_map(sessions: list) -> dict[str, list[str]]:

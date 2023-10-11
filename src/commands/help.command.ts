@@ -11,12 +11,12 @@ export class HelpCommand {
 	public async onHelp(@Context() [interaction]: SlashCommandContext) {
 
     const newEmbed = new EmbedBuilder()
-      .setColor('#0099ff')
+      .setColor('#00FFFF')
       .setTitle('__Available Commands__')
       .addFields(
         { name: '__Commands__                                  __Descriptions__', value: '\n'},
+        { name: '`/ping`                                    :      Pong (for testing)', value: '\n'},
         { name: "`/login`                                  :      Login to 42 intra ", value: '\n'},
-        { name: '`/ping`                                    :      Pong', value: '\n'},
         { name: '`/rusheval cadet`             :      Get cadets to create timeslots', value: '\n'},
         { name: '`/rusheval feedback`      :      Get feedback from rush evaluators', value: '\n'},
         { name: '`/rusheval info`               :      Get current info about rush eval', value: '\n'},

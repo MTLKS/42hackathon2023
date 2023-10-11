@@ -79,7 +79,7 @@ export class RushEvalInfoCommand {
       });
 
       const newEmbed = new EmbedBuilder()
-        .setColor('#0099ff')
+        .setColor('#00FFFF')
         .setTitle('__Current Rush Eval Info__')
         // .setDescription('Current rush eval info')
         .addFields(
