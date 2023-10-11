@@ -125,7 +125,7 @@ export class RushEvalFeedbackFormCommand {
     const notes = new TextInputBuilder()
       .setStyle(TextInputStyle.Paragraph)
       .setCustomId('notes')
-      .setLabel('Additional notes')
+      .setLabel('Notes')
     ;
 
     const components: any[] = [
@@ -146,7 +146,30 @@ export class RushEvalFeedbackFormCommand {
      * saying that the feedback has been successfully recorded,
      * or a markdown of written feedback?
      */
-    console.log(interaction.fields.fields);
+    
+    console.log(interaction.fields.fields)
+    
+    /**
+     * Convert data to csv - Not using for now
+     */
+    // const { convertArrayToCSV } = require('convert-array-to-csv');
+    // const fs = require('fs');
+
+    // const header = ['Name', 'Feedback'];
+    // const dataArr = [
+    //   ['Overview of Team Member', interaction.fields.fields.get('plau')['value'] + '\n'],
+    //   ['Notes', interaction.fields.fields.get('notes')['value'] + '\n'],
+    // ];
+
+    // const csvFromArrayOfArrays = convertArrayToCSV(dataArr, {
+    //   header,
+    //   separator: ';'
+    // });
+
+    // fs.appendFile('feedback.csv', csvFromArrayOfArrays, (err) => {
+    //   if (err) throw err;
+    //   console.log('The file has been saved!');
+    // });
     return interaction.reply({
       content: 'Thanks for submitting your feedback!',
       ephemeral: true
