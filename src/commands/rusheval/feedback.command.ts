@@ -119,12 +119,14 @@ export class RushEvalFeedbackFormCommand {
       .setLabel('Additional notes')
     ;
 
-    const components: any[] = [
+    let components: any[] = [
       new ActionRowBuilder().addComponents(leaderInput),
-      new ActionRowBuilder().addComponents(memberInputs),
-      new ActionRowBuilder().addComponents(notes)
     ]
 
+    if (memberInputs.length !== 0) {
+      components.push(new ActionRowBuilder().addComponents(memberInputs))
+    }
+    components.push(new ActionRowBuilder().addComponents(notes))
     modal.addComponents(components);
     return interaction.showModal(modal)
   }
