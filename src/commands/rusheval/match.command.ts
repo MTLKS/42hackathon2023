@@ -69,7 +69,6 @@ export class RushEvalMatchCommand {
                  */
                 content: `Rush evaluation time table for dear evaluators: <@&1160129265115873321>`,
                 files: [outfile],
-                embeds: [newEmbed],
               }).then(()=> unlink(outfile, ()=>{}));
           } else {
             return interaction.editReply({content: `Internal Server Error`, embeds: [newEmbed]});
