@@ -7,6 +7,7 @@ import { InjectModel } from '@nestjs/mongoose';
 import { Model } from 'mongoose';
 import { Team } from 'src/schema/team.schema';
 import { Student } from 'src/schema/student.schema';
+import { EmbedBuilder } from 'discord.js';
 
 @RushEvalCommandDecorator()
 export class RushEvalFeedbackCommand {
@@ -32,9 +33,15 @@ export class RushEvalFeedbackCommand {
         user: teams.map(team => team.evaluator.discordId)
       });
 
-    return interaction.reply({
+    const newEmbed = new EmbedBuilder()
+      .setColor('#00FFFF')
+      .setTitle('Rush Feedback')
+      .setDescription('Please provide your feedback before 13 Oct')
+    
+      return interaction.reply({
         content: `Rush Feedback ||${evaluatorsDc.toJSON()}||`,
-        components: [row]
+        components: [row],
+        embeds: [newEmbed],
       });
   }
 }
