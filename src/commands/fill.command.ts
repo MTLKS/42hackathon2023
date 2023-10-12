@@ -21,11 +21,11 @@ class GarbageGenerator {
     return res;
   }
 
-  public static randStudent(role: ProgressRole) {
+  public static randStudent(role?: ProgressRole) {
     const login = this.rand(6, 'abcdefghijklmnopqrstuvwxyz') + '39';
     const id = this.rand(6, '0123456789') + '39';
-    const discordId = this.rand(18, '0123456789') + '39';
-    const progressRole = role ? role : ['CADET', 'PICINER'][randomInt(2)];
+    const discordId = this.rand(2, '0123456789') + '39';
+    const progressRole = role ? role : ['CADET', 'PISCINER'][randomInt(2)];
     const coalitionRole = (progressRole === 'CADET'
       ? ['ss', 'kk', 'bb', 'uu'][randomInt(4)]
       : null);
