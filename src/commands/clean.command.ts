@@ -13,9 +13,14 @@ export class CleanCommand {
 
   @SlashCommand({
     name: 'clean',
-    description: 'clean the database'
+    description: 'Clean the database'
   })
-  public async onPing(@Context() [interaction]: SlashCommandContext) {
+  public async onClean(@Context() [interaction]: SlashCommandContext) {
+      
+      const newEmbed = new EmbedBuilder()
+        .setColor('#00FFFF')
+        .setTitle('This will clear every data in the database. Are you sure?')
+
       const yes = new ButtonBuilder()
         .setCustomId('clean-database-confirmed')
         .setLabel('Yes')
@@ -30,9 +35,10 @@ export class CleanCommand {
         .addComponents([yes, no]);
   
       return interaction.reply({
-        content: "This will clear every data in the database, are you sure?",
+
         components: [row],
-        ephemeral: true
+        embeds: [newEmbed],
+        ephemeral: true,
       });
   }
 }
