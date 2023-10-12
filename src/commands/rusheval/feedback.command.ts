@@ -8,6 +8,7 @@ import { Model } from 'mongoose';
 import { Team } from 'src/schema/team.schema';
 import { Student } from 'src/schema/student.schema';
 import { EmbedBuilder } from 'discord.js';
+import { EMPTY } from 'rxjs';
 
 @RushEvalCommandDecorator()
 export class RushEvalFeedbackCommand {
@@ -35,8 +36,7 @@ export class RushEvalFeedbackCommand {
 
     const newEmbed = new EmbedBuilder()
       .setColor('#00FFFF')
-      .setTitle('Rush Feedback')
-      .setDescription('Please provide your feedback before 13 Oct')
+      .setTitle('Please provide your feedback here <t:1697212740:R>')
     
       return interaction.reply({
         content: `Rush Feedback ||${evaluatorsDc.toJSON()}||`,
