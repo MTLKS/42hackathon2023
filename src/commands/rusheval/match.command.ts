@@ -6,6 +6,7 @@ import { Model } from 'mongoose';
 import { Evaluator } from 'src/schema/evaluator.schema';
 import { unlink } from 'fs';
 import { exec } from 'child_process';
+import { Embed, EmbedBuilder, embedLength } from 'discord.js';
 
 @RushEvalCommandDecorator()
 export class RushEvalMatchCommand {
@@ -49,6 +50,10 @@ export class RushEvalMatchCommand {
           console.error(stderr);
         }
       });
+    const newEmbed = new EmbedBuilder()
+      .setColor('#00FFFF')
+      .setTitle('Rush evaluation time table')
+
     interaction.guild.members.fetch({
         user: teams.map(team => team.evaluator.discordId),
         time: 10 * 1000,
@@ -61,15 +66,16 @@ export class RushEvalMatchCommand {
                  * As I heard that there's problem with explicit individual ping.
                  */
                 content: `Rush evaluation time table for dear evaluators: ||${matchedEvaluatorsDc.toJSON()}||`,
-                files: [outfile]
+                files: [outfile],
+                embeds: [newEmbed]
               }).then(()=> unlink(outfile, ()=>{}));
           } else {
-            return interaction.editReply({content: `Internal Server Error`});
+            return interaction.editReply({content: `Internal Server Error`, embeds: [newEmbed]});
           }
         })
       }).catch(error => {
         console.error(error);
-        return interaction.editReply({content: 'Timeout fetching guild members'});
+        return interaction.editReply({content: 'Timeout fetching guild members', embeds: [newEmbed]});
       });
 
   }
