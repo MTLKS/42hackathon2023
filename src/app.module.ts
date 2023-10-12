@@ -19,6 +19,7 @@ import { RushEvalInfoCommand } from './commands/rusheval/info.command';
 import { RushEvalMatchCommand } from './commands/rusheval/match.command';
 import { RushEvalFeedbackCommand, RushEvalFeedbackForm, RushEvalFeedbackTeamSelectButton } from './commands/rusheval/feedback.command';
 import { UpdateRolesCommand } from './commands/updateroles.command';
+import { CleanCommand, CleanDatabase } from './commands/clean.command';
 import { FillGarbageCommand } from './commands/fill.command';
 
 @Module({
@@ -60,6 +61,8 @@ import { FillGarbageCommand } from './commands/fill.command';
     RushEvalFeedbackCommand,
     RushEvalFeedbackTeamSelectButton,
     RushEvalFeedbackForm,
+    CleanCommand,
+    CleanDatabase,
     FillGarbageCommand,
     UpdateRolesCommand
   ],
