@@ -38,8 +38,10 @@ export class RushEvalFeedbackCommand {
       .setColor('#00FFFF')
       .setTitle('Please provide your feedback here <t:1697212740:R>')
     
-      return interaction.reply({
-        content: `Rush Feedback ||${evaluatorsDc.toJSON()}||`,
+      await interaction.deferReply();
+      await interaction.deleteReply();
+      return interaction.channel.send({
+        content: `Rush Feedback <@&1160129265115873321>`,
         components: [row],
         embeds: [newEmbed],
       });

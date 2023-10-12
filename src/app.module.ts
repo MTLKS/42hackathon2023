@@ -22,6 +22,7 @@ import { UpdateRolesCommand } from './commands/updateroles.command';
 import { CleanCommand, CleanDatabase } from './commands/clean.command';
 import { FillGarbageCommand } from './commands/fill.command';
 import { SpecRequest, SpecRequestSchema } from './schema/specrequest.schema';
+import { TestCommand } from './commands/test.command';
 
 @Module({
   imports: [
@@ -70,7 +71,8 @@ import { SpecRequest, SpecRequestSchema } from './schema/specrequest.schema';
     CleanCommand,
     CleanDatabase,
     FillGarbageCommand,
-    UpdateRolesCommand
+    UpdateRolesCommand,
+    TestCommand
   ],
 })
 export class AppModule {}

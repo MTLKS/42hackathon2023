@@ -18,7 +18,7 @@ export class Student {
   progressRole: string;
 
   @Prop()
-  coalitionRole: string;
+  coalitionRole?: string;
 
   @Prop({ required: false })
   intraImageLink?: string;

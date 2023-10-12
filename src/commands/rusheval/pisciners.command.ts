@@ -25,15 +25,15 @@ export class RushEvalPiscinersCommand {
     description: 'Get pisciners to choose timeslots',
   })
   public async onExecute(@Context() [interaction]: SlashCommandContext) {
-    // Hardcoded new team
-    const tryTeam = await this.teamModel.findOne({ 'teamLeader.intraName': 'hqixeo' }).exec();
-    if (tryTeam == null) {
-      console.log('Creating new team')
-      const teamLeader = await this.studentModel.findOne({ intraName: 'hqixeo' }).exec();
-      const teamMember = await this.studentModel.findOne({ intraName: 'plau' }).exec();
-      const newTeam = new this.teamModel({ teamLeader: teamLeader, teamMembers: [teamMember] });
-      await newTeam.save();
-    }
+    // // Hardcoded new team
+    // const tryTeam = await this.teamModel.findOne({ 'teamLeader.intraName': 'hqixeo' }).exec();
+    // if (tryTeam == null) {
+    //   console.log('Creating new team')
+    //   const teamLeader = await this.studentModel.findOne({ intraName: 'plau' }).exec();
+    //   const teamMember = await this.studentModel.findOne({ intraName: 'hqixeo' }).exec();
+    //   const newTeam = new this.teamModel({ teamLeader: teamLeader, teamMembers: [teamMember] });
+    //   await newTeam.save();
+    // }
 
     const button = new ButtonBuilder()
       .setCustomId('piscinersButton')

@@ -25,8 +25,8 @@ export class RushEvalMatchCommand {
     let evaluators = await this.evaluatorModel.find().exec();
 
     await interaction.deferReply({ephemeral: true});
-    teams.forEach(team => {
-      evaluators.find(evaluator => {
+    teams.forEach((team) => {
+      const evaluator = evaluators.find((evaluator) => {
         const matchedSlot = evaluator.timeslots.find(slot =>
           slot.timeslot === team.timeslot.timeslot);
 
@@ -37,6 +37,8 @@ export class RushEvalMatchCommand {
           return true;
         }
       });
+      evaluator.timeslots = evaluator.timeslots.filter(slot =>
+        slot.timeslot !== team.timeslot.timeslot);
     });
     const outfile = 'rush_evaluation_time_table.jpg';
     const child = exec(`python3 rusheval_time_table.py ${outfile}`,
@@ -65,9 +67,9 @@ export class RushEvalMatchCommand {
                 /** Ideal way is to assign a role for rush evaluators.
                  * As I heard that there's problem with explicit individual ping.
                  */
-                content: `Rush evaluation time table for dear evaluators: ||${matchedEvaluatorsDc.toJSON()}||`,
+                content: `Rush evaluation time table for dear evaluators: <@&1160129265115873321>`,
                 files: [outfile],
-                embeds: [newEmbed]
+                embeds: [newEmbed],
               }).then(()=> unlink(outfile, ()=>{}));
           } else {
             return interaction.editReply({content: `Internal Server Error`, embeds: [newEmbed]});
