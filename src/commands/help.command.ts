@@ -20,6 +20,7 @@ export class HelpCommand {
     commands.set('**/rusheval match**', 'Lock in cadet and pisciner timeslots');
     commands.set('**/rusheval feedback**', 'Get feedback from rush evaluators');
     commands.set('**/updateroles**', 'Update user roles');
+    commands.set('**/clean**', 'Clean the database');
     const newEmbed = new EmbedBuilder()
       .setColor('#00FFFF')
       .setTitle('__Available Commands__')
