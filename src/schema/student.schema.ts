@@ -20,6 +20,9 @@ export class Student {
   @Prop()
   coalitionRole: string;
 
+  @Prop({ required: false })
+  intraImageLink?: string;
+
 }
 
 export const StudentSchema = SchemaFactory.createForClass(Student);

@@ -5,6 +5,7 @@ import { firstValueFrom } from 'rxjs';
 import { InjectModel } from '@nestjs/mongoose';
 import { Student } from './schema/student.schema';
 import { Model } from 'mongoose';
+import { ActivityType } from 'discord.js';
 
 @Injectable()
 export class AppService {
@@ -14,6 +15,14 @@ export class AppService {
   @Once('ready')
   public onReady(@Context() [client]: ContextOf<'ready'>) {
     this.logger.log(`Bot logged in as ${client.user.username}`);
+    client.user.setPresence({
+      activities: [
+        {
+          name: 'Definitely not a clone of Thila',
+          type: ActivityType.Custom,
+        },
+      ]
+    });
   }
 
   async getCode(@Request() request: any): Promise<string> {
@@ -32,7 +41,7 @@ export class AppService {
     const intraUserData = await firstValueFrom(this.httpService.get('https://api.intra.42.fr/v2/me', { headers: { Authorization: `Bearer ${data.access_token}` } }));
     const discordId = request.cookies['id'];
     const intraId = intraUserData.data.id;
-    let student = await this.studentModel.findOne({ intraId: intraUserData.data.id });
+    let student = await this.studentModel.findOne({ intraId: intraId });
     let role = '';
     if (intraUserData.data.cursus_users.length == 1) {
       if (new Date(intraUserData.data.cursus_users[0].end_at).getTime() < Date.now())
@@ -53,23 +62,25 @@ export class AppService {
 
     let coalition = '';
     if (role == 'SPECIALIZATION' || role == 'CADET') {
-      let coalitionResponse = await firstValueFrom(this.httpService.get(`https://api.intra.42.fr/v2/users/${intraUserData.data.id}/coalitions`, { headers: { Authorization: `Bearer ${data.access_token}` } }));
+      let coalitionResponse = await firstValueFrom(this.httpService.get(`https://api.intra.42.fr/v2/users/${intraId}/coalitions`, { headers: { Authorization: `Bearer ${data.access_token}` } }));
       coalition = coalitionResponse.data[0].name;
     }
 
     if (student == null) {
       student = new this.studentModel({
-        intraId: intraUserData.data.id,
+        intraId: intraId,
         intraName: intraUserData.data.login,
         discordId: request.cookies['id'],
         progressRole: role,
-        coalitionRole: coalition
+        coalitionRole: coalition,
+        intraImageLink: intraUserData.data.image.link,
       });
       await student.save();
     } else {
       student.discordId = request.cookies['id'];
       student.progressRole = role;
       student.coalitionRole = coalition;
+      student.intraImageLink = intraUserData.data.image.link;
       await student.save();
     }
 

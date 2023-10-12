@@ -1,15 +1,17 @@
-import { Subcommand, Context, SlashCommandContext, Button, ButtonContext, StringSelect, StringSelectContext, SelectedStrings } from 'necord';
+import { Subcommand, Context, SlashCommandContext, Button, ButtonContext, StringSelect, StringSelectContext, SelectedStrings, Modal, ModalContext } from 'necord';
 import { RushEvalCommandDecorator } from './rusheval.command';
 import { InjectModel } from '@nestjs/mongoose';
 import { Model } from 'mongoose';
 import { Student } from '../../schema/student.schema';
 import { Timeslot } from 'src/schema/timeslot.schema';
 import { Evaluator } from 'src/schema/evaluator.schema';
-import { ButtonBuilder, ActionRowBuilder, ButtonStyle, StringSelectMenuBuilder } from 'discord.js';
-import { Injectable } from '@nestjs/common';
+import { ButtonBuilder, ActionRowBuilder, ButtonStyle, StringSelectMenuBuilder, ModalBuilder, TextInputBuilder, TextInputStyle, EmbedBuilder } from 'discord.js';
+import { Inject, Injectable } from '@nestjs/common';
 import { Team } from 'src/schema/team.schema';
 import { getRole } from '../updateroles.command';
-import { EmbedBuilder } from 'discord.js';
+import { SpecRequest } from 'src/schema/specrequest.schema';
+import { Specialslot } from 'src/schema/specialslot.schema';
+import { time } from 'console';
 
 @RushEvalCommandDecorator()
 export class RushEvalPiscinersCommand {
@@ -39,8 +41,14 @@ export class RushEvalPiscinersCommand {
       .setStyle(ButtonStyle.Primary)
     ;
 
+    const specialButton = new ButtonBuilder()
+      .setCustomId('piscinersSpecialButton')
+      .setLabel('Request for special timeslot')
+      .setStyle(ButtonStyle.Danger)
+    ;
+
     const row = new ActionRowBuilder<ButtonBuilder>()
-      .addComponents(button)
+      .addComponents(button, specialButton)
     ;
 
     const embed = new EmbedBuilder()
@@ -149,6 +157,120 @@ export class RushEvalPiscinersStringSelectComponent {
       await newTeam.save();
     }
     
+    return interaction.update({ content: `You have selected ${selected}`, components: [] });
+  }
+}
+
+@Injectable()
+export class RushEvalPiscinersSpecialButtonComponent {
+  @Button('piscinersSpecialButton')
+  public async onButton(@Context() [interaction]: ButtonContext) {
+
+    const modal = new ModalBuilder()
+      .setCustomId('special-request-modal')
+      .setTitle('Request for special timeslot')
+    ;
+
+    const reasonInput = new TextInputBuilder()
+      .setStyle(TextInputStyle.Paragraph)
+      .setCustomId('special-request-modal-reason')
+      .setLabel('You must provide me a really solid reason')
+      .setPlaceholder('Enter your reason here')
+      .setRequired(true)
+    ;
+
+    modal.addComponents(new ActionRowBuilder<TextInputBuilder>().addComponents(reasonInput));
+    
+    return interaction.showModal(modal);
+  }
+}
+
+@Injectable()
+export class RushEvalPiscinersSpecialModalComponent {
+  constructor(
+    @InjectModel(Student.name) private readonly studentModel: Model<Student>, 
+    @InjectModel(SpecRequest.name) private readonly specRequestModel: Model<SpecRequest>,
+  ) { }
+
+  @Modal('special-request-modal')
+  public async onModal(@Context() [interaction]: ModalContext) {
+    const student = await this.studentModel.findOne({ discordId: interaction.user.id }).exec();
+
+    const embed = new EmbedBuilder()
+      .setColor('#0099ff')
+      .setTitle('Special timeslot request')
+      .setAuthor({ name: student.intraName, iconURL: student.intraImageLink })
+      .addFields(
+        { name: 'Reason', value: interaction.fields.getTextInputValue('special-request-modal-reason') },
+      );
+
+    const approvedButton = new ButtonBuilder()
+        .setCustomId('special-request-modal-approved')
+        .setLabel('Approve')
+        .setStyle(ButtonStyle.Success);
+
+    const row = new ActionRowBuilder<ButtonBuilder>()
+        .addComponents(approvedButton);
+
+    interaction.guild.channels.fetch('1161720663401304155').then(async(channel) => {
+      if (channel.isTextBased()) {
+        const message = await channel.send({ content: `<@&1158623712136921098>`, embeds: [embed], components: [row] });
+        const newSpecRequest = new this.specRequestModel({ messageId: message.id, student: student });
+        newSpecRequest.save();
+        console.log(message.id);
+        interaction.reply({ content: 'Your request has been sent to the admins, please wait for their response.', ephemeral: true, components: [] });
+      } else {
+        interaction.reply({ content: 'Hmm, something went wrong, please contact the BOCALs.', ephemeral: true , components: [] });
+      }
+    }).catch(error => {
+      interaction.reply({ content: 'Hmm, something went wrong, please contact the BOCALs.', ephemeral: true , components: [] });
+    });
+  }
+}
+
+@Injectable()
+export class RushEvalPiscinersSpecialApproveButtonComponent {
+  constructor(
+    @InjectModel(SpecRequest.name) private readonly specRequestModel: Model<SpecRequest>,
+    @InjectModel(Specialslot.name) private readonly specialslotModel: Model<Specialslot>,
+  ) { }
+
+  @Button('special-request-modal-approved')
+  public async onButton(@Context() [interaction]: ButtonContext) {
+    const specRequest = await this.specRequestModel.findOne({ messageId: interaction.message.id }).exec();
+    const student = specRequest.student;
+    interaction.guild.members.fetch(student.discordId).then(async(member) => {
+      const specialslots = await this.specialslotModel.aggregate([{$unwind: '$evaluators'},{$group: {_id: '$timeslot',count: { $sum: 1 }}},{$project: {_id: 0,timeslot: '$_id',count: 1}}])
+      console.log(specialslots);
+      let timeslotOptions = [];
+      specialslots.forEach(specialslot => {
+        if (specialslot.count > 0)
+          timeslotOptions.push({ label: specialslot.timeslot, value: specialslot.timeslot });
+      });
+      console.log(timeslotOptions);
+      const stringSelect = new StringSelectMenuBuilder()
+        .setCustomId('special-modal-timeslot')
+        .setPlaceholder('Select your timeslot')
+        .setMinValues(1)
+        .setMaxValues(1)
+        .setOptions(timeslotOptions);
+
+      member.send({ content: "Hi, the BOCALs have approved your request, please pick one below", components: [new ActionRowBuilder<StringSelectMenuBuilder>().addComponents(stringSelect)] });
+    });
+    console.log(interaction.message.id);
+    interaction.update({ content: 'You have approved the request.',  components: [] });
+  }
+}
+
+@Injectable()
+export class RushEvalPiscinersSpecialStringSelectComponent {
+  constructor(
+    @InjectModel(Student.name) private readonly studentModel: Model<Student>, 
+    @InjectModel(Specialslot.name) private readonly specialslotModel: Model<Specialslot>,
+  ) { }
+
+  @StringSelect('special-modal-timeslot')
+  public async onStringSelect(@Context() [interaction]: StringSelectContext, @SelectedStrings() selected: string[]) {
     return interaction.update({ content: `You have selected ${selected}`, components: [] });
   }
 }

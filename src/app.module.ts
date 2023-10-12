@@ -14,13 +14,14 @@ import { LoginCommand } from './commands/login.command';
 import { PingCommand } from './commands/ping.command';
 import { HelpCommand } from './commands/help.command';
 import { RushEvalCadetCommand, RushEvalCadetFetchSlotsComponent, RushEvalCadetStringSelectComponent, RushEvalCadetFetchSpecialSlotsComponent, RushEvalCadetSpecialStringSelectComponent } from './commands/rusheval/cadet.command';
-import { RushEvalPiscinersCommand, RushEvalPiscinersButtonComponent, RushEvalPiscinersStringSelectComponent } from './commands/rusheval/pisciners.command';
+import { RushEvalPiscinersCommand, RushEvalPiscinersButtonComponent, RushEvalPiscinersStringSelectComponent, RushEvalPiscinersSpecialButtonComponent, RushEvalPiscinersSpecialModalComponent, RushEvalPiscinersSpecialApproveButtonComponent, RushEvalPiscinersSpecialStringSelectComponent } from './commands/rusheval/pisciners.command';
 import { RushEvalInfoCommand } from './commands/rusheval/info.command';
 import { RushEvalMatchCommand } from './commands/rusheval/match.command';
 import { RushEvalFeedbackCommand, RushEvalFeedbackForm, RushEvalFeedbackTeamSelectButton } from './commands/rusheval/feedback.command';
 import { UpdateRolesCommand } from './commands/updateroles.command';
 import { CleanCommand, CleanDatabase } from './commands/clean.command';
 import { FillGarbageCommand } from './commands/fill.command';
+import { SpecRequest, SpecRequestSchema } from './schema/specrequest.schema';
 
 @Module({
   imports: [
@@ -39,7 +40,8 @@ import { FillGarbageCommand } from './commands/fill.command';
       { name: Timeslot.name, schema: TimeslotSchema },
       { name: Evaluator.name, schema: EvaluatorSchema },
       { name: Team.name, schema: TeamSchema },
-      { name: Specialslot.name, schema: SpecialslotSchema }
+      { name: Specialslot.name, schema: SpecialslotSchema },
+      { name: SpecRequest.name, schema: SpecRequestSchema }
     ]) 
   ],
   controllers: [AppController],
@@ -56,6 +58,10 @@ import { FillGarbageCommand } from './commands/fill.command';
     RushEvalPiscinersCommand,
     RushEvalPiscinersButtonComponent,
     RushEvalPiscinersStringSelectComponent,
+    RushEvalPiscinersSpecialButtonComponent,
+    RushEvalPiscinersSpecialModalComponent,
+    RushEvalPiscinersSpecialApproveButtonComponent,
+    RushEvalPiscinersSpecialStringSelectComponent,
     RushEvalInfoCommand,
     RushEvalMatchCommand,
     RushEvalFeedbackCommand,
