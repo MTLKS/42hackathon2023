@@ -62,11 +62,12 @@ export class TestCommand {
     });
 
     const hqixeo = new this.studentModel({
-      intraId: '111869',
+      intraId: '111882',
       intraName: 'hqixeo',
-      discordId: '123455',
+      discordId: '387502639350284288',
       progressRole: 'CADET',
       coalitionRole: 'Segmentation Slayers',
+      intraImageLink: 'https://cdn.intra.42.fr/users/bf9767b1aa6a9b40f78f3e526a84f293/hqixeo.jpg'
     });
 
     const zah = new this.studentModel({
