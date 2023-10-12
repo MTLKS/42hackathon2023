@@ -48,7 +48,7 @@ export class RushEvalPiscinersCommand {
       .setColor('#00FFFF')
     ;
 
-    interaction.deferReply({ephemeral: true});
+    await interaction.deferReply({ephemeral: true});
     await interaction.deleteReply();
     return interaction.channel.send(
       {

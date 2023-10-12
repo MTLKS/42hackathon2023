@@ -23,7 +23,7 @@ export class RushEvalMatchCommand {
     let teams = await this.teamModel.find().exec();
     let evaluators = await this.evaluatorModel.find().exec();
 
-    interaction.deferReply({ephemeral: true});
+    await interaction.deferReply({ephemeral: true});
     teams.forEach(team => {
       evaluators.find(evaluator => {
         const matchedSlot = evaluator.timeslots.find(slot =>

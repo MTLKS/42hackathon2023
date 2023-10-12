@@ -38,7 +38,7 @@ export class UpdateRolesCommand {
     );
     const everyRoles = [...roleMap.values(), ...coalitionMap.values()];
 
-    interaction.deferReply({ ephemeral: true });
+    await interaction.deferReply({ ephemeral: true });
     const members = await interaction.guild.members.fetch();
     const getMemberRoles = (student: Student) => {
       let rolesAdd: Role[] = [];

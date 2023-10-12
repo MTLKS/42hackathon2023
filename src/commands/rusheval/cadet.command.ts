@@ -62,7 +62,7 @@ export class RushEvalCadetCommand {
       .setTitle("For those who are able to volunteer for tomorrow's RUSH00 evaluations, please choose your slots. You will be getting eval points / blackholes ya!")
       .setColor('#00FFFF')
 
-    interaction.deferReply({ ephemeral: true });
+    await interaction.deferReply({ ephemeral: true });
     await interaction.deleteReply();
     return interaction.channel.send({
         content: `Dear ${getRole(interaction.guild, "CADET")}s`,
