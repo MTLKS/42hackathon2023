@@ -142,9 +142,10 @@ export class TestCommand {
     const testteam = new this.teamModel({
       teamLeader: await this.studentModel.findOne({ intraName: 'plau' }),
       teamMembers: [
-        await this.studentModel.findOne({ intraName: 'hqixeo' }),
+        await this.studentModel.findOne({ intraName: 'maliew' }),
         await this.studentModel.findOne({ intraName: 'zah' })
       ],
+      timeslot: {timeslot: ''}
     });
     testteam.save();
 

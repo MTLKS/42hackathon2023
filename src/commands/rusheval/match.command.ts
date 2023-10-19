@@ -52,15 +52,15 @@ export class RushEvalMatchCommand {
           console.error(stderr);
         }
       });
-    const newEmbed = new EmbedBuilder()
-      .setColor('#00FFFF')
-      .setTitle('Rush evaluation time table')
+    // const newEmbed = new EmbedBuilder()
+    //   .setColor('#00FFFF')
+    //   .setTitle('Rush evaluation time table')
 
-    interaction.guild.members.fetch({
-        user: teams.map(team => team.evaluator.discordId),
-        time: 10 * 1000,
-      }).then(matchedEvaluatorsDc => {
-        child.on('exit', async(code, signal) => {
+    // interaction.guild.members.fetch({
+        // user: teams.map(team => team.evaluator.discordId),
+        // time: 10 * 1000,
+      // }).then(matchedEvaluatorsDc => {
+        child.on('exit', (code, signal) => {
           if (code === 0) {
             interaction.deleteReply();
             return interaction.channel.send({
@@ -68,16 +68,16 @@ export class RushEvalMatchCommand {
                  * As I heard that there's problem with explicit individual ping.
                  */
                 content: `Rush evaluation time table for dear evaluators: <@&1160129265115873321>`,
-                files: [outfile],
+                files: [outfile]
               }).then(()=> unlink(outfile, ()=>{}));
           } else {
-            return interaction.editReply({content: `Internal Server Error`, embeds: [newEmbed]});
+            return interaction.editReply({content: `Internal Server Error`});
           }
         })
-      }).catch(error => {
-        console.error(error);
-        return interaction.editReply({content: 'Timeout fetching guild members', embeds: [newEmbed]});
-      });
+      // }).catch(error => {
+        // console.error(error);
+        // return interaction.editReply({content: 'Timeout fetching guild members', embeds: [newEmbed]});
+      // });
 
   }
 }

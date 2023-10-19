@@ -36,7 +36,7 @@ export class RushEvalFeedbackCommand {
 
     const newEmbed = new EmbedBuilder()
       .setColor('#00FFFF')
-      .setTitle('Please provide your feedback here <t:1697212740:R>')
+      .setTitle('Please provide your feedback here')
     
       await interaction.deferReply();
       await interaction.deleteReply();
