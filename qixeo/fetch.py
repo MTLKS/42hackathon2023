@@ -27,6 +27,10 @@ def main():
         json.dump(json.loads(child.stdout), sys.stdout, indent='\t')
     except KeyboardInterrupt:
         exit(130)
+    except KeyError as e:
+        args = ", ".join(f"'{arg}'" for arg in e.args)
+        print(f"{args} environment variable not set")
+        exit(1)
     except Exception as e:
         print('Error:', e)
         exit(1)
