@@ -22,17 +22,24 @@ def main():
             f'{DOMAIN}/v2/{uri}?{"&".join(args)}'
         ]
 
-        print("url:", command[-1])
+        print("url:", command[-1], file=sys.stderr)
         child = subprocess.run(command, capture_output=True)
-        json.dump(json.loads(child.stdout), sys.stdout, indent='\t')
+        if child.returncode != 0:
+            raise RuntimeError(child.stderr.decode())
+        try:
+            content = json.loads(child.stdout)
+        except Exception as e:
+            # print(child.stdout.decode(), file=sys.stderr)
+            raise RuntimeError("Invalid JSON response, likely a 404")
+        json.dump(content, sys.stdout, indent='\t')
     except KeyboardInterrupt:
         exit(130)
     except KeyError as e:
         args = ", ".join(f"'{arg}'" for arg in e.args)
-        print(f"{args} environment variable not set")
+        print(f"{args} environment variable not set", file=sys.stderr)
         exit(1)
     except Exception as e:
-        print('Error:', e)
+        print('Error:', e, file=sys.stderr)
         exit(1)
 
 
