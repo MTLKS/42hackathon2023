@@ -30,12 +30,17 @@ export class AppService {
       return 'No code provided';
     }
 
+    let redirect_uri = process.env.HOST;
+    if (process.env.PORT != undefined) {
+      redirect_uri += `:${process.env.PORT}`;
+    }
+
     let { data } = await firstValueFrom(this.httpService.post('https://api.intra.42.fr/oauth/token', {
       'grant_type': 'authorization_code',
       'client_id': process.env.API_UID,
       'client_secret': process.env.API_SECRET,
       'code': request.query.code,
-      'redirect_uri': 'http://hack.mtlks.com:3000'
+      'redirect_uri': redirect_uri
     }));
 
     const intraUserData = await firstValueFrom(this.httpService.get('https://api.intra.42.fr/v2/me', { headers: { Authorization: `Bearer ${data.access_token}` } }));

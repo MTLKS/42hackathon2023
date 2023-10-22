@@ -10,18 +10,24 @@ export class LoginCommand {
     description: 'Login to 42 intra',
   })
   public async onLogin(@Context() [interaction]: SlashCommandContext) {
+    let url = '';
+    if (process.env.PORT == undefined) {
+      url = `${process.env.HOST}/login/${interaction.user.id}`;
+    } else {
+      url = `${process.env.HOST}:${process.env.PORT}/login/${interaction.user.id}`;
+    }
     
     const newEmbed = new EmbedBuilder()
       .setColor('#00FFFF')
       .setTitle('Login to 42 intra')
       .setDescription('Click on the button below to login to 42 intra')
-      .setURL(`http://hack.mtlks.com:${process.env.PORT}/login/${interaction.user.id}`)
+      .setURL(url)
     ;
 
     const button = new ButtonBuilder()
       .setStyle(ButtonStyle.Link)
       .setLabel('Login')
-      .setURL(`http://hack.mtlks.com:${process.env.PORT}/login/${interaction.user.id}`);
+      .setURL(url);
     
     const row = new ActionRowBuilder<ButtonBuilder>()
       .addComponents(button);
