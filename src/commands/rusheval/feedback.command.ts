@@ -9,6 +9,7 @@ import { Team } from 'src/schema/team.schema';
 import { Student } from 'src/schema/student.schema';
 import { EmbedBuilder } from 'discord.js';
 import { EMPTY } from 'rxjs';
+import { getRole } from '../updateroles.command';
 
 @RushEvalCommandDecorator()
 export class RushEvalFeedbackCommand {
@@ -41,7 +42,7 @@ export class RushEvalFeedbackCommand {
       await interaction.deferReply();
       await interaction.deleteReply();
       return interaction.channel.send({
-        content: `Rush Feedback <@&1160129265115873321>`,
+        content: `Rush Feedback ${getRole(interaction.guild, 'CADET')}`,
         components: [row],
         embeds: [newEmbed],
       });
@@ -67,15 +68,15 @@ export class RushEvalFeedbackTeamSelectButton {
       });
     }
     const buttons = team.map(team => {
-      const groupName = team.teamLeader.intraName + "'s group";
-      const button = new ButtonBuilder()
-        .setCustomId('feedback-team-select-button')
-        .setLabel(groupName)
-        .setStyle(ButtonStyle.Secondary)
-      ;
+        const groupName = team.teamLeader.intraName + "'s group";
+        const button = new ButtonBuilder()
+          .setCustomId('feedback-team-select-button')
+          .setLabel(groupName)
+          .setStyle(ButtonStyle.Secondary)
+        ;
 
-      return button;
-    })
+        return button;
+      });
     const row = new ActionRowBuilder<ButtonBuilder>()
       .addComponents(buttons)
     ;
@@ -104,10 +105,6 @@ export class RushEvalFeedbackForm {
 
     const cadet = await this.studentModel.findOne({ discordId: interaction.user.id }).exec();
     const team = await this.teamModel.findOne({ evaluator: cadet }).exec();
-    const modal = new ModalBuilder()
-      .setCustomId('feedback')
-      .setTitle(`Evaluation notes for ${team.teamLeader.intraName}'s group`)
-    ;
     const getInputOverview = (student: Student) => {
       const login = student.intraName;
       const input = new TextInputBuilder()
@@ -143,6 +140,10 @@ export class RushEvalFeedbackForm {
       new ActionRowBuilder().addComponents(notes)
     ];
 
+    const modal = new ModalBuilder()
+      .setCustomId('feedback')
+      .setTitle(`Evaluation notes for ${team.teamLeader.intraName}'s group`)
+    ;
     modal.addComponents(components);
     return interaction.showModal(modal);
   }

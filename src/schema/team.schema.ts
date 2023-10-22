@@ -11,7 +11,7 @@ export class Team {
   teamLeader: Student;
 
   @Prop()
-  teamMembers: [Student];
+  teamMembers: Student[];
 
   @Prop()
   timeslot: Timeslot;

@@ -10,17 +10,17 @@ export class HelpCommand {
 	})
 	public async onHelp(@Context() [interaction]: SlashCommandContext) {
 
-    let commands = new Map<string, string>()
-
-    commands.set('**/ping**', 'Pong (for testing)');
-    commands.set('**/login**', 'Login to 42 intra');
-    commands.set('**/rusheval info**', 'Get current info about rush eval');
-    commands.set('**/rusheval cadet**', 'Get cadets to create timeslots');
-    commands.set('**/rusheval pisciners**', 'Get pisciners to choose timeslots');
-    commands.set('**/rusheval match**', 'Lock in cadet and pisciner timeslots');
-    commands.set('**/rusheval feedback**', 'Get feedback from rush evaluators');
-    commands.set('**/updateroles**', 'Update user roles');
-    commands.set('**/clean**', 'Clean the database');
+    const commands = new Map<string, string>()
+      .set('**/ping**', 'Pong (for testing)')
+      .set('**/login**', 'Login to 42 intra')
+      .set('**/rusheval info**', 'Get current info about rush eval')
+      .set('**/rusheval cadet**', 'Get cadets to create timeslots')
+      .set('**/rusheval pisciners**', 'Get pisciners to choose timeslots')
+      .set('**/rusheval match**', 'Lock in cadet and pisciner timeslots')
+      .set('**/rusheval feedback**', 'Get feedback from rush evaluators')
+      .set('**/updateroles**', 'Update user roles')
+      .set('**/clean**', 'Clean the database')
+    ;
     const newEmbed = new EmbedBuilder()
       .setColor('#00FFFF')
       .setTitle('__Available Commands__')
@@ -33,9 +33,9 @@ export class HelpCommand {
         {
           name: '__Descriptions__',
           value: [...commands.values()].join('\n\n'),
-          inline:true
+          inline: true
         }
       )
-    return interaction.reply({ content: '', ephemeral: true, embeds: [newEmbed]});
+    return interaction.reply({embeds: [newEmbed], ephemeral: true});
   }
 }

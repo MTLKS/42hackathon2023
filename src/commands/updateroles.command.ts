@@ -7,7 +7,7 @@ import { Guild, Role } from 'discord.js';
 import { EmbedBuilder } from 'discord.js';
 
 export function getRole(guild: Guild, roleName: string) {
-  return guild.roles.cache.find((r) => r.name === roleName);
+  return '@' + roleName;
 }
 
 @Injectable()
@@ -22,6 +22,10 @@ export class UpdateRolesCommand {
     defaultMemberPermissions: ['Administrator']
   })
   public async onExecute(@Context() [interaction]: SlashCommandContext) {
+    function getRole(guild: Guild, roleName: string) {
+      return guild.roles.cache.find((r) => r.name === roleName);
+    }
+    
     const roleMap = new Map<string, Role>([
         'PISCINER',
         'FLOATY',

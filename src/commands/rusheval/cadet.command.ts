@@ -10,15 +10,10 @@ import { Evaluator } from 'src/schema/evaluator.schema';
 import { Specialslot } from 'src/schema/specialslot.schema';
 import { getRole } from '../updateroles.command';
 
-
-/**
- * Has to do what has to be done because we couldn't refactor the code in time confidently
- */
 function rearrangeTimeslot(timeslots: Array<Timeslot>, evaluators: Array<Evaluator>) {
   let table = new Map<string, Student[]>();
 
-  timeslots.forEach(timeslot =>
-    table.set(timeslot.timeslot, []));
+  timeslots.forEach(timeslot => table.set(timeslot.timeslot, []));
   evaluators.forEach(evaluator => {
       evaluator.timeslots.forEach(slot =>
         table.get(slot.timeslot).push(evaluator['student']));
@@ -121,7 +116,6 @@ export class RushEvalCadetStringSelectComponent {
     const timeslots = await this.timeslotModel.find().exec();
     const evaluators = await this.evaluatorModel.find().exec();
     const underBookedSessions = getUnderBookedSessions(timeslots, evaluators);
-    const selectedTimeslots: any[] = timeslots.filter(timeslot => selected.includes(timeslot.timeslot));
     const student = await this.studentModel.findOne({ discordId: interaction.user.id }).exec();
     const evaluator = await this.evaluatorModel.findOne({ student: student }).exec();
 
@@ -136,6 +130,8 @@ Please regenerate your selection by clicking on the \`Open slots\` button one mo
           });
       }
     }
+
+    const selectedTimeslots = timeslots.filter(timeslot => selected.includes(timeslot.timeslot));
 
     if (evaluator) {
       evaluator.timeslots = selectedTimeslots;
@@ -196,20 +192,21 @@ export class RushEvalCadetSpecialStringSelectComponent {
   @StringSelect('cadet-session-select-special')
   public async onStringSelect(@Context() [interaction]: StringSelectContext, @SelectedStrings() selected: string[]) {
     const timeslots = await this.specialslotModel.find().exec();
-    const selectedTimeslots: any[] = timeslots.filter(timeslot => selected.includes(timeslot.timeslot));
+    const selectedTimeslots = timeslots.filter(timeslot => selected.includes(timeslot.timeslot));
     const student = await this.studentModel.findOne({ discordId: interaction.user.id }).exec();
 
-    timeslots.forEach(async (timeslot) => {
+    for (let timeslot of timeslots) {
       timeslot.evaluators = timeslot.evaluators.filter((evaluator) => evaluator.discordId !== student.discordId);
       if (selectedTimeslots.includes(timeslot)) {
         timeslot.evaluators.push(student);
       }
       await timeslot.save();
-    });
-
-    if (selected.length == 0) {
-      return interaction.reply({ content: 'You have not selected any timeslots', ephemeral: true });
     }
-    return interaction.reply({ content: `You have selected ${selected}`, ephemeral: true });
+    return interaction.reply({
+        content: ((selected.length === 0)
+            ? 'You have not selected any timeslots'
+            : `You have selected ${selected}`),
+        ephemeral: true
+      });
   }
 }

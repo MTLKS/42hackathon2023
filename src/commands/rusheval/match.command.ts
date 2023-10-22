@@ -7,6 +7,7 @@ import { Evaluator } from 'src/schema/evaluator.schema';
 import { unlink } from 'fs';
 import { exec } from 'child_process';
 import { Embed, EmbedBuilder, embedLength } from 'discord.js';
+import { getRole } from '../updateroles.command';
 
 @RushEvalCommandDecorator()
 export class RushEvalMatchCommand {
@@ -25,23 +26,23 @@ export class RushEvalMatchCommand {
     let evaluators = await this.evaluatorModel.find().exec();
 
     await interaction.deferReply({ephemeral: true});
-    teams.forEach((team) => {
-      const evaluator = evaluators.find((evaluator) => {
+    for (let team of teams) {
+      evaluators.find((evaluator) => {
         const matchedSlot = evaluator.timeslots.find(slot =>
           slot.timeslot === team.timeslot.timeslot);
 
-        if (matchedSlot) {
-          team.timeslot = matchedSlot;
-          team.evaluator = evaluator.student;
-          team.save();
-          return true;
+        if (!matchedSlot) {
+          return false;
         }
+        team.timeslot = matchedSlot;
+        team.evaluator = evaluator.student;
+        evaluator.timeslots.splice(evaluator.timeslots.indexOf(matchedSlot), 1);
+        team.save();
+        return true;
       });
-      evaluator.timeslots = evaluator.timeslots.filter(slot =>
-        slot.timeslot !== team.timeslot.timeslot);
-    });
+    }
     const outfile = 'rush_evaluation_time_table.jpg';
-    const child = exec(`python3 rusheval_time_table.py ${outfile}`,
+    const child = exec(`python rusheval_time_table.py ${outfile}`,
       (error, stdout, stderr) => {
         if (stdout) {
           console.log(stdout);
@@ -67,9 +68,9 @@ export class RushEvalMatchCommand {
                 /** Ideal way is to assign a role for rush evaluators.
                  * As I heard that there's problem with explicit individual ping.
                  */
-                content: `Rush evaluation time table for dear evaluators: <@&1160129265115873321>`,
+                content: `Rush evaluation time table for dear evaluators: ${getRole(interaction.guild, 'CADET')}`,
                 files: [outfile]
-              }).then(()=> unlink(outfile, ()=>{}));
+              }).then(() => unlink(outfile, ()=>{}));
           } else {
             return interaction.editReply({content: `Internal Server Error`});
           }
