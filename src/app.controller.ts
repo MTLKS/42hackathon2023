@@ -1,4 +1,4 @@
-import { Controller, Get, Request } from '@nestjs/common';
+import { Controller, Get, HttpStatus, Request } from '@nestjs/common';
 import { AppService } from './app.service';
 import { Param, Response } from '@nestjs/common';
 
@@ -12,8 +12,12 @@ export class AppController {
   }
 
   @Get('login/:id')
-  getId(@Param() param: any, @Response() response: any): void {
+  async getId(@Param() param: any, @Response() response: any): Promise<void> {
     response.cookie('id', param.id);
-    response.redirect(302, process.env.CLIENT_REDIRECT);
+    if (process.env.CLIENT_REDIRECT == undefined) {
+      response.status(HttpStatus.INTERNAL_SERVER_ERROR).send('No redirect url provided');
+    } else {
+      response.redirect(302, process.env.CLIENT_REDIRECT);
+    }
   }
 }

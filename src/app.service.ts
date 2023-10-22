@@ -18,8 +18,8 @@ export class AppService {
     client.user.setPresence({
       activities: [
         {
-          name: 'Definitely not a clone of Thila',
-          type: ActivityType.Custom,
+          name: 'all cadets',
+          type: ActivityType.Watching,
         },
       ]
     });
