@@ -16,11 +16,12 @@ function install_mongodb() {
 
 # compass
 function install_compass() {
-  version="1.40.4"
-  package="mongodb-compass-$version-darwin-x64"
-  dmg="$package.dmg"
+  local version="1.40.4"
+  local package="mongodb-compass-$version-darwin-x64"
+  local dmg="$package.dmg"
+
   if [ ! -d "$package" ] && [ ! -f "$dmg" ]; then
-    curl -O "https://downloads.mongodb.com/compass/$dmg"
+    curl -O "https://downloads.mongodb.com/compass/$dmg" &&
     echo "Compass is installed as .dmg file. Please extract it manually."
   fi
 }
@@ -30,7 +31,6 @@ function install_mongosh() {
   local version="2.0.2"
   local package="mongosh-$version-darwin-x64"
   local zip="$package.zip"
-
 
   curl -O "https://downloads.mongodb.com/compass/$zip" &&
   unzip "$zip" &&
