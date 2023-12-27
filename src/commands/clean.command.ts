@@ -16,26 +16,24 @@ export class CleanCommand {
     description: 'Clean the database'
   })
   public async onClean(@Context() [interaction]: SlashCommandContext) {
-      
       const newEmbed = new EmbedBuilder()
         .setColor('#00FFFF')
         .setTitle('This will clear every data in the database. Are you sure?')
-
+        ;
       const yes = new ButtonBuilder()
         .setCustomId('clean-database-confirmed')
         .setLabel('Yes')
         .setStyle(ButtonStyle.Danger)
-      ;
+        ;
       const no = new ButtonBuilder()
         .setCustomId('clean-database-rejected')
         .setLabel('No')
         .setStyle(ButtonStyle.Success)
-      ;
+        ;
       const row = new ActionRowBuilder<ButtonBuilder>()
         .addComponents([yes, no]);
   
       return interaction.reply({
-
         components: [row],
         embeds: [newEmbed],
         ephemeral: true,

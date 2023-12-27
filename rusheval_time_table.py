@@ -104,20 +104,21 @@ def get_session_file(filename: str):
 
 
 def main():
+    if len(sys.argv) != 2:
+        print(f"Usage: {sys.argv[0]} <dst image>", file=sys.stderr)
+        return 1
     try:
         teams = list(database.get_collection('teams').find())
-        if len(sys.argv) != 2:
-            raise RuntimeError(f"Usage: {sys.argv[0]} <dst image>")
         outfile = sys.argv[1]
         # draw_session(get_session_file("testmatch.json"))
         draw_session(get_session(teams))
         plt.savefig(outfile)
     except KeyboardInterrupt:
-        exit(130)
-    # except Exception as e:
-        # print(f'{e.__class__.__name__}: {e}', file=sys.stderr)
-        # exit(1)
+        return 130
+    except Exception as e:
+        print(f'{e.__class__.__name__}: {e}', file=sys.stderr)
+        return 1
 
 
 if __name__ == "__main__":
-    main()
+    exit(main())

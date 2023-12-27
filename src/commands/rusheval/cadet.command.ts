@@ -1,7 +1,7 @@
 import { Subcommand, Context, SlashCommandContext, StringSelectContext, SelectedStrings, StringSelect, Button, ButtonContext } from 'necord';
 import { RushEvalCommandDecorator } from './rusheval.command';
-import { StringSelectMenuBuilder, ActionRowBuilder, ButtonBuilder, ButtonStyle, roleMention, EmbedBuilder } from 'discord.js';
-import { Injectable } from '@nestjs/common';
+import { StringSelectMenuBuilder, ActionRowBuilder, ButtonBuilder, ButtonStyle, EmbedBuilder } from 'discord.js';
+import { ConsoleLogger, Injectable } from '@nestjs/common';
 import { InjectModel } from '@nestjs/mongoose';
 import { Model } from 'mongoose';
 import { Student } from '../../schema/student.schema';
@@ -42,20 +42,22 @@ export class RushEvalCadetCommand {
       .setCustomId('cadet-fetch-slot')
       .setLabel('Open slots')
       .setStyle(ButtonStyle.Success)
-    ;
+      ;
 
     const specialButton = new ButtonBuilder()
       .setCustomId('cadet-fetch-special')
       .setLabel('Open special slots')
       .setStyle(ButtonStyle.Primary)
+      ;
 
     const row = new ActionRowBuilder<ButtonBuilder>()
       .addComponents([slotsButton, specialButton])
-    ;
+      ;
 
     const embed = new EmbedBuilder()
       .setTitle("For those who are able to volunteer for tomorrow's RUSH00 evaluations, please choose your slots. You will be getting eval points / blackholes ya!")
       .setColor('#00FFFF')
+      ;
 
     await interaction.deferReply({ ephemeral: true });
     await interaction.deleteReply();
@@ -83,17 +85,17 @@ export class RushEvalCadetFetchSlotsComponent {
     const availableOptions = (underBookedSessions.length
         ? underBookedSessions.map(selectMap)
         : timeslots.map(timeslot => selectMap(timeslot.timeslot)))
-    ;
+      ;
     const stringSelect = new StringSelectMenuBuilder()
       .setCustomId('cadet-session-select')
       .setPlaceholder('Select your timeslots')
       .setMinValues(0)
       .setMaxValues(availableOptions.length)
       .setOptions(availableOptions)
-    ;
+      ;
     const row = new ActionRowBuilder<StringSelectMenuBuilder>()
       .addComponents(stringSelect)
-    ;
+      ;
 
     return interaction.reply({
         content: 'Please select your timeslot for the next rush defense.',
