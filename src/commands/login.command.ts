@@ -1,6 +1,6 @@
-import { Injectable } from '@nestjs/common';
+import { ConsoleLogger, Injectable } from '@nestjs/common';
 import { ActionRowBuilder, ButtonBuilder, ButtonStyle } from 'discord.js';
-import { SlashCommand, SlashCommandContext, Context } from 'necord';
+import { SlashCommand, SlashCommandContext, Context, Button } from 'necord';
 import { EmbedBuilder } from 'discord.js';
 
 @Injectable()
@@ -10,6 +10,37 @@ export class LoginCommand {
     description: 'Login to 42 intra',
   })
   public async onLogin(@Context() [interaction]: SlashCommandContext) {
+    try {
+      const button = new ButtonBuilder()
+        .setStyle(ButtonStyle.Primary)
+        .setLabel('Login')
+        .setCustomId('login')
+        ;
+      const row = new ActionRowBuilder<ButtonBuilder>()
+        .addComponents(button);
+      await interaction.deferReply({ ephemeral: true });
+      await interaction.deleteReply();
+      return interaction.channel.send({
+        content: 'Click on the button below to generate link to connect to 42 intra',
+        components: [row]
+      });
+    } catch (error) {
+      const logger = new ConsoleLogger("LoginButton");
+      
+      logger.error(error);
+      if (interaction.replied === true) {
+        logger.debug('Premature reply going on?');
+      }
+      else if (interaction.deferred === true) {
+        return interaction.editReply({
+          content: 'An error occured generating login button'
+        });
+      }
+    }
+  }
+
+  @Button('login')
+  public async onLoginButton(@Context() [interaction]: SlashCommandContext) {
     const port = (process.env.PORT !== undefined) ? `:${process.env.PORT}`: "";
     const url = `${process.env.HOST}${port}/login/${interaction.user.id}`
 
