@@ -1,6 +1,6 @@
 import { ConsoleLogger, Injectable } from '@nestjs/common';
 import { ActionRowBuilder, ButtonBuilder, ButtonStyle } from 'discord.js';
-import { SlashCommand, SlashCommandContext, Context, Button } from 'necord';
+import { SlashCommand, SlashCommandContext, Context, Button, ButtonContext } from 'necord';
 import { EmbedBuilder } from 'discord.js';
 
 @Injectable()
@@ -40,7 +40,7 @@ export class LoginCommand {
   }
 
   @Button('login')
-  public async onLoginButton(@Context() [interaction]: SlashCommandContext) {
+  public async onLoginButton(@Context() [interaction]: ButtonContext) {
     const port = (process.env.PORT !== undefined) ? `:${process.env.PORT}`: "";
     const url = `${process.env.HOST}${port}/login/${interaction.user.id}`
 
@@ -67,7 +67,9 @@ export class LoginCommand {
           components: [row]
         });
     } catch (error) {
-      console.error(error);
+      const logger = new ConsoleLogger("onLoginButtonClick");
+
+      logger.error(error);
       return interaction.reply({
         ephemeral: true,
         content: 'An error occured while trying to login to 42 intra'
