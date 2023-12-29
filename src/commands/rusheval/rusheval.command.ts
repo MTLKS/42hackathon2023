@@ -1,3 +1,4 @@
+import { InteractionReplyOptions } from 'discord.js';
 import { createCommandGroupDecorator } from 'necord';
 
 export const RushEvalCommandDecorator = createCommandGroupDecorator({
@@ -5,7 +6,10 @@ export const RushEvalCommandDecorator = createCommandGroupDecorator({
   description: 'Rush Eval',
 });
 
-
+export const LOGIN_REDIRECT_REPLY: InteractionReplyOptions = {
+  content: 'Please identify yourself by clicking on login button fist.',
+  ephemeral: true
+};
 
 
 
