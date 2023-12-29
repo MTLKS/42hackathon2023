@@ -66,15 +66,15 @@ export class RushEvalFeedbackTeamSelectButton {
       });
     }
     const buttons = team.map(team => {
-        const groupName = team.teamLeader.intraName + "'s group";
-        const button = new ButtonBuilder()
-          .setCustomId('feedback-team-select-button')
-          .setLabel(groupName)
-          .setStyle(ButtonStyle.Secondary)
-          ;
+      const groupName = team.teamLeader.intraName + "'s group";
+      const button = new ButtonBuilder()
+        .setCustomId('feedback-team-select-button')
+        .setLabel(groupName)
+        .setStyle(ButtonStyle.Secondary)
+        ;
 
-        return button;
-      });
+      return button;
+    });
     const row = new ActionRowBuilder<ButtonBuilder>()
       .addComponents(buttons)
       ;
