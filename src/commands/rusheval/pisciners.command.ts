@@ -6,7 +6,7 @@ import { Student } from '../../schema/student.schema';
 import { Timeslot } from 'src/schema/timeslot.schema';
 import { Evaluator } from 'src/schema/evaluator.schema';
 import { ButtonBuilder, ActionRowBuilder, ButtonStyle, StringSelectMenuBuilder, ModalBuilder, TextInputBuilder, TextInputStyle, EmbedBuilder } from 'discord.js';
-import { Inject, Injectable } from '@nestjs/common';
+import { ConsoleLogger, Inject, Injectable } from '@nestjs/common';
 import { Team } from 'src/schema/team.schema';
 import { getRole } from '../updateroles.command';
 import { SpecRequest } from 'src/schema/specrequest.schema';
@@ -98,6 +98,12 @@ export class RushEvalPiscinersButtonComponent {
         timeslotOptions.push({ label: timeslot.timeslot, value: timeslot.timeslot });
     });
 
+    if (timeslotOptions.length === 0) {
+      /* Should notify the admin that there is no available session for pisciner */
+      const logger = new ConsoleLogger(interaction.customId);
+      logger.error(`No available session`);
+      return interaction.reply({ content: 'There are no available session at the moment.', ephemeral: true });
+    }
     const stringSelect = new StringSelectMenuBuilder()
       .setCustomId('piscinersStringSelect')
       .setPlaceholder('Select your timeslot')
