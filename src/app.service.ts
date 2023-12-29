@@ -35,6 +35,10 @@ import { ActivityType } from 'discord.js';
 //     return data;
 //   }
 
+  // private getApiData(access_token: string, intraId: string) {
+  //   return axios.get(`https://api.intra.42.fr/v2/users`, { headers: { Authorization: `Bearer ${access_token}` } });
+  // }
+
 //   public async getDiscordUserData(id: string): Promise<any> {
 //     let { data } = await firstValueFrom(this.httpService.get(`https://discord.com/api/v10/users/${id}`, {
 //       headers: {
