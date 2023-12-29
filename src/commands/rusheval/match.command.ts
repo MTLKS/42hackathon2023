@@ -41,6 +41,37 @@ export class RushEvalMatchCommand {
         return true;
       });
     }
+    const teamsWithoutEvaluator = teams.filter(team => team.evaluator === undefined);
+    /* TODO: Handle teams without evaluator */
+    if (teamsWithoutEvaluator.length) {
+      try {
+      const teamsNoRegister = teamsWithoutEvaluator.filter(team => team.timeslot.timeslot === "");
+      const teamsRegitered = teamsWithoutEvaluator.filter(team => team.timeslot.timeslot !== "");
+      const fields = [
+        {
+          name: 'Teams did not registered',
+          value: teamsNoRegister.map(team => `${team.teamLeader.intraName}'s group`).join('\n\n') || 'None',
+          inline: true
+        },
+        {
+          name: 'Registered team missing evaluator',
+          value: teamsRegitered.map(team => `${team.teamLeader.intraName}'s group: ${team.timeslot.timeslot}`).join('\n\n') || 'None',
+          inline: true
+        }
+      ];
+      const newEmbed = new EmbedBuilder()
+        .setColor('#00FFFF')
+        .addFields(fields)
+        ;
+      return interaction.editReply({
+          content: 'Error, below teams are missing evaluator: ' + teamsWithoutEvaluator.map(team => `${team.teamLeader.intraName}'s group`).join(', '),
+          embeds: [newEmbed]
+        });
+      } catch (error) {
+        console.log(error);
+        return interaction.editReply({content: `Unexpected error occured, probably has something to do with the teams without evaluator`});
+      }
+    }
     const outfile = 'rush_evaluation_time_table.jpg';
     const child = exec(`python rusheval_time_table.py ${outfile}`,
       (error, stdout, stderr) => {
