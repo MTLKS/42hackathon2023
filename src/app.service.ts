@@ -7,54 +7,6 @@ import { Student } from './schema/student.schema';
 import { Model } from 'mongoose';
 import { ActivityType } from 'discord.js';
 
-// class ApiManager {
-//   private readonly logger = new Logger(ApiManager.name);
-
-//   public constructor(private httpService: HttpService = new HttpService()) {
-
-//   }
-//   public async getAccessToken(code: string): Promise<string> {
-//     let redirect_uri = process.env.HOST;
-//     if (process.env.PORT != undefined) {
-//       redirect_uri += `:${process.env.PORT}`;
-//     }
-
-//     let { data } = await firstValueFrom(this.httpService.post('https://api.intra.42.fr/oauth/token', {
-//       'grant_type': 'authorization_code',
-//       'client_id': process.env.API_UID,
-//       'client_secret': process.env.API_SECRET,
-//       'code': code,
-//       'redirect_uri': redirect_uri
-//     }));
-
-//     return data.access_token;
-//   }
-
-//   public async getIntraUserData(access_token: string): Promise<any> {
-//     let { data } = await firstValueFrom(this.httpService.get('https://api.intra.42.fr/v2/me', { headers: { Authorization: `Bearer ${access_token}` } }));
-//     return data;
-//   }
-
-  // private getApiData(access_token: string, intraId: string) {
-  //   return axios.get(`https://api.intra.42.fr/v2/users`, { headers: { Authorization: `Bearer ${access_token}` } });
-  // }
-
-//   public async getDiscordUserData(id: string): Promise<any> {
-//     let { data } = await firstValueFrom(this.httpService.get(`https://discord.com/api/v10/users/${id}`, {
-//       headers: {
-//         Authorization: `Bot ${process.env.DISCORD_TOKEN}`,
-//       },
-//     }));
-//     return data;
-//   }
-
-//   public async getCoalitionRole(access_token: string, intraId: string): Promise<string> {
-//     let coalitionResponse = await firstValueFrom(this.httpService.get(`https://api.intra.42.fr/v2/users/${intraId}/coalitions`, { headers: { Authorization: `
-//     Bearer ${access_token}` } }));
-//     return coalitionResponse.data[0].name;
-//   }
-// }
-
 @Injectable()
 export class AppService {
   constructor(private httpService: HttpService, @InjectModel(Student.name) private readonly studentModel: Model<Student>) {}
