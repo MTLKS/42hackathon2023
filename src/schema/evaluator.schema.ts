@@ -13,6 +13,8 @@ export class Evaluator {
   @Prop()
   timeslots: Timeslot[];
 
+  @Prop()
+  lastCreatedTimeslotsAt?: Date;
 }
 
 export const EvaluatorSchema = SchemaFactory.createForClass(Evaluator);

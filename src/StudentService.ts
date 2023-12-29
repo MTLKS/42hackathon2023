@@ -4,7 +4,7 @@ import { Model } from "mongoose";
 import { Student } from "./schema/student.schema";
 import { Modal, ModalContext } from "necord";
 import { ApiManager } from "./ApiManager";
-import { ConsoleLogger } from "@nestjs/common";
+import { Evaluator } from "./schema/evaluator.schema";
 
 export function newEvaluatorModal(): ModalBuilder {
   /* TODO: add trace of where we left off so that after modal finish could automatically track back? */
@@ -31,7 +31,9 @@ export function newEvaluatorModal(): ModalBuilder {
 
 /* Foresighting a ticket for reconfiguring intra */
 export class StudentService {
-  constructor(@InjectModel(Student.name) private readonly studentModel: Model<Student>) { }
+  constructor(
+    @InjectModel(Evaluator.name) private readonly evaluatorModel: Model<Evaluator>
+    ) { }
 
   @Modal('new-evaluator-modal')
   public async onNewEvaluator([interaction]: ModalContext) {
@@ -73,12 +75,12 @@ export class StudentService {
       progressRole: temporaryGetRole(discordRoles),
     };
     try {
-      await this.studentModel.create(student);
-      return interaction.reply({ content: `Added ${login} as new student`, ephemeral: true });
+      await this.evaluatorModel.create({student: student});
+      return interaction.reply({ content: `Added ${login} as new evaluator`, ephemeral: true });
     } catch (error) {
       const logger = new ConsoleLogger("StudentService");
-      logger.error(`Failed to add ${login} as new student: ${error}`);
-      return interaction.reply({ content: `Failed to add ${login} as new student. Please contact the maintainer for this.`, ephemeral: true });
+      logger.error(`Failed to add ${login} as new evaluator: ${error}`);
+      return interaction.reply({ content: `Failed to add ${login} as new evaluator. Please contact the maintainer for this.`, ephemeral: true });
     }
   }
 }

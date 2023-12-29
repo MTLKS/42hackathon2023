@@ -73,14 +73,13 @@ export class RushEvalCadetCommand {
 @Injectable()
 export class RushEvalCadetFetchSlotsComponent { 
   constructor(
-    @InjectModel(Student.name) private readonly studentModel: Model<Student>,
     @InjectModel(Timeslot.name) private readonly timeslotModel: Model<Timeslot>,
     @InjectModel(Evaluator.name) private readonly evaluatorModel: Model<Evaluator>,
   ) {}
 
   @Button('cadet-fetch-slot')
   public async onExecute(@Context() [interaction]: ButtonContext) {
-    const student = await this.studentModel.findOne({ discordId: interaction.user.id }).exec();
+    const student = await this.evaluatorModel.findOne({ 'student.discordId': interaction.user.id }).exec();
     if (student === null) {
       return interaction.showModal(newEvaluatorModal());
     }
@@ -114,18 +113,19 @@ export class RushEvalCadetFetchSlotsComponent {
 @Injectable()
 export class RushEvalCadetStringSelectComponent {
   constructor(
-    @InjectModel(Student.name) private readonly studentModel: Model<Student>,
     @InjectModel(Timeslot.name) private readonly timeslotModel: Model<Timeslot>,
     @InjectModel(Evaluator.name) private readonly evaluatorModel: Model<Evaluator>,
   ) { }
 
   @StringSelect('cadet-session-select')
   public async onStringSelect(@Context() [interaction]: StringSelectContext, @SelectedStrings() selected: string[]) {
+    const evaluator = await this.evaluatorModel.findOne({ 'student.discordId': interaction.user.id }).exec();
+    if (evaluator === null) {
+      return interaction.reply({content: 'Please try fetching slots and register yourself as new evaluator again.', ephemeral: true});
+    }
     const timeslots = await this.timeslotModel.find().exec();
     const evaluators = await this.evaluatorModel.find().exec();
     const underBookedSessions = getUnderBookedSessions(timeslots, evaluators);
-    const student = await this.studentModel.findOne({ discordId: interaction.user.id }).exec();
-    const evaluator = await this.evaluatorModel.findOne({ student: student }).exec();
 
     if (underBookedSessions.length) {
       /** Check if the chosen slots contain any overbooked sessions */
@@ -141,13 +141,9 @@ Please regenerate your selection by clicking on the \`Open slots\` button one mo
 
     const selectedTimeslots = timeslots.filter(timeslot => selected.includes(timeslot.timeslot));
 
-    if (evaluator) {
-      evaluator.timeslots = selectedTimeslots;
-      await evaluator.save();
-    } else {
-      const newEvaluator = new this.evaluatorModel({ student: student, timeslots: selectedTimeslots });
-      await newEvaluator.save();
-    }
+    evaluator.timeslots = selectedTimeslots;
+    evaluator.lastCreatedTimeslotsAt = new Date();
+    await evaluator.save();
 
     return interaction.reply({
         content: ((selected.length === 0)
