@@ -6,10 +6,13 @@ import { Student } from '../schema/student.schema';
 import { Guild, Role } from 'discord.js';
 import { EmbedBuilder } from 'discord.js';
 
-export function getRole(guild: Guild, roleName: string) {
-  return '@' + roleName;
-}
+// export function getRole(guild: Guild, roleName: string) {
+//   return '@' + roleName;
+// }
 
+export function getRole(guild: Guild, roleName: string) {
+  return guild.roles.cache.find((r) => r.name === roleName);
+}
 @Injectable()
 export class UpdateRolesCommand {
   constructor(
