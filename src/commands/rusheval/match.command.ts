@@ -17,34 +17,8 @@ export class RushEvalMatchCommand {
     @InjectModel(Evaluator.name) private readonly evaluatorModel: Model<Evaluator>,
   ) {}
 
-  @Subcommand({
-    name: 'match',
-    description: 'Lock in cadet and pisciner timeslots',
-  })
-  public async onPing(@Context() [interaction]: SlashCommandContext) {
-    let teams = await this.teamModel.find().exec();
-    let evaluators = await this.evaluatorModel.find().exec();
-
-    await interaction.deferReply({ephemeral: true});
-    for (let team of teams) {
-      evaluators.find((evaluator) => {
-        const matchedSlot = evaluator.timeslots.find(slot =>
-          slot.timeslot === team.timeslot.timeslot);
-
-        if (!matchedSlot) {
-          return false;
-        }
-        team.timeslot = matchedSlot;
-        team.evaluator = evaluator.student;
-        evaluator.timeslots.splice(evaluator.timeslots.indexOf(matchedSlot), 1);
-        team.save();
-        return true;
-      });
-    }
-    const teamsWithoutEvaluator = teams.filter(team => team.evaluator === undefined);
-    /* TODO: Handle teams without evaluator */
-    if (teamsWithoutEvaluator.length) {
-      try {
+  private async handleMissingEvaluator(@Context() [interaction]: SlashCommandContext, teamsWithoutEvaluator: Team[]) {
+    try {
       const teamsNoRegister = teamsWithoutEvaluator.filter(team => team.timeslot.timeslot === "");
       const teamsRegitered = teamsWithoutEvaluator.filter(team => team.timeslot.timeslot !== "");
       const fields = [
@@ -64,13 +38,57 @@ export class RushEvalMatchCommand {
         .addFields(fields)
         ;
       return interaction.editReply({
-          content: 'Error, below teams are missing evaluator: ' + teamsWithoutEvaluator.map(team => `${team.teamLeader.intraName}'s group`).join(', '),
-          embeds: [newEmbed]
-        });
-      } catch (error) {
-        console.log(error);
-        return interaction.editReply({content: `Unexpected error occured, probably has something to do with the teams without evaluator`});
+        content: 'Error, below teams are missing evaluator: ' + teamsWithoutEvaluator.map(team => `${team.teamLeader.intraName}'s group`).join(', '),
+        embeds: [newEmbed]
+      });
+    } catch (error) {
+      console.log(error);
+      return interaction.editReply({content: `Unexpected error occured, probably has something to do with the teams without evaluator`});
+    }
+  }
+
+  private async matching() {
+    let teams = await this.teamModel.find().exec();
+    let evaluators = await this.evaluatorModel.find().exec();
+
+    for (let team of teams) {
+      evaluators.find((evaluator) => {
+        const matchedSlot = evaluator.timeslots.find(slot =>
+          slot.timeslot === team.timeslot.timeslot);
+
+        if (!matchedSlot) {
+          return false;
+        }
+        team.timeslot = matchedSlot;
+        team.evaluator = evaluator.student;
+        evaluator.timeslots.splice(evaluator.timeslots.indexOf(matchedSlot), 1);
+        team.save();
+        return true;
+      });
+    }
+  }
+
+  @Subcommand({
+    name: 'match',
+    description: 'Lock in cadet and pisciner timeslots',
+  })
+  public async onMatch(@Context() [interaction]: SlashCommandContext) {
+    await interaction.deferReply({ephemeral: true});
+    try {
+      await this.matching();
+    } catch (error) {
+      console.error(error);
+      return interaction.editReply({content: `Error occured while matching teams and evaluators`});
+    }
+    try {
+      const teams = await this.teamModel.find().exec();
+      const teamsWithoutEvaluator = teams.filter(team => team.evaluator === undefined);
+      if (teamsWithoutEvaluator.length) {
+        return this.handleMissingEvaluator([interaction], teamsWithoutEvaluator);
       }
+    } catch (error) {
+      console.error(error);
+      return interaction.editReply({content: `Error occured while checking teams without evaluator`});
     }
     const outfile = 'rush_evaluation_time_table.jpg';
     const child = exec(`python rusheval_time_table.py ${outfile}`,
