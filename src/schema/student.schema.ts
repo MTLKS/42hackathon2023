@@ -11,6 +11,7 @@ export type CoalitionRole = 'Segmentation Slayer' | 'Bug Buster'| 'Unix Unicorn'
 
 @Schema()
 export class Student {
+  /* do we need this? */
   @Prop()
   intraId: string;
 
@@ -20,8 +21,23 @@ export class Student {
   @Prop()
   discordId: string;
 
+  /* Except coalitionRole and intraImageLink,
+    follows variable are optional just so I don't have to refactor the code.
+  */
   @Prop()
-  progressRole: string;
+  discordName?: string;
+
+  @Prop()
+  discordServerName?: string;
+
+  @Prop()
+  discordServerRoles?: string[];
+
+  @Prop()
+  discordServerJoinedAt?: Date;
+
+  @Prop()
+  progressRole?: string;
 
   @Prop()
   coalitionRole?: string;

@@ -23,6 +23,7 @@ import { CleanCommand, CleanDatabase } from './commands/clean.command';
 import { FillGarbageCommand } from './commands/fill.command';
 import { SpecRequest, SpecRequestSchema } from './schema/specrequest.schema';
 import { TestCommand } from './commands/test.command';
+import { StudentService } from './StudentService';
 
 @Module({
   imports: [
@@ -48,6 +49,7 @@ import { TestCommand } from './commands/test.command';
   controllers: [AppController],
   providers: [
     AppService,
+    StudentService,
     PingCommand,
     LoginCommand,
     HelpCommand,
@@ -72,7 +74,7 @@ import { TestCommand } from './commands/test.command';
     CleanDatabase,
     FillGarbageCommand,
     UpdateRolesCommand,
-    TestCommand
+    TestCommand,
   ],
 })
 export class AppModule {}
