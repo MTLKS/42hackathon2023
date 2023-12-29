@@ -6,7 +6,7 @@ import { Modal, ModalContext } from "necord";
 import { ApiManager } from "./ApiManager";
 import { ConsoleLogger } from "@nestjs/common";
 
-export function discordIdentityPromptModal(): ModalBuilder {
+export function newEvaluatorModal(): ModalBuilder {
   /* TODO: add trace of where we left off so that after modal finish could automatically track back? */
   const login = new TextInputBuilder()
     .setStyle(TextInputStyle.Short)
@@ -18,8 +18,12 @@ export function discordIdentityPromptModal(): ModalBuilder {
     .addComponents(login)
     ;
   const modal = new ModalBuilder()
-    .setCustomId('new-cadet-modal')
-    .setTitle('New user detected')
+    .setCustomId('new-evaluator-modal')
+    .setTitle('New Evaluator detected')
+    .addComponents(component)
+    ;
+  return modal;
+}
     .addComponents(component)
     ;
   return modal;
@@ -29,8 +33,8 @@ export function discordIdentityPromptModal(): ModalBuilder {
 export class StudentService {
   constructor(@InjectModel(Student.name) private readonly studentModel: Model<Student>) { }
 
-  @Modal('new-cadet-modal')
-  public async onCadetIdentityModal([interaction]: ModalContext) {
+  @Modal('new-evaluator-modal')
+  public async onNewEvaluator([interaction]: ModalContext) {
     const login = interaction.fields.getField('login').value;
     let intraData;
 

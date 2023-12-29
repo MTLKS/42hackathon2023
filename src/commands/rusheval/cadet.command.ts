@@ -9,6 +9,7 @@ import { Timeslot } from 'src/schema/timeslot.schema';
 import { Evaluator } from 'src/schema/evaluator.schema';
 import { Specialslot } from 'src/schema/specialslot.schema';
 import { getRole } from '../updateroles.command';
+import { newEvaluatorModal } from 'src/StudentService';
 
 function rearrangeTimeslot(timeslots: Array<Timeslot>, evaluators: Array<Evaluator>) {
   let table = new Map<string, Student[]>();
@@ -72,12 +73,17 @@ export class RushEvalCadetCommand {
 @Injectable()
 export class RushEvalCadetFetchSlotsComponent { 
   constructor(
+    @InjectModel(Student.name) private readonly studentModel: Model<Student>,
     @InjectModel(Timeslot.name) private readonly timeslotModel: Model<Timeslot>,
     @InjectModel(Evaluator.name) private readonly evaluatorModel: Model<Evaluator>,
   ) {}
 
   @Button('cadet-fetch-slot')
   public async onExecute(@Context() [interaction]: ButtonContext) {
+    const student = await this.studentModel.findOne({ discordId: interaction.user.id }).exec();
+    if (student === null) {
+      return interaction.showModal(newEvaluatorModal());
+    }
     const timeslots = await this.timeslotModel.find().exec();
     const evaluators = await this.evaluatorModel.find().exec();
     const underBookedSessions = getUnderBookedSessions(timeslots, evaluators);
