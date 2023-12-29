@@ -90,7 +90,7 @@ export class RushEvalCadetFetchSlotsComponent {
       .setCustomId('cadet-session-select')
       .setPlaceholder('Select your timeslots')
       .setMinValues(0)
-      .setMaxValues(availableOptions.length)
+      .setMaxValues(Math.min(availableOptions.length, 2))
       .setOptions(availableOptions)
       ;
     const row = new ActionRowBuilder<StringSelectMenuBuilder>()
