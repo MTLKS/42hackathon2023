@@ -5,6 +5,7 @@ import { Student } from "./schema/student.schema";
 import { Modal, ModalContext } from "necord";
 import { ApiManager } from "./ApiManager";
 import { Evaluator } from "./schema/evaluator.schema";
+import { ConsoleLogger } from "@nestjs/common";
 
 export function newEvaluatorModal(): ModalBuilder {
   /* TODO: add trace of where we left off so that after modal finish could automatically track back? */
@@ -20,10 +21,6 @@ export function newEvaluatorModal(): ModalBuilder {
   const modal = new ModalBuilder()
     .setCustomId('new-evaluator-modal')
     .setTitle('New Evaluator detected')
-    .addComponents(component)
-    ;
-  return modal;
-}
     .addComponents(component)
     ;
   return modal;
