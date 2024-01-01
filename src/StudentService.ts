@@ -29,6 +29,7 @@ export function newEvaluatorModal(): ModalBuilder {
 /* Foresighting a ticket for reconfiguring intra */
 export class StudentService {
   constructor(
+    @InjectModel(Student.name) private readonly studentModel: Model<Student>,
     @InjectModel(Evaluator.name) private readonly evaluatorModel: Model<Evaluator>
     ) { }
 
@@ -72,7 +73,9 @@ export class StudentService {
       progressRole: temporaryGetRole(discordRoles),
     };
     try {
-      await this.evaluatorModel.create({student: student});
+      await this.studentModel.create(student);
+      const unique_student = await this.studentModel.findOne(student).exec();
+      await this.evaluatorModel.create({student: unique_student});
       return interaction.reply({ content: `Added ${login} as new evaluator`, ephemeral: true });
     } catch (error) {
       const logger = new ConsoleLogger("StudentService");
