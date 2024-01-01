@@ -18,6 +18,12 @@ export class Team {
 
   @Prop()
   evaluator: Student;
+
+  @Prop()
+  feedback?: Map<string, string>;
+
+  @Prop()
+  feedbackAt?: Date;
 }
 
 export const TeamSchema = SchemaFactory.createForClass(Team);

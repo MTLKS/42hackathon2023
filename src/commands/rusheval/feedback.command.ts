@@ -105,7 +105,7 @@ export class RushEvalFeedbackForm {
     const team = await this.teamModel.findOne({ evaluator: cadet }).exec();
     const getOverviewInput = (student: Student) => {
       const login = student.intraName;
-      const input = new TextInputBuilder()
+      let input = new TextInputBuilder()
         .setStyle(TextInputStyle.Paragraph)
         .setCustomId(login)
         .setLabel(`Overview of ${login}`)
@@ -118,7 +118,9 @@ export class RushEvalFeedbackForm {
       // <actions during evaluation>
       // <something to keep in mind about said student? (if there's any)>
       // `)
-
+      if (team.feedbackAt) {
+        input.setValue(team.feedback.get(login));
+      }
       return input;
     };
 
@@ -126,12 +128,15 @@ export class RushEvalFeedbackForm {
       .concat(team.teamMembers.map(getOverviewInput))
       ;
 
-    const notes = new TextInputBuilder()
+    let notes = new TextInputBuilder()
       .setStyle(TextInputStyle.Paragraph)
       .setCustomId('notes')
       .setLabel('Notes')
       ;
 
+    if (team.feedbackAt) {
+      notes.setValue(team.feedback.get('notes'));
+    }
     const components: any[] = [
       ...membersInputs.map(member => new ActionRowBuilder().addComponents(member)),
       new ActionRowBuilder().addComponents(notes)
@@ -153,9 +158,21 @@ export class RushEvalFeedbackForm {
      * saying that the feedback has been successfully recorded,
      * or a markdown of written feedback?
      */
+    try {
+      const leaderField = interaction.fields.fields.first();
+      const leaderIntraName = leaderField.customId;
+      const team = await this.teamModel.findOne({ 'teamLeader.intraName': leaderIntraName }).exec();
 
-    console.log(interaction.fields.fields)
-
+      team.feedback = new Map(interaction.fields.fields.map((value, key) => [key, value.value]));
+      team.feedbackAt = new Date();
+      team.save();
+    } catch (error) {
+      console.error(error);
+      return interaction.reply({
+        content: 'Something went wrong. Please try again.',
+        ephemeral: true
+      });
+    }
     /**
      * Convert data to csv - Not using for now
      */
