@@ -35,6 +35,8 @@ then
   echo "Setup completed" >&2
 fi
 
-(source venv/bin/activate || source venv/Scripts/activate) 2> /dev/null || echo "venv not found" >&2
+source venv/bin/activate 2> /dev/null ||
+source venv/Scripts/activate 2> /dev/null ||
+echo "venv not found" >&2
 export $(cat .env | xargs) &&
 npm run start:dev
