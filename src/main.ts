@@ -2,6 +2,7 @@ import { NestFactory } from '@nestjs/core';
 import { AppModule } from './app.module';
 import * as cookieParser from 'cookie-parser';
 import { ConsoleLogger } from '@nestjs/common';
+import { ApiManager } from './ApiManager';
 
 function checkEnv() {
   const requiredEnv = new Array<[string, string]>(
@@ -29,6 +30,7 @@ async function bootstrap() {
   if (!checkEnv()) {
     return ;
   }
+  await ApiManager.init();
   const app = await NestFactory.create(AppModule);
   app.use(cookieParser());
   await app.listen(process.env.PORT || 3000);

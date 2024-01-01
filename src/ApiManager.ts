@@ -9,6 +9,10 @@ export class ApiManager {
 
   private constructor () { }
 
+  public static async init() {
+    this.accessToken = await this.getAccessToken();
+  }
+
   public static async getAccessToken(code?: string): Promise<string> {
     let redirect_uri = process.env.HOST;
     if (process.env.PORT !== undefined) {
