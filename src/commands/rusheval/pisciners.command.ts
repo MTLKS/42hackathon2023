@@ -99,22 +99,27 @@ export class RushEvalPiscinersButtonComponent {
     if (team === null) {
       return null;
     }
-    const toStudent = function(member: any) {
-      const student: Student = {
-        intraId: member.id,
-        intraName: member.login,
+    const users: any[] = team.users;
+    const promises = users.map(async (user) => {
+      const student = await this.studentModel.findOne({ intraId: user.id }).exec();
+      if (student !== null) {
+        return {student: student, leader: user.leader};
       }
-      return student;
-    }
-    const intraLeader = team.users.find(member => member.leader === true);
-    const intraMembers = team.users.filter(member => member.leader === false);
-    const members = this.studentModel.create(intraMembers.map(toStudent));
+      const c: Student = {
+        intraId: user.id,
+        intraName: user.login,
+      };
+      const newStudent = await this.studentModel.create(c);
+
+      return {student: newStudent, leader: user.leader};
+    });
+    const members = await Promise.all(promises);
 
     return await this.teamModel.create({
       intraId: team.id,
       name: team.name,
-      teamLeader: toStudent(intraLeader),
-      teamMembers: members
+      teamLeader: members.find((m) => m.leader).student,
+      teamMembers: members.filter((m) => !m.leader).map((m) => m.student),
     });
   }
 
