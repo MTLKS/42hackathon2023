@@ -13,6 +13,7 @@ import { EmbedBuilder } from 'discord.js';
 export function getRole(guild: Guild, roleName: string) {
   return guild.roles.cache.find((r) => r.name === roleName);
 }
+
 @Injectable()
 export class UpdateRolesCommand {
   constructor(

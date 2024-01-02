@@ -145,8 +145,8 @@ export class RushEvalFeedbackForm {
     const modal = new ModalBuilder()
       .setCustomId('feedback')
       .setTitle(`Evaluation notes for ${team.teamLeader.intraName}'s group`)
+      .addComponents(components)
       ;
-    modal.addComponents(components);
     return interaction.showModal(modal);
   }
 
