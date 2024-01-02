@@ -11,7 +11,6 @@ export type CoalitionRole = 'Segmentation Slayer' | 'Bug Buster'| 'Unix Unicorn'
 
 @Schema()
 export class Student {
-  /* do we need this? */
   @Prop()
   intraId: string;
 
