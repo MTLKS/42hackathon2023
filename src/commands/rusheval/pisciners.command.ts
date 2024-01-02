@@ -11,7 +11,11 @@ import { Team } from 'src/schema/team.schema';
 import { getRole } from '../updateroles.command';
 import { SpecRequest } from 'src/schema/specrequest.schema';
 import { Specialslot } from 'src/schema/specialslot.schema';
-import { time } from 'console';
+import { ApiManager, ProjectStatus } from 'src/ApiManager';
+import { AxiosError } from 'axios';
+import { StudentService, newStudentModal } from 'src/StudentService';
+import { writeFile } from 'fs';
+import { toUSVString } from 'util';
 
 @RushEvalCommandDecorator()
 export class RushEvalPiscinersCommand {
@@ -70,6 +74,7 @@ export class RushEvalPiscinersCommand {
 
 @Injectable()
 export class RushEvalPiscinersButtonComponent {
+  private readonly logger = new ConsoleLogger("RushEvalPiscinersButtonComponent");
   constructor(
     @InjectModel(Student.name) private readonly studentModel: Model<Student>, 
     @InjectModel(Timeslot.name) private readonly timeslotModel: Model<Timeslot>,
@@ -77,8 +82,101 @@ export class RushEvalPiscinersButtonComponent {
     @InjectModel(Team.name) private readonly teamModel: Model<Team>,
   ) { }
 
+  private async getTeam(projectSlugOrId: string | number, intraId: number) {
+    const filteredProjects = await ApiManager.getProjectUsers(projectSlugOrId, intraId);
+
+    if (filteredProjects.length === 0) {
+      return null;
+    } else if (filteredProjects.length > 1) {
+      this.logger.error(`Found multiple records of \`\`${projectSlugOrId}\`\`.`);
+    }
+    return filteredProjects[0].teams[0];
+  }
+
+  private async fetchIntraGroup(projectSlugOrId: string | number, intraId: number) {
+    const team = await this.getTeam(projectSlugOrId, intraId);
+
+    if (team === null) {
+      return null;
+    }
+    const toStudent = function(member: any) {
+      const student: Student = {
+        intraId: member.id,
+        intraName: member.login,
+      }
+      return student;
+    }
+    const intraLeader = team.users.find(member => member.leader === true);
+    const intraMembers = team.users.filter(member => member.leader === false);
+    const members = this.studentModel.create(intraMembers.map(toStudent));
+
+    return await this.teamModel.create({
+      intraId: team.id,
+      name: team.name,
+      teamLeader: toStudent(intraLeader),
+      teamMembers: members
+    });
+  }
+
   @Button('piscinersButton')
   public async onButton(@Context() [interaction]: ButtonContext) {
+    const student = await this.studentModel.findOne({ discordId: interaction.user.id }).exec();
+
+    /* if student not found, prompt student intra login */
+    if (student === null) {
+      return interaction.showModal(newStudentModal());
+    } else if (student.discordId === undefined) {
+      console.log("before set: ", student);
+      StudentService.setStudentDiscordData(interaction.guild, interaction.user, student);
+      console.log("after set: ", student);
+    }
+    const projectSlug = 'c-piscine-rush-00';
+    /* if recognise student, look for their team */
+    const team = await this.teamModel.findOne({ teamLeader: student }).exec()
+    /* if team not found, fetch from intra */
+      ?? await this.fetchIntraGroup(projectSlug, student.intraId);
+
+    /* if team not found in intra, reply error */
+    if (team === null) {
+      const content = `Did not find your record of \`\`${projectSlug}\`\`.
+If you're certain you've signed up for this project, please contact BOCAL for it.
+`;
+
+      return interaction.reply({ content: content, ephemeral: true });
+    }
+    let reply = '';
+    const leader = team.teamLeader;
+    console.log(`team name: ${team.name}`);
+    if (student != leader) {
+      reply += `**Unless your leader(${leader.intraName}) is unresponsive, please leave it to them to choose the timeslot.**\n`;
+    }
+    /* Return available session */
+    const timeslotOptions = await this.getTimeslotOptions();
+    if (timeslotOptions.length === 0) {
+      /* Should notify the admin that there is no available session for pisciner */
+      this.logger.error(`No available session`);
+      reply += 'There\'s no available session at the moment.';
+      return interaction.reply({ content: reply, ephemeral: true });
+    }
+    const stringSelect = new StringSelectMenuBuilder()
+      .setCustomId('piscinersStringSelect')
+      .setPlaceholder('Select your timeslot')
+      .setMinValues(1)
+      .setMaxValues(1)
+      .setOptions(timeslotOptions);
+
+    const row = new ActionRowBuilder<StringSelectMenuBuilder>()
+      .addComponents(stringSelect);
+
+    reply += 'Please select your timeslot for the next rush defense';
+    return interaction.reply({
+        content: reply,
+        ephemeral: true,
+        components: [row]
+      });
+  }
+
+  private async getTimeslotOptions() {
     const timeslots = await this.timeslotModel.find().exec();
     const availableCount = await this.evaluatorModel.aggregate([{$unwind: '$timeslots'},{$group: {_id: '$timeslots.timeslot',count: { $sum: 1 }}},{$project: {_id: 0,timeslot: '$_id',count: 1}}]);
     const unavailableCount = await this.teamModel.aggregate([{$unwind: '$timeslot'},{$group: {_id: '$timeslot.timeslot',count: { $sum: 1 }}},{$project: {_id: 0,timeslot: '$_id',count: 1}}]);
@@ -98,29 +196,7 @@ export class RushEvalPiscinersButtonComponent {
         timeslotOptions.push({ label: timeslot.timeslot, value: timeslot.timeslot });
     });
 
-    if (timeslotOptions.length === 0) {
-      /* Should notify the admin that there is no available session for pisciner */
-      const logger = new ConsoleLogger(interaction.customId);
-      logger.error(`No available session`);
-      return interaction.reply({ content: 'There are no available session at the moment.', ephemeral: true });
-    }
-    const stringSelect = new StringSelectMenuBuilder()
-      .setCustomId('piscinersStringSelect')
-      .setPlaceholder('Select your timeslot')
-      .setMinValues(1)
-      .setMaxValues(1)
-      .setOptions(timeslotOptions);
-
-    const row = new ActionRowBuilder<StringSelectMenuBuilder>()
-      .addComponents(stringSelect);
-
-    return interaction.reply(
-      {
-        content: 'Please select your timeslot for the next rush defense',
-        ephemeral: true,
-        components: [row]
-      }
-    );
+    return timeslotOptions;
   }
 }
 
@@ -136,6 +212,9 @@ export class RushEvalPiscinersStringSelectComponent {
   @StringSelect('piscinersStringSelect')
   public async onStringSelect(@Context() [interaction]: StringSelectContext, @SelectedStrings() selected: string[]) {
     const student = await this.studentModel.findOne({ discordId: interaction.user.id }).exec();
+    if (student === null) {
+      return interaction.reply({content: 'Please try fetching slots and register yourself as new student again.', ephemeral: true});
+    }
     const availableCount = await this.evaluatorModel.aggregate([{$unwind: '$timeslots'},{$group: {_id: '$timeslots.timeslot',count: { $sum: 1 }}},{$project: {_id: 0,timeslot: '$_id',count: 1}}]);
     const unavailableCount = await this.teamModel.aggregate([{$unwind: '$timeslot'},{$group: {_id: '$timeslot.timeslot',count: { $sum: 1 }}},{$project: {_id: 0,timeslot: '$_id',count: 1}}]);
     let currentAvailable = availableCount.find((timeslot) => timeslot.timeslot === selected[0]);
@@ -153,16 +232,17 @@ export class RushEvalPiscinersStringSelectComponent {
     }
 
     const selectedTimeslot = await this.timeslotModel.findOne({ timeslot: selected[0] }).exec();
-    const team = await this.teamModel.findOne({ teamLeader: student }).exec();
+    const team = await this.teamModel.findOne({ $or: [
+      {teamLeader: student},
+      {teamMembers: { $in: [student] }}]
+    }).exec();
+    // const team = await this.teamModel.findOne({ teamLeader: student }).exec();
 
-    if (team) {
-      team.timeslot = selectedTimeslot;
-      await team.save();
-    } else {
-      const newTeam = new this.teamModel({ teamLeader: student, timeslot: selectedTimeslot });
-      await newTeam.save();
-    }
-    
+    console.log(team);
+    team.timeslot = selectedTimeslot;
+    team.chosenTimeslotAt = new Date();
+    team.chosenTimeslotBy = student;
+    await team.save();
     return interaction.update({ content: `You have selected ${selected}`, components: [] });
   }
 }

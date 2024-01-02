@@ -8,16 +8,28 @@ export type TeamDocument = HydratedDocument<Team>;
 @Schema()
 export class Team {
   @Prop()
+  intraId: number;
+
+  @Prop()
+  name: string;
+
+  @Prop()
   teamLeader: Student;
 
   @Prop()
   teamMembers: Student[];
 
   @Prop()
-  timeslot: Timeslot;
+  timeslot?: Timeslot;
 
   @Prop()
-  evaluator: Student;
+  evaluator?: Student;
+
+  @Prop()
+  chosenTimeslotAt?: Date;
+
+  @Prop()
+  chosenTimeslotBy?: Student;
 
   @Prop()
   feedback?: Map<string, string>;
