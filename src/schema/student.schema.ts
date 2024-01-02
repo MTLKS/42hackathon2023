@@ -18,11 +18,8 @@ export class Student {
   intraName: string;
 
   @Prop()
-  discordId: string;
+  discordId?: string;
 
-  /* Except coalitionRole and intraImageLink,
-    follows variable are optional just so I don't have to refactor the code.
-  */
   @Prop()
   discordName?: string;
 
