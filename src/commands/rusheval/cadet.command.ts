@@ -9,7 +9,7 @@ import { Timeslot } from 'src/schema/timeslot.schema';
 import { Evaluator } from 'src/schema/evaluator.schema';
 import { Specialslot } from 'src/schema/specialslot.schema';
 import { getRole } from '../updateroles.command';
-import { newEvaluatorModal } from 'src/StudentService';
+import { newStudentModal } from 'src/StudentService';
 
 function rearrangeTimeslot(timeslots: Array<Timeslot>, evaluators: Array<Evaluator>) {
   let table = new Map<string, Student[]>();
@@ -73,15 +73,16 @@ export class RushEvalCadetCommand {
 @Injectable()
 export class RushEvalCadetFetchSlotsComponent { 
   constructor(
+    @InjectModel(Student.name) private readonly studentModel: Model<Student>,
     @InjectModel(Timeslot.name) private readonly timeslotModel: Model<Timeslot>,
     @InjectModel(Evaluator.name) private readonly evaluatorModel: Model<Evaluator>,
   ) {}
 
   @Button('cadet-fetch-slot')
   public async onExecute(@Context() [interaction]: ButtonContext) {
-    const student = await this.evaluatorModel.findOne({ 'student.discordId': interaction.user.id }).exec();
+    const student = await this.studentModel.findOne({ discordId: interaction.user.id }).exec();
     if (student === null) {
-      return interaction.showModal(newEvaluatorModal());
+      return interaction.showModal(newStudentModal());
     }
     const timeslots = await this.timeslotModel.find().exec();
     const evaluators = await this.evaluatorModel.find().exec();
@@ -113,15 +114,16 @@ export class RushEvalCadetFetchSlotsComponent {
 @Injectable()
 export class RushEvalCadetStringSelectComponent {
   constructor(
+    @InjectModel(Student.name) private readonly studentModel: Model<Student>,
     @InjectModel(Timeslot.name) private readonly timeslotModel: Model<Timeslot>,
     @InjectModel(Evaluator.name) private readonly evaluatorModel: Model<Evaluator>,
   ) { }
 
   @StringSelect('cadet-session-select')
   public async onStringSelect(@Context() [interaction]: StringSelectContext, @SelectedStrings() selected: string[]) {
-    const evaluator = await this.evaluatorModel.findOne({ 'student.discordId': interaction.user.id }).exec();
-    if (evaluator === null) {
-      return interaction.reply({content: 'Please try fetching slots and register yourself as new evaluator again.', ephemeral: true});
+    const student = await this.studentModel.findOne({ discordId: interaction.user.id }).exec();
+    if (student === null) {
+      return interaction.reply({content: 'Please try fetching slots and register yourself as new student again.', ephemeral: true});
     }
     const timeslots = await this.timeslotModel.find().exec();
     const evaluators = await this.evaluatorModel.find().exec();
@@ -140,6 +142,8 @@ Please regenerate your selection by clicking on the \`Open slots\` button one mo
     }
 
     const selectedTimeslots = timeslots.filter(timeslot => selected.includes(timeslot.timeslot));
+    const evaluator = await this.evaluatorModel.findOne({ student: student }).exec()
+      ?? await this.evaluatorModel.create({ student: student });
 
     evaluator.timeslots = selectedTimeslots;
     evaluator.lastCreatedTimeslotsAt = new Date();

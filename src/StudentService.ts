@@ -4,10 +4,11 @@ import { Model } from "mongoose";
 import { Student } from "./schema/student.schema";
 import { Modal, ModalContext } from "necord";
 import { ApiManager } from "./ApiManager";
-import { Evaluator } from "./schema/evaluator.schema";
 import { ConsoleLogger } from "@nestjs/common";
+import { Evaluator } from "./schema/evaluator.schema";
+import { AxiosError } from "axios";
 
-export function newEvaluatorModal(): ModalBuilder {
+export function newStudentModal(): ModalBuilder {
   /* TODO: add trace of where we left off so that after modal finish could automatically track back? */
   const login = new TextInputBuilder()
     .setStyle(TextInputStyle.Short)
@@ -19,8 +20,8 @@ export function newEvaluatorModal(): ModalBuilder {
     .addComponents(login)
     ;
   const modal = new ModalBuilder()
-    .setCustomId('new-evaluator-modal')
-    .setTitle('New Evaluator detected')
+    .setCustomId('new-student-modal')
+    .setTitle('New Student detected')
     .addComponents(component)
     ;
   return modal;
@@ -28,24 +29,29 @@ export function newEvaluatorModal(): ModalBuilder {
 
 /* Foresighting a ticket for reconfiguring intra */
 export class StudentService {
+  private readonly logger = new ConsoleLogger("StudentService");
   constructor(
     @InjectModel(Student.name) private readonly studentModel: Model<Student>,
     @InjectModel(Evaluator.name) private readonly evaluatorModel: Model<Evaluator>
     ) { }
 
-  @Modal('new-evaluator-modal')
-  public async onNewEvaluator([interaction]: ModalContext) {
+  @Modal('new-student-modal')
+  public async onNewStudent([interaction]: ModalContext) {
     const login = interaction.fields.getField('login').value;
     let intraData;
 
     try {
       intraData = await ApiManager.getUser(login);
     } catch (error) {
-      const status = error.response.status;
+      const axiosError = error as AxiosError;
+      const status = axiosError.response.status;
 
       if (status === 401) {
         return interaction.reply({ content: `Internal server authentication error, please notify the maintainer for this issue.`, ephemeral: true });
       } else {
+        if (status !== 404) {
+          this.logger.error(`Failed to fetch ${login} from intra: ${status} ${axiosError.response.statusText}`);
+        }
         return interaction.reply({ content: `${login} not found (${status})`, ephemeral: true });
       }
     }
@@ -58,8 +64,7 @@ export class StudentService {
       if (roles.includes('BLACKHOLED')) return 'BLACKHOLED'; 
       if (roles.includes('FLOATY')) return 'FLOATY';
       if (roles.includes('ALUMNI')) return 'ALUMNI';
-      const logger = new ConsoleLogger("StudentService");
-      logger.error(`Unable to determine role for ${login} with roles ${roles}`);
+      this.logger.error(`Unable to determine role for ${login} with roles ${roles}`);
       return null;
     }
     const student: Student = {
@@ -74,13 +79,10 @@ export class StudentService {
     };
     try {
       await this.studentModel.create(student);
-      const unique_student = await this.studentModel.findOne(student).exec();
-      await this.evaluatorModel.create({student: unique_student});
-      return interaction.reply({ content: `Added ${login} as new evaluator`, ephemeral: true });
+      return interaction.reply({ content: `Added ${login} as new student`, ephemeral: true });
     } catch (error) {
-      const logger = new ConsoleLogger("StudentService");
-      logger.error(`Failed to add ${login} as new evaluator: ${error}`);
-      return interaction.reply({ content: `Failed to add ${login} as new evaluator. Please contact the maintainer for this.`, ephemeral: true });
+      this.logger.error(`Failed to add ${login} as new student: ${error}`);
+      return interaction.reply({ content: `Failed to add ${login} as new student. Please contact the maintainer for this.`, ephemeral: true });
     }
   }
 }
