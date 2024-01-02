@@ -12,7 +12,7 @@ export type CoalitionRole = 'Segmentation Slayer' | 'Bug Buster'| 'Unix Unicorn'
 @Schema()
 export class Student {
   @Prop()
-  intraId: string;
+  intraId: number;
 
   @Prop()
   intraName: string;

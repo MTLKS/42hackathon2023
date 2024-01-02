@@ -24,15 +24,15 @@ class GarbageGenerator {
 
   public static randStudent(role?: ProgressRole) {
     const login = this.rand(6, 'abcdefghijklmnopqrstuvwxyz') + '39';
-    const id = this.rand(6, '0123456789') + '39';
+    const id = this.rand(6, '123456789') + '39';
     const discordId = this.rand(2, '0123456789') + '39';
-    const progressRole = role ? role : ['CADET', 'PISCINER'][randomInt(2)];
+    const progressRole = role ?? ['CADET', 'PISCINER'][randomInt(2)];
     const coalitionRole = (progressRole === 'CADET'
       ? ['ss', 'kk', 'bb', 'uu'][randomInt(4)]
       : null);
     const student: Student = {
       intraName: login,
-      intraId: id,
+      intraId: +id,
       discordId: discordId,
       progressRole: progressRole,
       coalitionRole: coalitionRole

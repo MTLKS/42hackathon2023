@@ -41,8 +41,8 @@ export class LoginCommand {
 
   @Button('login')
   public async onLoginButton(@Context() [interaction]: ButtonContext) {
-    const port = (process.env.PORT !== undefined) ? `:${process.env.PORT}`: "";
-    const url = `${process.env.HOST}${port}/login/${interaction.user.id}`
+    const port = (process.env.BOT_PORT !== undefined) ? `:${process.env.BOT_PORT}`: "";
+    const url = `${process.env.BOT_HOST}${port}/login/${interaction.user.id}`
 
     try {
       const newEmbed = new EmbedBuilder()

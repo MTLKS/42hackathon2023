@@ -30,9 +30,9 @@ export class AppService {
       return 'No code provided';
     }
 
-    let redirect_uri = process.env.HOST;
-    if (process.env.PORT != undefined) {
-      redirect_uri += `:${process.env.PORT}`;
+    let redirect_uri = process.env.BOT_HOST;
+    if (process.env.BOT_PORT != undefined) {
+      redirect_uri += `:${process.env.BOT_PORT}`;
     }
 
     let { data } = await firstValueFrom(this.httpService.post('https://api.intra.42.fr/oauth/token', {

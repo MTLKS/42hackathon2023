@@ -6,7 +6,7 @@ import { ApiManager } from './ApiManager';
 
 function checkEnv() {
   const requiredEnv = new Array<[string, string]>(
-      ['HOST(ex: http://localhost)', process.env.HOST],
+      ['HOST(ex: http://localhost)', process.env.BOT_HOST],
       ['API_UID', process.env.API_UID],
       ['API_SECRET', process.env.API_SECRET],
       ['DISCORD_TOKEN', process.env.DISCORD_TOKEN],
@@ -33,7 +33,7 @@ async function bootstrap() {
   await ApiManager.init();
   const app = await NestFactory.create(AppModule);
   app.use(cookieParser());
-  await app.listen(process.env.PORT || 3000);
+  await app.listen(process.env.BOT_PORT || 3000);
 }
 
 bootstrap().catch(error => console.error(error));
