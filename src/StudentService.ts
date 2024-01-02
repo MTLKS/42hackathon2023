@@ -1,5 +1,5 @@
 import { InjectModel } from "@nestjs/mongoose";
-import { ActionRowBuilder, ModalBuilder, TextInputBuilder, TextInputStyle } from "discord.js";
+import { ActionRowBuilder, Guild, ModalBuilder, TextInputBuilder, TextInputStyle, User } from "discord.js";
 import { Model } from "mongoose";
 import { Student } from "./schema/student.schema";
 import { Modal, ModalContext } from "necord";
@@ -35,6 +35,25 @@ export class StudentService {
     @InjectModel(Evaluator.name) private readonly evaluatorModel: Model<Evaluator>
     ) { }
 
+  private static temporaryGetRole(roles: string[]) {
+    const knownRoles = ['SPECIALIZATION', 'CADET', 'PISCINER', 'BLACKHOLED', 'FLOATY', 'ALUMNI'];
+
+    return knownRoles.find(r => roles.includes(r))
+  }
+
+  public static async setStudentDiscordData(guild: Guild, user: User, student: Student) {
+    const discordData = await guild.members.fetch({ user: user.id });
+    const discordRoles = discordData.roles.cache.map(role => role.name);
+
+    student.discordId = discordData.id;
+    student.discordName = user.username;
+    student.discordServerName = discordData.displayName;
+    student.discordServerRoles = discordRoles;
+    student.discordServerJoinedAt = discordData.joinedAt;
+    student.progressRole = StudentService.temporaryGetRole(discordRoles);
+    return student;
+  }
+
   @Modal('new-student-modal')
   public async onNewStudent([interaction]: ModalContext) {
     const login = interaction.fields.getField('login').value;
@@ -57,16 +76,6 @@ export class StudentService {
     }
     const discordData = await interaction.guild.members.fetch({ user: interaction.user.id });
     const discordRoles = discordData.roles.cache.map(role => role.name);
-    const temporaryGetRole = (roles: string[]) => {
-      if (roles.includes('SPECIALIZATION')) return 'SPECIALIZATION';
-      if (roles.includes('CADET')) return 'CADET';
-      if (roles.includes('PISCINER')) return 'PISCINER';
-      if (roles.includes('BLACKHOLED')) return 'BLACKHOLED'; 
-      if (roles.includes('FLOATY')) return 'FLOATY';
-      if (roles.includes('ALUMNI')) return 'ALUMNI';
-      this.logger.error(`Unable to determine role for ${login} with roles ${roles}`);
-      return null;
-    }
     const student: Student = {
       intraId: intraData.id,
       intraName: login,
@@ -75,8 +84,11 @@ export class StudentService {
       discordServerName: discordData.displayName,
       discordServerRoles: discordRoles,
       discordServerJoinedAt: discordData.joinedAt,
-      progressRole: temporaryGetRole(discordRoles),
+      progressRole: StudentService.temporaryGetRole(discordRoles),
     };
+    if (student.progressRole === null) {
+      this.logger.error(`Unable to determine role for ${login} with roles ${discordRoles}`);
+    }
     try {
       await this.studentModel.create(student);
       return interaction.reply({ content: `Added ${login} as new student`, ephemeral: true });
