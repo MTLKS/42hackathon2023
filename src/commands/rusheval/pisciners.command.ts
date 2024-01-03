@@ -82,45 +82,14 @@ export class RushEvalPiscinersButtonComponent {
     @InjectModel(Team.name) private readonly teamModel: Model<Team>,
   ) { }
 
-  private async getTeam(projectSlugOrId: string | number, intraId: number) {
-    const filteredProjects = await ApiManager.getProjectUsers(projectSlugOrId, intraId);
+  private async fetchIntraGroup(projectSlugOrId: string | number, intraIdOrLogin: string | number) {
+    const intraTeam = await ApiManager.getUserTeam(intraIdOrLogin, projectSlugOrId);
 
-    if (filteredProjects.length === 0) {
-      return null;
-    } else if (filteredProjects.length > 1) {
-      this.logger.error(`Found multiple records of \`\`${projectSlugOrId}\`\`.`);
-    }
-    return filteredProjects[0].teams[0];
-  }
-
-  private async fetchIntraGroup(projectSlugOrId: string | number, intraId: number) {
-    const team = await this.getTeam(projectSlugOrId, intraId);
-
-    if (team === null) {
+    if (intraTeam === null) {
       return null;
     }
-    const users: any[] = team.users;
-    const promises = users.map(async (user) => {
-      const student = await this.studentModel.findOne({ intraId: user.id }).exec();
-      if (student !== null) {
-        return {student: student, leader: user.leader};
-      }
-      const c: Student = {
-        intraId: user.id,
-        intraName: user.login,
-      };
-      const newStudent = await this.studentModel.create(c);
-
-      return {student: newStudent, leader: user.leader};
-    });
-    const members = await Promise.all(promises);
-
-    return await this.teamModel.create({
-      intraId: team.id,
-      name: team.name,
-      teamLeader: members.find((m) => m.leader).student,
-      teamMembers: members.filter((m) => !m.leader).map((m) => m.student),
-    });
+    const team = await ApiManager.intraTeamToTeam(intraTeam, this.studentModel);
+    return await this.teamModel.create(team);
   }
 
   @Button('piscinersButton')
@@ -131,9 +100,8 @@ export class RushEvalPiscinersButtonComponent {
     if (student === null) {
       return interaction.showModal(newStudentModal());
     } else if (student.discordId === undefined) {
-      console.log("before set: ", student);
-      StudentService.setStudentDiscordData(interaction.guild, interaction.user, student);
-      console.log("after set: ", student);
+      await StudentService.setStudentDiscordData(interaction.guild, interaction.user, student)
+        .then(() => student.save());
     }
     const projectSlug = 'c-piscine-rush-00';
     /* if recognise student, look for their team */
@@ -151,7 +119,6 @@ If you're certain you've signed up for this project, please contact BOCAL for it
     }
     let reply = '';
     const leader = team.teamLeader;
-    console.log(`team name: ${team.name}`);
     if (student != leader) {
       reply += `**Unless your leader(${leader.intraName}) is unresponsive, please leave it to them to choose the timeslot.**\n`;
     }
