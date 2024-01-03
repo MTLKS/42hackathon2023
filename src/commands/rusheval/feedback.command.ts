@@ -165,7 +165,7 @@ export class RushEvalFeedbackForm {
 
       team.feedback = new Map(interaction.fields.fields.map((value, key) => [key, value.value]));
       team.feedbackAt = new Date();
-      team.save();
+      await team.save();
     } catch (error) {
       console.error(error);
       return interaction.reply({
