@@ -50,7 +50,8 @@ export class ApiManager {
     return response.data[0].name;
   }
 
-  public static async getProjectUsers(projectSlugOrId: string | number, intraId?: number, status?: ProjectStatus, page: number = 0): Promise<Array<any>> {
+  /* This function is bloated */
+  public static getProjectUsers(projectSlugOrId: string | number, intraId?: number, status?: ProjectStatus, page: number = 0): Promise<Array<any>> {
     let queryArr: string[] = [];
 
     if (intraId !== undefined) {
@@ -67,15 +68,26 @@ export class ApiManager {
     }
     const query = `?${queryArr.join('&')}`;
     try {
-      return await this.get42Api(`projects/${projectSlugOrId}/projects_users${query}`);
+      return this.get42Api(`projects/${projectSlugOrId}/projects_users${query}`);
     } catch (error) {
       console.error(error);
-      const logger = new ConsoleLogger("ApiManager");
+      this.logger.error(`Failed to get project users: ${error.response.data.error_description}`);
     }
   }
 
-  public static async getTeam(teamId: number) {
+  public static getTeam(teamId: number) {
     return this.get42Api(`teams/${teamId}`);
+  }
+
+  public static async getUserTeam(intraIdOrLogin: number | string, projectSlugOrId: string | number) {
+    const response = await this.get42Api(`users/${intraIdOrLogin}/projects/${projectSlugOrId}/teams`);
+
+    if (response.length === 0) {
+      return null;
+    } else if (response.length > 1) {
+      this.logger.warn(`User ${intraIdOrLogin} has more than one team in project ${projectSlugOrId}`);
+    }
+    return response[0];
   }
 
   public static async get42Api(url: string) {
