@@ -54,15 +54,10 @@ export class ApiManager {
   }
 
   public static getProjectUsers(projectSlugOrId: string | number, intraId: number): Promise<Array<any>> {
-    try {
-      return this.get42Api(`projects/${projectSlugOrId}/projects_users?filter[user_id]=${intraId}`);
-    } catch (error) {
-      console.error(error);
-      this.logger.error(`Failed to get project users: ${error.response.data.error_description}`);
-    }
+    return this.get42Api(`projects/${projectSlugOrId}/projects_users?filter[user_id]=${intraId}`);
   }
 
-  public static getProjectTeams(projectSlugOrId: string | number, ...fields: string[]) {
+  public static getProjectTeams(projectSlugOrId: string | number, ...fields: string[]): Promise<Array<any>> {
     return this.get42Api(`projects/${projectSlugOrId}/teams`, ...fields.concat([`page[size]=100`]));
   }
 
@@ -109,12 +104,7 @@ export class ApiManager {
 
   public static async get42Api(url: string, ...fields: string[]) {
     if (this.accessToken === undefined) {
-      try {
-        this.accessToken = await this.getAccessToken();
-      } catch (error) {
-        this.logger.fatal(`Failed to get access token from 42 API: ${error.response.data.error_description}`);
-        return ;
-      }
+      this.accessToken = await this.getAccessToken();
     }
     fields.push(`filter[campus]=${this.CAMPUS_ID}`);
     return await this.get("https://api.intra.42.fr/v2/" + url + `?${fields.join('&')}`, `Bearer ${this.accessToken}`);

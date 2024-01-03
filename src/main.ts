@@ -30,7 +30,13 @@ async function bootstrap() {
   if (!checkEnv()) {
     return ;
   }
-  await ApiManager.init();
+  try {
+    await ApiManager.init();
+  } catch (error) {
+    const logger = new ConsoleLogger("main");
+    logger.fatal(`Failed to get access token from 42 API: ${error.response.data.error_description}`);
+    return ;
+  }
   const app = await NestFactory.create(AppModule);
   app.use(cookieParser());
   await app.listen(process.env.BOT_PORT || 3000);
