@@ -69,7 +69,7 @@ export class StudentService {
         return interaction.reply({ content: `Internal server authentication error, please notify the maintainer for this issue.`, ephemeral: true });
       } else {
         if (status !== 404) {
-          this.logger.error(`Failed to fetch ${login} from intra: ${status} ${axiosError.response.statusText}`);
+          this.logger.warn(`Failed to fetch ${login} from intra: ${status} ${axiosError.response.statusText}`);
         }
         return interaction.reply({ content: `${login} not found (${status})`, ephemeral: true });
       }
@@ -89,12 +89,12 @@ export class StudentService {
     if (student.progressRole === null) {
       this.logger.error(`Unable to determine role for ${login} with roles ${discordRoles}`);
     }
-    try {
-      await this.studentModel.create(student);
+    return await this.studentModel.create(student).then(() => {
+      this.logger.log(`Added ${login} as new student`);
       return interaction.reply({ content: `Added ${login} as new student`, ephemeral: true });
-    } catch (error) {
-      this.logger.error(`Failed to add ${login} as new student: ${error}`);
+    }).catch(error => {
+      this.logger.warn(`Failed to add ${login} as new student: ${error}`);
       return interaction.reply({ content: `Failed to add ${login} as new student. Please contact the maintainer for this.`, ephemeral: true });
-    }
+    });
   }
 }
