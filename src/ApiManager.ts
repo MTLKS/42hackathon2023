@@ -79,17 +79,17 @@ export class ApiManager {
   public static async intraTeamToTeam(intraTeam, studentModel: Model<Student>) {
     const users: any[] = intraTeam.users;
     const promises = users.map(async (user) => {
-      const student = await studentModel.findOne({ intraId: user.id }).exec();
-      if (student !== null) {
-        return {student: student, leader: user.leader};
-      }
-      const c: Student = {
-        intraId: user.id,
-        intraName: user.login,
-      };
-      const newStudent = await studentModel.create(c);
+      let student = await studentModel.findOne({ intraId: user.id }).exec();
 
-      return {student: newStudent, leader: user.leader};
+      if (student === null) {
+        const c: Student = {
+          intraId: user.id,
+          intraName: user.login,
+        };
+
+        student = await studentModel.create(c);
+      }
+      return {student: student, leader: user.leader};
     });
     const members = await Promise.all(promises);
     const team: Team = {
