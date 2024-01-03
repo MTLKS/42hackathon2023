@@ -1,6 +1,9 @@
 import { HttpService } from "@nestjs/axios";
 import { ConsoleLogger, Logger } from "@nestjs/common";
+import { Model } from "mongoose";
 import { firstValueFrom } from "rxjs";
+import { Student } from "./schema/student.schema";
+import { Team } from "./schema/team.schema";
 
 export enum ProjectStatus {
   Finished = 'finished',
@@ -50,32 +53,20 @@ export class ApiManager {
     return response.data[0].name;
   }
 
-  /* This function is bloated */
-  public static getProjectUsers(projectSlugOrId: string | number, intraId?: number, status?: ProjectStatus, page: number = 0): Promise<Array<any>> {
-    let queryArr: string[] = [];
-
-    if (intraId !== undefined) {
-      queryArr.push(`filter[user_id]=${intraId}`);
-    } else {
-      if (status !== undefined) {
-        queryArr.push(`filter[status]=${status}`);
-      }
-      queryArr.concat([
-        `filter[campus_id]=${this.CAMPUS_ID}`,
-        `page[number]=${page}`,
-        `page[size]=100`,
-      ]);
-    }
-    const query = `?${queryArr.join('&')}`;
+  public static getProjectUsers(projectSlugOrId: string | number, intraId: number): Promise<Array<any>> {
     try {
-      return this.get42Api(`projects/${projectSlugOrId}/projects_users${query}`);
+      return this.get42Api(`projects/${projectSlugOrId}/projects_users?filter[user_id]=${intraId}`);
     } catch (error) {
       console.error(error);
       this.logger.error(`Failed to get project users: ${error.response.data.error_description}`);
     }
   }
 
-  public static getTeam(teamId: number) {
+  public static getProjectTeams(projectSlugOrId: string | number, ...fields: string[]) {
+    return this.get42Api(`projects/${projectSlugOrId}/teams`, ...fields.concat([`page[size]=100`]));
+  }
+
+  public static getTeam(teamId: number, ...fields: string[]) {
     return this.get42Api(`teams/${teamId}`);
   }
 
@@ -90,7 +81,33 @@ export class ApiManager {
     return response[0];
   }
 
-  public static async get42Api(url: string) {
+  public static async intraTeamToTeam(intraTeam, studentModel: Model<Student>) {
+    const users: any[] = intraTeam.users;
+    const promises = users.map(async (user) => {
+      const student = await studentModel.findOne({ intraId: user.id }).exec();
+      if (student !== null) {
+        return {student: student, leader: user.leader};
+      }
+      const c: Student = {
+        intraId: user.id,
+        intraName: user.login,
+      };
+      const newStudent = await studentModel.create(c);
+
+      return {student: newStudent, leader: user.leader};
+    });
+    const members = await Promise.all(promises);
+    const team: Team = {
+      intraId: intraTeam.id,
+      name: intraTeam.name,
+      teamLeader: members.find((m) => m.leader).student,
+      teamMembers: members.filter((m) => !m.leader).map((m) => m.student),
+    };
+
+    return team;
+  }
+
+  public static async get42Api(url: string, ...fields: string[]) {
     if (this.accessToken === undefined) {
       try {
         this.accessToken = await this.getAccessToken();
@@ -99,7 +116,8 @@ export class ApiManager {
         return ;
       }
     }
-    return await this.get("https://api.intra.42.fr/v2/" + url, `Bearer ${this.accessToken}`);
+    fields.push(`filter[campus]=${this.CAMPUS_ID}`);
+    return await this.get("https://api.intra.42.fr/v2/" + url + `?${fields.join('&')}`, `Bearer ${this.accessToken}`);
   }
 
   /* TODO: This kinda don't belong to this class */
