@@ -1,0 +1,123 @@
+{
+  "id": 4140753,
+  "name": "zcheah-m's group",
+  "url": "https://api.intra.42.fr/v2/teams/4140753",
+  "final_mark": 116,
+  "project_id": 1308,
+  "created_at": "2022-05-20T11:00:19.889Z",
+  "updated_at": "2022-05-23T08:01:34.496Z",
+  "status": "finished",
+  "terminating_at": "2022-05-27T11:00:22.706Z",
+  "users": [
+    {
+      "id": 111858,
+      "login": "lguan-xi",
+      "url": "https://api.intra.42.fr/v2/users/lguan-xi",
+      "leader": false,
+      "occurrence": 0,
+      "validated": true,
+      "projects_user_id": 2594932
+    },
+    {
+      "id": 111882,
+      "login": "hqixeo",
+      "url": "https://api.intra.42.fr/v2/users/hqixeo",
+      "leader": false,
+      "occurrence": 0,
+      "validated": true,
+      "projects_user_id": 2595837
+    },
+    {
+      "id": 111888,
+      "login": "zcheah-m",
+      "url": "https://api.intra.42.fr/v2/users/zcheah-m",
+      "leader": true,
+      "occurrence": 0,
+      "validated": true,
+      "projects_user_id": 2594586
+    },
+    {
+      "id": 111891,
+      "login": "zting",
+      "url": "https://api.intra.42.fr/v2/users/zting",
+      "leader": false,
+      "occurrence": 0,
+      "validated": true,
+      "projects_user_id": 2594288
+    },
+    {
+      "id": 111988,
+      "login": "tjien-ji",
+      "url": "https://api.intra.42.fr/v2/users/tjien-ji",
+      "leader": false,
+      "occurrence": 0,
+      "validated": true,
+      "projects_user_id": 2594286
+    }
+  ],
+  "locked?": true,
+  "validated?": true,
+  "closed?": true,
+  "repo_url": "git@vogsphere.42kl.edu.my:vogsphere/intra-uuid-ad1e56b5-0db2-430b-a303-e4f32a1c8687-4140753-zcheah-m",
+  "repo_uuid": "intra-uuid-ad1e56b5-0db2-430b-a303-e4f32a1c8687-4140753-zcheah-m",
+  "locked_at": "2022-05-20T11:00:20.370Z",
+  "closed_at": "2022-05-22T11:00:22.706Z",
+  "project_session_id": 5539,
+  "project_gitlab_path": "pedago_world/c-piscine/rush-00",
+  "scale_teams": [
+    {
+      "id": 4162361,
+      "scale_id": 13473,
+      "comment": "All members know what they are doing. They work together to present a solution. There is no norme error. The solution works without any problem. Code is readable and structured well. Bonuses files were completed too. Good job on your first group project. Wish to see you in the core programme. clue (int argc, char **argv) ",
+      "created_at": "2022-05-23T04:21:08.931Z",
+      "updated_at": "2022-05-23T08:01:33.632Z",
+      "feedback": "The evaluator is friendly and nice.",
+      "final_mark": 116,
+      "flag": {
+        "id": 1,
+        "name": "Ok",
+        "positive": true,
+        "icon": "check-4",
+        "created_at": "2015-09-14T23:06:52.000Z",
+        "updated_at": "2015-09-14T23:06:52.000Z"
+      },
+      "begin_at": "2022-05-23T07:00:00.000Z",
+      "correcteds": [
+        {
+          "id": 111858,
+          "login": "lguan-xi",
+          "url": "https://api.intra.42.fr/v2/users/lguan-xi"
+        },
+        {
+          "id": 111882,
+          "login": "hqixeo",
+          "url": "https://api.intra.42.fr/v2/users/hqixeo"
+        },
+        {
+          "id": 111888,
+          "login": "zcheah-m",
+          "url": "https://api.intra.42.fr/v2/users/zcheah-m"
+        },
+        {
+          "id": 111891,
+          "login": "zting",
+          "url": "https://api.intra.42.fr/v2/users/zting"
+        },
+        {
+          "id": 111988,
+          "login": "tjien-ji",
+          "url": "https://api.intra.42.fr/v2/users/tjien-ji"
+        }
+      ],
+      "corrector": {
+        "id": 110510,
+        "login": "lwilliam",
+        "url": "https://api.intra.42.fr/v2/users/lwilliam"
+      },
+      "truant": {},
+      "filled_at": "2022-05-23T07:53:54.093Z",
+      "questions_with_answers": []
+    }
+  ],
+  "teams_uploads": []
+}
