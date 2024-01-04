@@ -44,7 +44,7 @@ export class ApiManager {
     return data.access_token;
   }
 
-  public static getUser(intraIdOrLogin: string) {
+  public static getUser(intraIdOrLogin: string | number) {
     return this.get42Api(`users/${intraIdOrLogin}`);
   }
 
@@ -54,11 +54,16 @@ export class ApiManager {
   }
 
   public static getProjectUsers(projectSlugOrId: string | number, intraId: number): Promise<Array<any>> {
-    return this.get42Api(`projects/${projectSlugOrId}/projects_users?filter[user_id]=${intraId}`);
+    return this.get42Api(`projects/${projectSlugOrId}/projects_users`,
+      `filter[user_id]=${intraId}`,
+      `filter[campus]=${this.CAMPUS_ID}`
+    );
   }
 
   public static getProjectTeams(projectSlugOrId: string | number, ...fields: string[]): Promise<Array<any>> {
-    return this.get42Api(`projects/${projectSlugOrId}/teams`, ...fields.concat([`page[size]=100`]));
+    return this.get42Api(`projects/${projectSlugOrId}/teams`,
+      ...fields.concat([`page[size]=100`, `filter[campus]=${this.CAMPUS_ID}`])
+    );
   }
 
   public static getTeam(teamId: number, ...fields: string[]) {
@@ -106,7 +111,6 @@ export class ApiManager {
     if (this.accessToken === undefined) {
       this.accessToken = await this.getAccessToken();
     }
-    fields.push(`filter[campus]=${this.CAMPUS_ID}`);
     return await this.get("https://api.intra.42.fr/v2/" + url + `?${fields.join('&')}`, `Bearer ${this.accessToken}`);
   }
 
