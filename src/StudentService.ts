@@ -49,7 +49,6 @@ export class StudentService {
     student.discordName = user.username;
     student.discordServerName = discordData.displayName;
     student.discordServerRoles = discordRoles;
-    student.discordServerJoinedAt = discordData.joinedAt;
     student.progressRole = StudentService.temporaryGetRole(discordRoles);
     return student;
   }
@@ -79,11 +78,12 @@ export class StudentService {
     const student: Student = {
       intraId: intraData.id,
       intraName: login,
+      poolYear: intraData.pool_year,
+      poolMonth: intraData.pool_month,
       discordId: discordData.id,
       discordName: interaction.user.username,
       discordServerName: discordData.displayName,
       discordServerRoles: discordRoles,
-      discordServerJoinedAt: discordData.joinedAt,
       progressRole: StudentService.temporaryGetRole(discordRoles),
     };
     if (student.progressRole === null) {

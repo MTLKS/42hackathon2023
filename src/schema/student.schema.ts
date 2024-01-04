@@ -18,6 +18,12 @@ export class Student {
   intraName: string;
 
   @Prop()
+  poolYear?: string;
+
+  @Prop()
+  poolMonth?: string;
+
+  @Prop()
   discordId?: string;
 
   @Prop()
@@ -28,9 +34,6 @@ export class Student {
 
   @Prop()
   discordServerRoles?: string[];
-
-  @Prop()
-  discordServerJoinedAt?: Date;
 
   @Prop()
   progressRole?: string;
