@@ -7,6 +7,25 @@ import { Student } from './schema/student.schema';
 import { Model } from 'mongoose';
 import { ActivityType } from 'discord.js';
 
+function getCursusRole(cursus_users) {
+  if (cursus_users.length == 1) {
+    if (new Date(cursus_users[0].end_at).getTime() < Date.now())
+      return 'FLOATY';
+    else
+      return 'PISCINER';
+  }
+  else if (cursus_users[1].grade == 'Member') {
+    return 'SPECIALIZATION';
+  } else if (cursus_users[1].grade == 'Learner') {
+    if (new Date(cursus_users[1].blackholed_at).getTime() < Date.now())
+      return 'BLACKHOLED';
+    else if (new Date(cursus_users[1].begin_at).getTime() < Date.now())
+      return 'CADET';
+    else
+      return 'RESERVISTS';
+  }
+}
+
 @Injectable()
 export class AppService {
   constructor(private httpService: HttpService, @InjectModel(Student.name) private readonly studentModel: Model<Student>) {}
@@ -47,23 +66,7 @@ export class AppService {
     const discordId = request.cookies['id'];
     const intraId = intraUserData.data.id;
     let student = await this.studentModel.findOne({ intraId: intraId });
-    let role = '';
-    if (intraUserData.data.cursus_users.length == 1) {
-      if (new Date(intraUserData.data.cursus_users[0].end_at).getTime() < Date.now())
-        role = 'FLOATY';
-      else
-        role = 'PISCINER';
-    }
-    else if (intraUserData.data.cursus_users[1].grade == 'Member') {
-      role = 'SPECIALIZATION';
-    } else if (intraUserData.data.cursus_users[1].grade == 'Learner') {
-      if (new Date(intraUserData.data.cursus_users[1].blackholed_at).getTime() < Date.now())
-        role = 'BLACKHOLED';
-      else if (new Date(intraUserData.data.cursus_users[1].begin_at).getTime() < Date.now())
-        role = 'CADET';
-      else
-        role = 'RESERVISTS';
-    }
+    const role = getCursusRole(intraUserData.data.cursus_users)
 
     let coalition = '';
     if (role == 'SPECIALIZATION' || role == 'CADET') {
@@ -80,15 +83,13 @@ export class AppService {
         coalitionRole: coalition,
         intraImageLink: intraUserData.data.image.link,
       });
-      await student.save();
     } else {
       student.discordId = request.cookies['id'];
       student.progressRole = role;
       student.coalitionRole = coalition;
       student.intraImageLink = intraUserData.data.image.link;
-      await student.save();
     }
-
+    await student.save();
 
     const discordUserData = await firstValueFrom(this.httpService.get(`https://discord.com/api/v10/users/${discordId}`, {
       headers: {
