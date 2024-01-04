@@ -6,7 +6,7 @@ import { ApiManager } from './ApiManager';
 
 function checkEnv() {
   const requiredEnv = new Array<[string, string]>(
-      ['HOST(ex: http://localhost)', process.env.BOT_HOST],
+      ['BOT_HOST(ex: http://localhost)', process.env.BOT_HOST],
       ['API_UID', process.env.API_UID],
       ['API_SECRET', process.env.API_SECRET],
       ['DISCORD_TOKEN', process.env.DISCORD_TOKEN],
