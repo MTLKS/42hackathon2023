@@ -59,19 +59,21 @@ export class StudentService {
     let intraData;
 
     try {
-      intraData = await ApiManager.getUser(login);
+      intraData = await ApiManager.getUserInCampus(login);
     } catch (error) {
       const axiosError = error as AxiosError;
       const status = axiosError.response.status;
 
       if (status === 401) {
         return interaction.reply({ content: `Internal server authentication error, please notify the maintainer for this issue.`, ephemeral: true });
-      } else {
-        if (status !== 404) {
-          this.logger.warn(`Failed to fetch ${login} from intra: ${status} ${axiosError.response.statusText}`);
-        }
-        return interaction.reply({ content: `${login} not found (${status})`, ephemeral: true });
+      } else if (status === 404) {
+        return interaction.reply({ content: `${login} not found`, ephemeral: true });
       }
+      this.logger.warn(`Failed to fetch ${login} from intra: ${status} ${axiosError.response.statusText}`);
+      return interaction.reply({ content: `Internal server error. (${status})`, ephemeral: true });
+    }
+    if (intraData === null) {
+      return interaction.reply({ content: `${login} is not local student.`, ephemeral: true });
     }
     const discordData = await interaction.guild.members.fetch({ user: interaction.user.id });
     const discordRoles = discordData.roles.cache.map(role => role.name);

@@ -14,7 +14,7 @@ export enum ProjectStatus {
 }
 
 export class ApiManager {
-  private static readonly CAMPUS_ID = 34; // 42 Kuala Lumpur
+  public static readonly CAMPUS_ID = 34; // 42 Kuala Lumpur
   private static accessToken: string;
   private static readonly httpService = new HttpService();
   private static readonly logger = new Logger(ApiManager.name);
@@ -46,6 +46,20 @@ export class ApiManager {
 
   public static getUser(intraIdOrLogin: string | number) {
     return this.get42Api(`users/${intraIdOrLogin}`);
+  }
+
+  public static async getUserInCampus(intraIdOrLogin: string | number) {
+    const filterField = (typeof intraIdOrLogin === 'string' ? 'login' : 'id');
+    const response: any[] = await this.get42Api(`campus/${this.CAMPUS_ID}/users`,
+      `filter[${filterField}]=${intraIdOrLogin}`
+    );
+
+    if (response.length === 0) {
+      return null;
+    } else if (response.length > 1) {
+      this.logger.warn(`Multiple users found for ${intraIdOrLogin}`);
+    }
+    return response[0];
   }
 
   public static async getCoalitionRole(intraIdOrLogin: string): Promise<string> {
