@@ -20,7 +20,6 @@ import { RushEvalMatchCommand } from './commands/rusheval/match.command';
 import { RushEvalFeedbackCommand, RushEvalFeedbackForm, RushEvalFeedbackTeamSelectButton } from './commands/rusheval/feedback.command';
 import { UpdateRolesCommand } from './commands/updateroles.command';
 import { CleanCommand, CleanDatabase } from './commands/clean.command';
-import { FillGarbageCommand } from './commands/fill.command';
 import { SpecRequest, SpecRequestSchema } from './schema/specrequest.schema';
 import { TestCommand } from './commands/test.command';
 import { StudentService } from './StudentService';
@@ -72,7 +71,6 @@ import { StudentService } from './StudentService';
     RushEvalFeedbackForm,
     CleanCommand,
     CleanDatabase,
-    FillGarbageCommand,
     UpdateRolesCommand,
     TestCommand,
   ],
