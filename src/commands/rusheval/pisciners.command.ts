@@ -107,7 +107,12 @@ export class RushEvalPiscinersButtonComponent {
     /* if recognise student, look for their team */
     const team = await this.teamModel.findOne({ teamLeader: student }).exec()
     /* if team not found, fetch from intra */
-      ?? await this.fetchIntraGroup(projectSlug, student.intraId);
+      ?? await this.fetchIntraGroup(projectSlug, student.intraName).catch((error: AxiosError) => {
+        if (error.response?.status !== 404) {
+          this.logger.error(error.message);
+        }
+        return null;
+      });
 
     /* if team not found in intra, reply error */
     if (team === null) {
