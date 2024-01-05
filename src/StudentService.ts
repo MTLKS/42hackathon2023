@@ -59,7 +59,7 @@ export class StudentService {
     const studentAlreadyExist = await this.studentModel.findOne({ intraName: login }).exec()
       .then(student => student !== null);
     if (studentAlreadyExist) {
-      return interaction.reply({ content: `${login} has been registered, pleace contact the admin if this is your intra login.`, ephemeral: true });
+      return interaction.reply({ content: `${login} has been registered, pleace contact the admin **IMMEDIATELY** if this is your intra login.`, ephemeral: true });
     }
     let intraData;
 
