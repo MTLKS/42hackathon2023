@@ -105,7 +105,10 @@ export class RushEvalPiscinersButtonComponent {
     }
     const projectSlug = 'c-piscine-rush-00';
     /* if recognise student, look for their team */
-    const team = await this.teamModel.findOne({ teamLeader: student }).exec()
+    const team = await this.teamModel.findOne({ $or: [
+        {teamLeader: student},
+        {teamMembers: { $in: [student] }}]
+      }).exec()
     /* if team not found, fetch from intra */
       ?? await this.fetchIntraGroup(projectSlug, student.intraName).catch((error: AxiosError) => {
         if (error.response?.status !== 404) {
