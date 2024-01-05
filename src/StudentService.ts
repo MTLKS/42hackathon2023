@@ -56,6 +56,11 @@ export class StudentService {
   @Modal('new-student-modal')
   public async onNewStudent([interaction]: ModalContext) {
     const login = interaction.fields.getField('login').value;
+    const studentAlreadyExist = await this.studentModel.findOne({ intraName: login }).exec()
+      .then(student => student !== null);
+    if (studentAlreadyExist) {
+      return interaction.reply({ content: `${login} has been registered, pleace contact the admin if this is your intra login.`, ephemeral: true });
+    }
     let intraData;
 
     try {
