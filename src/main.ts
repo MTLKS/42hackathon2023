@@ -39,7 +39,7 @@ async function bootstrap() {
   }
   const app = await NestFactory.create(AppModule);
   app.use(cookieParser());
-  await app.listen(process.env.BOT_PORT || 3000);
+  await app.listen(process.env.BOT_PORT || 80);
 }
 
 bootstrap().catch(error => console.error(error));

@@ -5,6 +5,8 @@ import { firstValueFrom } from "rxjs";
 import { Student } from "./schema/student.schema";
 import { Team } from "./schema/team.schema";
 
+export type ProjectIdentifier = string | number;
+
 export enum ProjectStatus {
   Finished = 'finished',
   WaitingForCorrection = 'waiting_for_correction',
@@ -27,8 +29,8 @@ export class ApiManager {
 
   public static async getAccessToken(code?: string): Promise<string> {
     let redirect_uri = process.env.HOST;
-    if (process.env.PORT !== undefined) {
-      redirect_uri += `:${process.env.PORT}`;
+    if (process.env.BOT_PORT !== undefined) {
+      redirect_uri += `:${process.env.BOT_PORT}`;
     }
 
     const url = `https://api.intra.42.fr/oauth/token?grant_type=client_credentials&client_id=${process.env.API_UID}&client_secret=${process.env.API_SECRET}`;
@@ -75,8 +77,9 @@ export class ApiManager {
   }
 
   public static getProjectTeams(projectSlugOrId: string | number, ...fields: string[]): Promise<Array<any>> {
-    return this.get42Api(`projects/${projectSlugOrId}/teams`,
-      ...fields.concat([`page[size]=100`, `filter[campus]=${this.CAMPUS_ID}`])
+    return this.get42Api(`projects/${projectSlugOrId}/teams`, ...fields,
+      `page[size]=100`,
+      `filter[campus]=${this.CAMPUS_ID}`
     );
   }
 
