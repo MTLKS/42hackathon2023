@@ -45,14 +45,17 @@ export class RushEvalCadetCommand {
       .setStyle(ButtonStyle.Success)
       ;
 
-    const specialButton = new ButtonBuilder()
-      .setCustomId('cadet-fetch-special')
-      .setLabel('Open special slots')
-      .setStyle(ButtonStyle.Primary)
-      ;
+    // const specialButton = new ButtonBuilder()
+    //   .setCustomId('cadet-fetch-special')
+    //   .setLabel('Open special slots')
+    //   .setStyle(ButtonStyle.Primary)
+    //   ;
 
     const row = new ActionRowBuilder<ButtonBuilder>()
-      .addComponents([slotsButton, specialButton])
+      .addComponents([
+        slotsButton,
+        // specialButton
+      ])
       ;
 
     const embed = new EmbedBuilder()

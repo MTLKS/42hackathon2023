@@ -45,15 +45,17 @@ export class RushEvalPiscinersCommand {
       .setStyle(ButtonStyle.Primary)
     ;
 
-    const specialButton = new ButtonBuilder()
-      .setCustomId('piscinersSpecialButton')
-      .setLabel('Request for special timeslot')
-      .setStyle(ButtonStyle.Danger)
-    ;
+    // const specialButton = new ButtonBuilder()
+    //   .setCustomId('piscinersSpecialButton')
+    //   .setLabel('Request for special timeslot')
+    //   .setStyle(ButtonStyle.Danger)
+    // ;
 
     const row = new ActionRowBuilder<ButtonBuilder>()
-      .addComponents(button, specialButton)
-    ;
+      .addComponents(button,
+        // specialButton
+      )
+      ;
 
     const embed = new EmbedBuilder()
       .setTitle("Please select your timeslot for the next rush defense")
@@ -218,7 +220,6 @@ export class RushEvalPiscinersStringSelectComponent {
     }).exec();
     // const team = await this.teamModel.findOne({ teamLeader: student }).exec();
 
-    console.log(team);
     team.timeslot = selectedTimeslot;
     team.chosenTimeslotAt = new Date();
     team.chosenTimeslotBy = student;
