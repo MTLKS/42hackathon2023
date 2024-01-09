@@ -69,7 +69,7 @@ export class RushEvalFeedbackTeamSelectButton {
       const button = new ButtonBuilder()
         .setCustomId('feedback-team-select-button')
         .setLabel(team.name)
-        .setStyle(ButtonStyle.Secondary)
+        .setStyle(team.feedbackAt ? ButtonStyle.Success : ButtonStyle.Secondary)
         ;
 
       return button;
