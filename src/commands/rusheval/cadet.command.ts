@@ -90,14 +90,17 @@ export class RushEvalCadetFetchSlotsComponent {
     const timeslots = await this.timeslotModel.find().exec();
     const evaluators = await this.evaluatorModel.find().exec();
     const underBookedSessions = getUnderBookedSessions(timeslots, evaluators);
-    const selectMap = (time: string) => {return {label: time, value: time}};
+    const evaluator = await this.evaluatorModel.findOne({student: student}).exec()
+      ?? await this.evaluatorModel.create({ student: student });
+    const selectMap = (time: string) => ({label: time, value: time});
     const availableOptions = (underBookedSessions.length
         ? underBookedSessions.map(selectMap)
         : timeslots.map(timeslot => selectMap(timeslot.timeslot)))
       ;
+    const selectedOptions = evaluator.timeslots.map(t => t.timeslot);
     const stringSelect = new StringSelectMenuBuilder()
       .setCustomId('cadet-session-select')
-      .setPlaceholder('Select your timeslots')
+      .setPlaceholder(`Selected: ${selectedOptions.length ? selectedOptions : 'None'}`)
       .setMinValues(0)
       .setMaxValues(Math.min(availableOptions.length, 2))
       .setOptions(availableOptions)
@@ -126,7 +129,7 @@ export class RushEvalCadetStringSelectComponent {
   public async onStringSelect(@Context() [interaction]: StringSelectContext, @SelectedStrings() selected: string[]) {
     const student = await this.studentModel.findOne({ discordId: interaction.user.id }).exec();
     if (student === null) {
-      return interaction.reply({content: 'Please try fetching slots and register yourself as new student again.', ephemeral: true});
+      return interaction.update({content: 'Please try fetching slots and register yourself as new student again.', components: []});
     }
     const timeslots = await this.timeslotModel.find().exec();
     const evaluators = await this.evaluatorModel.find().exec();
@@ -136,10 +139,10 @@ export class RushEvalCadetStringSelectComponent {
       /** Check if the chosen slots contain any overbooked sessions */
       const overBooked = selected.filter(session => !underBookedSessions.includes(session));
       if (overBooked.length) {
-        return interaction.reply({
+        return interaction.update({
             content: `**${overBooked}** are currently filled.
 Please regenerate your selection by clicking on the \`Open slots\` button one more time`,
-            ephemeral: true
+            components: []
           });
       }
     }
@@ -151,10 +154,9 @@ Please regenerate your selection by clicking on the \`Open slots\` button one mo
     evaluator.timeslots = selectedTimeslots;
     evaluator.lastCreatedTimeslotsAt = new Date();
     await evaluator.save();
-
     return interaction.reply({
         content: ((selectedTimeslots.length === 0)
-            ? 'You have not selected any timeslots'
+            ? 'You have canceled your timeslots'
             : `You have selected ${selectedTimeslots.map(t => t.timeslot)}`),
         ephemeral: true
       });

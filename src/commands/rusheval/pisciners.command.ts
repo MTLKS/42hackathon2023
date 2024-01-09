@@ -143,7 +143,7 @@ If you're certain you've signed up for this project, please contact BOCAL for it
     }
     const stringSelect = new StringSelectMenuBuilder()
       .setCustomId('piscinersStringSelect')
-      .setPlaceholder('Select your timeslot')
+      .setPlaceholder(`Selected: ${team.timeslot?.timeslot ?? 'None'}`)
       .setMinValues(1)
       .setMaxValues(1)
       .setOptions(timeslotOptions);
