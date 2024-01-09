@@ -58,20 +58,24 @@ def set_cells_colors(table: plttable.Table):
 
 
 def set_cells_size(table: plttable.Table):
-    table.auto_set_font_size(False)
+    table.auto_set_column_width(col=list(range(MAX_SLOTS)))
     for cell in table.get_celld().values():
-        cell.set_width(CELL_WIDTH)
         cell.set_height(CELL_HEIGHT)
 
 
 def draw_session(sessions: list):
     create_figure()
     data = get_data_map(sessions)
+    global MAX_SLOTS
+    MAX_SLOTS = max(MAX_SLOTS, max(len(lst) for lst in data.values()))
     for lst in data.values():
         # Why not [''] * (MAX_SLOTS - len(lst)) ?
         # Just in case I need to modify each cell independently.
         # Since that expression would create shallow copy
-        lst += ['' for _ in range(MAX_SLOTS - len(lst))]
+        if len(lst) < MAX_SLOTS:
+            lst += ['' for _ in range(MAX_SLOTS - len(lst))]
+        # elif len(lst) > MAX_SLOTS:
+        #     [lst.pop(MAX_SLOTS) for _ in range(MAX_SLOTS, len(lst))]
     table = plt.table(
             rowLabels=list(data.keys()),
             rowLoc='center',
@@ -112,7 +116,7 @@ def main():
         outfile = sys.argv[1]
         # draw_session(get_session_file("testmatch.json"))
         draw_session(get_session(teams))
-        plt.savefig(outfile)
+        plt.savefig(outfile, bbox_inches='tight')
     except KeyboardInterrupt:
         return 130
     except Exception as e:
