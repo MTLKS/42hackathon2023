@@ -36,7 +36,6 @@ export class StudentService {
     ) { }
 
   public static getCursusRole(cursus_users: any[]) {
-    console.log(cursus_users);
     if (cursus_users.length === 0) {
       return undefined;
     } else if (cursus_users.length === 1) {
@@ -65,13 +64,30 @@ export class StudentService {
     else
       return 'RESERVISTS';
   }
-    
+
   public static async setStudentDiscordData(guild: Guild, user: User, student: Student) {
     const discordData = await guild.members.fetch({ user: user.id });
 
     student.discordId = discordData.id;
     student.discordName = user.username;
     student.discordServerName = discordData.displayName;
+    return student;
+  }
+
+  public static async fetchStudent(intraIdOrLogin: number | string) {
+    const intraData = await ApiManager.getUser(intraIdOrLogin);
+    const student: Student = {
+      intraId: intraData.id,
+      intraName: intraData.login,
+      poolYear: intraData.pool_year,
+      poolMonth: intraData.pool_month,
+      progressRole: StudentService.getCursusRole(intraData.cursus_users),
+    };
+
+    /* A bandage solution for checking locality, because throwing exception makes everything messy */
+    if (intraData.campus_users[0].campus_id !== ApiManager.CAMPUS_ID) {
+      return null;
+    }
     return student;
   }
 
@@ -83,10 +99,9 @@ export class StudentService {
     if (studentAlreadyExist) {
       return interaction.reply({ content: `${login} has been registered, pleace contact the admin **IMMEDIATELY** if this is your intra login.`, ephemeral: true });
     }
-    let intraData;
-
+    let student: Student;
     try {
-      intraData = await ApiManager.getUser(login);
+      student = await StudentService.fetchStudent(login);
     } catch (error) {
       const axiosError = error as AxiosError;
       const status = axiosError.response.status;
@@ -99,17 +114,9 @@ export class StudentService {
       StudentService.logger.warn(`Failed to fetch ${login} from intra: ${status} ${axiosError.response.statusText}`);
       return interaction.reply({ content: `Internal server error. (${status})`, ephemeral: true });
     }
-    if (intraData.campus_users[0].campus_id !== ApiManager.CAMPUS_ID) {
+    if (student === null) {
       return interaction.reply({ content: `${login} is not local student.`, ephemeral: true });
     }
-    const student: Student = {
-      intraId: intraData.id,
-      intraName: login,
-      poolYear: intraData.pool_year,
-      poolMonth: intraData.pool_month,
-      progressRole: StudentService.getCursusRole(intraData.cursus_users),
-    };
-
     if (student.progressRole === undefined) {
       StudentService.logger.error(`Unable to determine progressRole for ${login}`);
     }
