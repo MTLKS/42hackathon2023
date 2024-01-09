@@ -13,8 +13,8 @@ def get_access_token() -> str:
         raise EnvironmentError("API_UID environment variable not set")
     if not SECRET:
         raise EnvironmentError("API_SECRET environment variable not set")
-    r = requests.post(f"{DOMAIN}/oauth/token?grant_type=client_credentials&client_id={UID}&client_secret={SECRET}",
-                      headers={'Content-type':'application/json'})
+    REQUEST = f"{DOMAIN}/oauth/token?grant_type=client_credentials&client_id={UID}&client_secret={SECRET}"
+    r = requests.post(REQUEST, headers={'Content-type':'application/json'})
     try:
         r.raise_for_status()
     except Exception as e:
