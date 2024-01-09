@@ -8,7 +8,6 @@ import { unlink } from 'fs';
 import { exec } from 'child_process';
 import { APIEmbedField, EmbedBuilder } from 'discord.js';
 import { getRole } from '../updateroles.command';
-import { ApiManager, ProjectStatus } from 'src/ApiManager';
 import { Student } from 'src/schema/student.schema';
 import { randomInt } from 'crypto';
 
@@ -99,22 +98,6 @@ export class RushEvalMatchCommand {
     await Promise.all(matchPromises);
   }
 
-  private async fetchOngoingRush(projectSlugOrId: string | number) {
-    const intraRushTeams = await ApiManager.getProjectTeams(projectSlugOrId,
-      `filter[status]=${ProjectStatus.WaitingForCorrection}`
-      );
-    if (intraRushTeams.length === 0) {
-      throw new Error(`No ongoing rush project`);
-    }
-    const allRushTeams = await Promise.all(intraRushTeams.map(team => ApiManager.intraTeamToTeam(team, this.studentModel)));
-    const localTeams = await this.teamModel.find().exec();
-
-    return await Promise.all(allRushTeams
-      .filter(intra => !localTeams.find(local => local.intraId === intra.intraId))
-      .map(intra => this.teamModel.create(intra))
-      );
-  }
-
   @Subcommand({
     name: 'match',
     description: 'Lock in cadet and pisciner timeslots',
@@ -124,10 +107,6 @@ export class RushEvalMatchCommand {
     const projectSlug = 'c-piscine-rush-00';
 
     await interaction.deferReply({ephemeral: true});
-    interaction.editReply('Fetching ongoing rush teams...');
-    await this.fetchOngoingRush(projectSlug).catch(error => {
-      replyContent += `This attempt will be assumed as testing since there is no ongoing \`\`${projectSlug}\`\` team that is waiting for correction.\n`;
-    });
     interaction.editReply('Matching rush teams and evaluators...');
     try {
       await this.matching(projectSlug);

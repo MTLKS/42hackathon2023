@@ -27,16 +27,6 @@ export class RushEvalPiscinersCommand {
     description: 'Get pisciners to choose timeslots',
   })
   public async onExecute(@Context() [interaction]: SlashCommandContext) {
-    // // Hardcoded new team
-    // const tryTeam = await this.teamModel.findOne({ 'teamLeader.intraName': 'hqixeo' }).exec();
-    // if (tryTeam == null) {
-    //   console.log('Creating new team')
-    //   const teamLeader = await this.studentModel.findOne({ intraName: 'plau' }).exec();
-    //   const teamMember = await this.studentModel.findOne({ intraName: 'hqixeo' }).exec();
-    //   const newTeam = new this.teamModel({ teamLeader: teamLeader, teamMembers: [teamMember] });
-    //   await newTeam.save();
-    // }
-
     const button = new ButtonBuilder()
       .setCustomId('piscinersButton')
       .setLabel('Get timeslots')
@@ -58,10 +48,17 @@ export class RushEvalPiscinersCommand {
     const embed = new EmbedBuilder()
       .setTitle("Please select your timeslot for the next rush defense")
       .setColor('#00FFFF')
-    ;
+      ;
 
-    await interaction.deferReply({ephemeral: true});
-    await interaction.deleteReply();
+    await interaction.reply({content: 'Fetching ongoing rush teams...', ephemeral: true});
+    const projectSlug = 'c-piscine-rush-00';
+    const teams = await this.fetchOngoingRush(projectSlug);
+
+    if (teams.length === 0) {
+      await interaction.editReply(`This attempt will be assumed as testing since there is no ongoing \`\`${projectSlug}\`\` team that is waiting for correction.\n`);
+    } else {
+      await interaction.editReply(`Found ${teams.length} ongoing rush teams`);
+    }
     return interaction.channel.send(
       {
         content: `Dear ${getRole(interaction.guild, "PISCINER")}s`,
@@ -69,6 +66,22 @@ export class RushEvalPiscinersCommand {
         components: [row],
       }
     );
+  }
+
+  private async fetchOngoingRush(projectSlugOrId: string | number) {
+    const intraRushTeams = await ApiManager.getProjectTeams(projectSlugOrId,
+      `filter[status]=${ProjectStatus.WaitingForCorrection}`
+      );
+    if (intraRushTeams.length === 0) {
+      return intraRushTeams;
+    }
+    const allRushTeams = await Promise.all(intraRushTeams.map(team => ApiManager.intraTeamToTeam(team, this.studentModel)));
+    const localTeams = await this.teamModel.find().exec();
+
+    return await Promise.all(allRushTeams
+      .filter(intra => !localTeams.find(local => local.intraId === intra.intraId))
+      .map(intra => this.teamModel.create(intra))
+      );
   }
 }
 
