@@ -10,6 +10,7 @@ import { Evaluator } from 'src/schema/evaluator.schema';
 import { Specialslot } from 'src/schema/specialslot.schema';
 import { getRole } from '../updateroles.command';
 import { newStudentModal } from 'src/StudentService';
+import { LoginCommand } from '../login.command';
 
 function rearrangeTimeslot(timeslots: Array<Timeslot>, evaluators: Array<Evaluator>) {
   let table = new Map<string, Student[]>();
@@ -85,7 +86,7 @@ export class RushEvalCadetFetchSlotsComponent {
   public async onExecute(@Context() [interaction]: ButtonContext) {
     const student = await this.studentModel.findOne({ discordId: interaction.user.id }).exec();
     if (student === null) {
-      return interaction.showModal(newStudentModal());
+      return interaction.reply(LoginCommand.getLoginReply(interaction.user.id, 'New student detected'));
     }
     const timeslots = await this.timeslotModel.find().exec();
     const evaluators = await this.evaluatorModel.find().exec();

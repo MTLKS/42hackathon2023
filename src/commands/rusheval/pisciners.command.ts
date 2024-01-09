@@ -14,6 +14,7 @@ import { Specialslot } from 'src/schema/specialslot.schema';
 import { ApiManager, ProjectStatus } from 'src/ApiManager';
 import { AxiosError } from 'axios';
 import { StudentService, newStudentModal } from 'src/StudentService';
+import { LoginCommand } from '../login.command';
 
 @RushEvalCommandDecorator()
 export class RushEvalPiscinersCommand {
@@ -111,7 +112,7 @@ export class RushEvalPiscinersButtonComponent {
 
     /* if student not found, prompt student intra login */
     if (student === null) {
-      return interaction.showModal(newStudentModal());
+      return interaction.reply(LoginCommand.getLoginReply(interaction.user.id, 'New student detected'));
     } else if (student.discordId === undefined) {
       await StudentService.setStudentDiscordData(interaction.guild, interaction.user, student)
         .then(() => student.save());

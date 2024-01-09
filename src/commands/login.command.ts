@@ -1,5 +1,5 @@
 import { ConsoleLogger, Injectable } from '@nestjs/common';
-import { ActionRowBuilder, ButtonBuilder, ButtonStyle } from 'discord.js';
+import { ActionRowBuilder, ButtonBuilder, ButtonStyle, InteractionReplyOptions } from 'discord.js';
 import { SlashCommand, SlashCommandContext, Context, Button, ButtonContext } from 'necord';
 import { EmbedBuilder } from 'discord.js';
 
@@ -39,33 +39,39 @@ export class LoginCommand {
     }
   }
 
+  public static getLoginReply(discordId: string, content?: string) {
+    const port = (process.env.BOT_PORT !== undefined) ? `:${process.env.BOT_PORT}`: "";
+    const url = `${process.env.BOT_HOST}${port}/login/${discordId}`;
+
+    const newEmbed = new EmbedBuilder()
+      .setColor('#00FFFF')
+      .setTitle('Login to 42 intra')
+      .setDescription('Click on the button below to login to 42 intra')
+      .setURL(url)
+      ;
+
+    const button = new ButtonBuilder()
+      .setStyle(ButtonStyle.Link)
+      .setLabel('Login')
+      .setURL(url)
+      ;
+
+    const row = new ActionRowBuilder<ButtonBuilder>()
+      .addComponents(button);
+
+    const reply: InteractionReplyOptions = {
+      content: content,
+      embeds: [newEmbed],
+      components: [row],
+      ephemeral: true,
+    };
+    return reply;
+  }
+
   @Button('login')
   public async onLoginButton(@Context() [interaction]: ButtonContext) {
-    const port = (process.env.BOT_PORT !== undefined) ? `:${process.env.BOT_PORT}`: "";
-    const url = `${process.env.BOT_HOST}${port}/login/${interaction.user.id}`
-
     try {
-      const newEmbed = new EmbedBuilder()
-        .setColor('#00FFFF')
-        .setTitle('Login to 42 intra')
-        .setDescription('Click on the button below to login to 42 intra')
-        .setURL(url)
-        ;
-
-      const button = new ButtonBuilder()
-        .setStyle(ButtonStyle.Link)
-        .setLabel('Login')
-        .setURL(url)
-        ;
-
-      const row = new ActionRowBuilder<ButtonBuilder>()
-        .addComponents(button);
-
-      return interaction.reply({
-          ephemeral: true,
-          embeds: [newEmbed],
-          components: [row]
-        });
+      return interaction.reply(LoginCommand.getLoginReply(interaction.user.id));
     } catch (error) {
       const logger = new ConsoleLogger("onLoginButtonClick");
 
