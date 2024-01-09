@@ -101,7 +101,6 @@ export class RushEvalMatchCommand {
 
   private async fetchOngoingRush(projectSlugOrId: string | number) {
     const intraRushTeams = await ApiManager.getProjectTeams(projectSlugOrId,
-      // 'range[created_at]=2023-09-01,2023-09-30'
       `filter[status]=${ProjectStatus.WaitingForCorrection}`
       );
     if (intraRushTeams.length === 0) {
@@ -125,9 +124,11 @@ export class RushEvalMatchCommand {
     const projectSlug = 'c-piscine-rush-00';
 
     await interaction.deferReply({ephemeral: true});
+    interaction.editReply('Fetching ongoing rush teams...');
     await this.fetchOngoingRush(projectSlug).catch(error => {
       replyContent += `This attempt will be assumed as testing since there is no ongoing \`\`${projectSlug}\`\` team that is waiting for correction.\n`;
     });
+    interaction.editReply('Matching rush teams and evaluators...');
     try {
       await this.matching(projectSlug);
     } catch (error) {
@@ -135,6 +136,7 @@ export class RushEvalMatchCommand {
       replyContent += `Error occured while matching teams and evaluators\n`;
       return interaction.editReply(replyContent);
     }
+    interaction.editReply('Looking for teams without evaluator...');
     try {
       const teamsWithoutEvaluator = await this.teamModel.find({evaluator: undefined}).exec();
 
@@ -149,6 +151,7 @@ export class RushEvalMatchCommand {
       replyContent += `Error occured while checking teams without evaluator\n`;
       return interaction.editReply(replyContent);
     }
+    interaction.editReply('Generating time table...');
     const outfile = 'rush_evaluation_time_table.jpg';
     const child = exec(`python rusheval_time_table.py ${outfile}`, (error, stdout, stderr) => {
         if (stdout) {

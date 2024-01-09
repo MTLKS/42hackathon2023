@@ -57,7 +57,7 @@ export class LoginCommand {
         .setLabel('Login')
         .setURL(url)
         ;
-      
+
       const row = new ActionRowBuilder<ButtonBuilder>()
         .addComponents(button);
 

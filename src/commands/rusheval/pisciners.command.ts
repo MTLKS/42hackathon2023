@@ -14,8 +14,6 @@ import { Specialslot } from 'src/schema/specialslot.schema';
 import { ApiManager, ProjectStatus } from 'src/ApiManager';
 import { AxiosError } from 'axios';
 import { StudentService, newStudentModal } from 'src/StudentService';
-import { writeFile } from 'fs';
-import { toUSVString } from 'util';
 
 @RushEvalCommandDecorator()
 export class RushEvalPiscinersCommand {
@@ -106,6 +104,8 @@ export class RushEvalPiscinersButtonComponent {
         .then(() => student.save());
     }
     const projectSlug = 'c-piscine-rush-00';
+    await interaction.deferReply({ephemeral: true});
+    interaction.editReply(`Looking for ${student.intraName} team...`);
     /* if recognise student, look for their team */
     const team = await this.teamModel.findOne({ $or: [
         {teamLeader: student},
@@ -125,8 +125,9 @@ export class RushEvalPiscinersButtonComponent {
 If you're certain you've signed up for this project, please contact BOCAL for it.
 `;
 
-      return interaction.reply({ content: content, ephemeral: true });
+      return interaction.editReply(content);
     }
+    interaction.editReply('Looking for available timeslot...');
     let reply = '';
     const leader = team.teamLeader;
     if (student != leader) {
@@ -138,7 +139,7 @@ If you're certain you've signed up for this project, please contact BOCAL for it
       /* Should notify the admin that there is no available session for pisciner */
       this.logger.error(`No available session`);
       reply += 'There\'s no available session at the moment.';
-      return interaction.reply({ content: reply, ephemeral: true });
+      return interaction.editReply(reply);
     }
     const stringSelect = new StringSelectMenuBuilder()
       .setCustomId('piscinersStringSelect')
@@ -151,9 +152,8 @@ If you're certain you've signed up for this project, please contact BOCAL for it
       .addComponents(stringSelect);
 
     reply += 'Please select your timeslot for the next rush defense';
-    return interaction.reply({
+    return interaction.editReply({
         content: reply,
-        ephemeral: true,
         components: [row]
       });
   }

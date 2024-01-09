@@ -1,5 +1,5 @@
 import { HttpService } from "@nestjs/axios";
-import { ConsoleLogger, Logger } from "@nestjs/common";
+import { HttpStatus, Logger } from "@nestjs/common";
 import { Model } from "mongoose";
 import { firstValueFrom } from "rxjs";
 import { Student } from "./schema/student.schema";
@@ -13,6 +13,10 @@ export enum ProjectStatus {
   InProgress = 'in_progress',
   SearchingAGroup = 'searching_a_group',
   CreatingGroup = 'creating_group'
+}
+
+function sleep(ms: number): Promise<void> {
+  return new Promise((resolve) => setTimeout(resolve, ms));
 }
 
 export class ApiManager {
@@ -111,7 +115,7 @@ export class ApiManager {
 
         student = await studentModel.create(c);
       }
-      return {student: student, leader: user.leader};
+      return { student: student, leader: user.leader };
     });
     const members = await Promise.all(promises);
     const team: Team = {
@@ -137,11 +141,20 @@ export class ApiManager {
   }
 
   private static async get(url: string, authorization: string) {
-    const { data } = await firstValueFrom(
-      this.httpService.get(url, {
-        headers: { Authorization: authorization }
-      }));
-    return data;
+    while (true) {
+      try {
+        const { data } = await firstValueFrom(this.httpService.get(url, { headers: { Authorization: authorization } }));
+        return data;
+      } catch (error) {
+        if (error.response.status !== HttpStatus.TOO_MANY_REQUESTS) {
+          this.logger.error(`Failed to get ${url}: ${error.message}`);
+          throw error;
+        }
+        const waitTime = parseInt(error.response.headers['retry-after']) * 1000;
+
+        await sleep(waitTime);
+      }
+    }
   }
 
   private static getDiscordApi(url: string) {

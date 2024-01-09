@@ -66,10 +66,9 @@ export class RushEvalFeedbackTeamSelectButton {
       });
     }
     const buttons = team.map(team => {
-      const groupName = team.teamLeader.intraName + "'s group";
       const button = new ButtonBuilder()
         .setCustomId('feedback-team-select-button')
-        .setLabel(groupName)
+        .setLabel(team.name)
         .setStyle(ButtonStyle.Secondary)
         ;
 
@@ -144,7 +143,7 @@ export class RushEvalFeedbackForm {
 
     const modal = new ModalBuilder()
       .setCustomId('feedback')
-      .setTitle(`Evaluation notes for ${team.teamLeader.intraName}'s group`)
+      .setTitle(`Evaluation notes for ${team.name}`)
       .addComponents(components)
       ;
     return interaction.showModal(modal);
