@@ -102,44 +102,23 @@ export class RushEvalFeedbackForm {
 
     const cadet = await this.studentModel.findOne({ discordId: interaction.user.id }).exec();
     const team = await this.teamModel.findOne({ evaluator: cadet }).exec();
-    const getOverviewInput = (student: Student) => {
-      const login = student.intraName;
-      let input = new TextInputBuilder()
-        .setStyle(TextInputStyle.Paragraph)
-        .setCustomId(login)
-        .setLabel(`Overview of ${login}`)
-        ;
-      /** Commented out due to 100 characters limitation for placeholder */
-      //         .setPlaceholder(`Example:
-      // <Name> <background and coding experience>.
-      // <impression>
-      // <contribution to the projects>
-      // <actions during evaluation>
-      // <something to keep in mind about said student? (if there's any)>
-      // `)
-      if (team.feedbackAt) {
-        input.setValue(team.feedback.get(login));
-      }
-      return input;
-    };
-
-    const membersInputs = [getOverviewInput(team.teamLeader)]
-      .concat(team.teamMembers.map(getOverviewInput))
+    const teamMembersInput = new TextInputBuilder()
+      .setStyle(TextInputStyle.Paragraph)
+      .setCustomId(team.name)
+      .setLabel(`Overview of team members`)
       ;
-
-    let notes = new TextInputBuilder()
+    const notesInput = new TextInputBuilder()
       .setStyle(TextInputStyle.Paragraph)
       .setCustomId('notes')
       .setLabel('Notes')
       ;
 
     if (team.feedbackAt) {
-      notes.setValue(team.feedback.get('notes'));
+      teamMembersInput.setValue(team.feedback.get(team.name));
+      notesInput.setValue(team.feedback.get('notes'));
     }
-    const components: any[] = [
-      ...membersInputs.map(member => new ActionRowBuilder().addComponents(member)),
-      new ActionRowBuilder().addComponents(notes)
-    ];
+    const components = [teamMembersInput, notesInput]
+      .map(member => new ActionRowBuilder<TextInputBuilder>().addComponents(member));
 
     const modal = new ModalBuilder()
       .setCustomId('feedback')
@@ -158,9 +137,8 @@ export class RushEvalFeedbackForm {
      * or a markdown of written feedback?
      */
     try {
-      const leaderField = interaction.fields.fields.first();
-      const leaderIntraName = leaderField.customId;
-      const team = await this.teamModel.findOne({ 'teamLeader.intraName': leaderIntraName }).exec();
+      const teamName = interaction.fields.fields.first().customId;
+      const team = await this.teamModel.findOne({ name: teamName }).exec();
 
       team.feedback = new Map(interaction.fields.fields.map((value, key) => [key, value.value]));
       team.feedbackAt = new Date();
