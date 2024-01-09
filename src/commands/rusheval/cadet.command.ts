@@ -153,9 +153,9 @@ Please regenerate your selection by clicking on the \`Open slots\` button one mo
     await evaluator.save();
 
     return interaction.reply({
-        content: ((selected.length === 0)
+        content: ((selectedTimeslots.length === 0)
             ? 'You have not selected any timeslots'
-            : `You have selected ${selected}`),
+            : `You have selected ${selectedTimeslots.map(t => t.timeslot)}`),
         ephemeral: true
       });
   }
