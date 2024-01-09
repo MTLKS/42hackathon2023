@@ -33,9 +33,6 @@ export class Student {
   discordServerName?: string;
 
   @Prop()
-  discordServerRoles?: string[];
-
-  @Prop()
   progressRole?: string;
 
   @Prop()

@@ -29,27 +29,49 @@ export function newStudentModal(): ModalBuilder {
 
 /* Foresighting a ticket for reconfiguring intra */
 export class StudentService {
-  private readonly logger = new ConsoleLogger("StudentService");
+  private static readonly logger = new ConsoleLogger("StudentService");
   constructor(
     @InjectModel(Student.name) private readonly studentModel: Model<Student>,
     @InjectModel(Evaluator.name) private readonly evaluatorModel: Model<Evaluator>
     ) { }
 
-  private static temporaryGetRole(roles: string[]) {
-    const knownRoles = ['SPECIALIZATION', 'CADET', 'PISCINER', 'BLACKHOLED', 'FLOATY', 'ALUMNI'];
+  public static getCursusRole(cursus_users: any[]) {
+    console.log(cursus_users);
+    if (cursus_users.length === 0) {
+      return undefined;
+    } else if (cursus_users.length === 1) {
+      const piscine = cursus_users[0];
+      const piscineEnded = new Date(piscine.end_at).getTime() < Date.now();
 
-    return knownRoles.find(r => roles.includes(r))
+      if (piscineEnded === false) {
+        return 'PISCINER';
+      } else {
+        return 'FLOATY';
+      }
+    } else if (cursus_users.length !== 2){
+      this.logger.warn('Unknown cursus_users length: ' + cursus_users.length);
+    }
+    const core = cursus_users[1];
+
+    if (core.grade === 'Member') {
+      return 'SPECIALIZATION';
+    } else if (core.grade !== 'Learner') {
+      this.logger.warn('Unknown grade: ' + core.grade);
+    }
+    if (new Date(core.blackholed_at).getTime() < Date.now())
+      return 'BLACKHOLED';
+    else if (new Date(core.begin_at).getTime() < Date.now())
+      return 'CADET';
+    else
+      return 'RESERVISTS';
   }
-
+    
   public static async setStudentDiscordData(guild: Guild, user: User, student: Student) {
     const discordData = await guild.members.fetch({ user: user.id });
-    const discordRoles = discordData.roles.cache.map(role => role.name);
 
     student.discordId = discordData.id;
     student.discordName = user.username;
     student.discordServerName = discordData.displayName;
-    student.discordServerRoles = discordRoles;
-    student.progressRole = StudentService.temporaryGetRole(discordRoles);
     return student;
   }
 
@@ -64,7 +86,7 @@ export class StudentService {
     let intraData;
 
     try {
-      intraData = await ApiManager.getUserInCampus(login);
+      intraData = await ApiManager.getUser(login);
     } catch (error) {
       const axiosError = error as AxiosError;
       const status = axiosError.response.status;
@@ -74,33 +96,29 @@ export class StudentService {
       } else if (status === 404) {
         return interaction.reply({ content: `${login} not found`, ephemeral: true });
       }
-      this.logger.warn(`Failed to fetch ${login} from intra: ${status} ${axiosError.response.statusText}`);
+      StudentService.logger.warn(`Failed to fetch ${login} from intra: ${status} ${axiosError.response.statusText}`);
       return interaction.reply({ content: `Internal server error. (${status})`, ephemeral: true });
     }
-    if (intraData === null) {
+    if (intraData.campus_users[0].campus_id !== ApiManager.CAMPUS_ID) {
       return interaction.reply({ content: `${login} is not local student.`, ephemeral: true });
     }
-    const discordData = await interaction.guild.members.fetch({ user: interaction.user.id });
-    const discordRoles = discordData.roles.cache.map(role => role.name);
     const student: Student = {
       intraId: intraData.id,
       intraName: login,
       poolYear: intraData.pool_year,
       poolMonth: intraData.pool_month,
-      discordId: discordData.id,
-      discordName: interaction.user.username,
-      discordServerName: discordData.displayName,
-      discordServerRoles: discordRoles,
-      progressRole: StudentService.temporaryGetRole(discordRoles),
+      progressRole: StudentService.getCursusRole(intraData.cursus_users),
     };
-    if (student.progressRole === null) {
-      this.logger.error(`Unable to determine role for ${login} with roles ${discordRoles}`);
+
+    if (student.progressRole === undefined) {
+      StudentService.logger.error(`Unable to determine progressRole for ${login}`);
     }
+    await StudentService.setStudentDiscordData(interaction.guild, interaction.user, student);
     return await this.studentModel.create(student).then(() => {
-      this.logger.log(`Added ${login} as new student`);
+      StudentService.logger.log(`Added ${login} as new student`);
       return interaction.reply({ content: `Added ${login} as new student`, ephemeral: true });
     }).catch(error => {
-      this.logger.warn(`Failed to add ${login} as new student: ${error}`);
+      StudentService.logger.warn(`Failed to add ${login} as new student: ${error}`);
       return interaction.reply({ content: `Failed to add ${login} as new student. Please contact the maintainer for this.`, ephemeral: true });
     });
   }
