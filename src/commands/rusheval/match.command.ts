@@ -76,23 +76,19 @@ export class RushEvalMatchCommand {
     // console.log("evaluators: ", evaluators.map(logEvaluator));
     // console.log("teams: ", teams.map(t => t.timeslot.timeslot));
     const matchPromises = teams.map(t => {
-      // if (t.evaluator !== undefined) {
-      //   continue ;
-      // }
+      t.evaluator = undefined;
       const evaluatorsWithMatchingTimelot = evaluators.filter(e => e.timeslots.find(slot => slot.timeslot === t.timeslot.timeslot));
 
       // console.log("evaluatorsWithMatchingTimelot: ", evaluatorsWithMatchingTimelot.map(logEvaluator));
       const len = evaluatorsWithMatchingTimelot.length;
-      if (len === 0) {
-        return ;
+      if (len !== 0) {
+        /* prefer the first 50% of sorted evaluators */
+        const matchedEvaluator = evaluatorsWithMatchingTimelot[randomInt(Math.round(len / 2))];
+        const slot = matchedEvaluator.timeslots.find(slot => slot.timeslot === t.timeslot.timeslot);
+        t.timeslot = slot;
+        t.evaluator = matchedEvaluator.student;
+        matchedEvaluator.timeslots.splice(matchedEvaluator.timeslots.indexOf(slot), 1);
       }
-
-      /* prefer the first 50% of sorted evaluators */
-      const matchedEvaluator = evaluatorsWithMatchingTimelot[randomInt(Math.round(len / 2))];
-      const slot = matchedEvaluator.timeslots.find(slot => slot.timeslot === t.timeslot.timeslot);
-      t.timeslot = slot;
-      t.evaluator = matchedEvaluator.student;
-      matchedEvaluator.timeslots.splice(matchedEvaluator.timeslots.indexOf(slot), 1);
       return t.save();
     });
     await Promise.all(matchPromises);
