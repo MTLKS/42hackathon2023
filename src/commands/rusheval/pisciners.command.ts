@@ -130,7 +130,7 @@ If you're certain you've signed up for this project, please contact BOCAL for it
     interaction.editReply('Looking for available timeslot...');
     let reply = '';
     const leader = team.teamLeader;
-    if (student != leader) {
+    if (student.intraName !== leader.intraName) {
       reply += `**Unless your leader(${leader.intraName}) is unresponsive, please leave it to them to choose the timeslot.**\n`;
     }
     /* Return available session */
