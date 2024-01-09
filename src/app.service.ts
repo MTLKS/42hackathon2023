@@ -78,24 +78,22 @@ export class AppService {
       student = new this.studentModel({
         intraId: intraId,
         intraName: intraUserData.data.login,
-        discordId: request.cookies['id'],
-        progressRole: role,
-        coalitionRole: coalition,
-        intraImageLink: intraUserData.data.image.link,
+        poolYear: intraUserData.data.pool_year,
+        poolMonth: intraUserData.data.pool_month,
       });
-    } else {
-      student.discordId = request.cookies['id'];
-      student.progressRole = role;
-      student.coalitionRole = coalition;
-      student.intraImageLink = intraUserData.data.image.link;
     }
-    await student.save();
+    student.discordId = request.cookies['id'];
+    student.progressRole = role;
+    student.coalitionRole = coalition;
+    student.intraImageLink = intraUserData.data.image.link;
 
     const discordUserData = await firstValueFrom(this.httpService.get(`https://discord.com/api/v10/users/${discordId}`, {
       headers: {
         Authorization: `Bot ${process.env.DISCORD_TOKEN}`,
       },
     }));
+    student.discordName = discordUserData.data.username;
+    await student.save();
 
     return `
       <html>
