@@ -49,7 +49,7 @@ import { StudentService } from './StudentService';
   providers: [
     AppService,
     StudentService,
-    PingCommand,
+    // PingCommand,
     LoginCommand,
     HelpCommand,
     RushEvalCadetCommand,
@@ -71,8 +71,8 @@ import { StudentService } from './StudentService';
     RushEvalFeedbackForm,
     CleanCommand,
     CleanDatabase,
-    UpdateRolesCommand,
-    TestCommand,
+    // UpdateRolesCommand,
+    // TestCommand,
   ],
 })
 export class AppModule {}
