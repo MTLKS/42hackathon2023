@@ -169,13 +169,10 @@ export class RushEvalMatchCommand {
       // }).then(matchedEvaluatorsDc => {
         child.on('exit', (code, signal) => {
           if (code === 0) {
-            // interaction.deleteReply();
-            /** Ideal way is to assign a role for rush evaluators.
-             * As I heard that there's problem with explicit individual ping.
-             */
             replyContent += `Rush evaluation time table for dear evaluators: ${getRole(interaction.guild, 'CADET')}\n`;
-            // return interaction.channel.send({content: replyContent, files: [outfile]})
-            return interaction.editReply({content: replyContent, files: [outfile]})
+            interaction.editReply('Done!');
+            return interaction.channel.send({content: replyContent, files: [outfile]})
+            // return interaction.editReply({content: replyContent, files: [outfile]})
               .finally(() => unlink(outfile, ()=>{}));
           } else {
             replyContent += `Error occured while generating time table\n`;
