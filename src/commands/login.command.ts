@@ -8,6 +8,7 @@ export class LoginCommand {
   @SlashCommand({
     name: 'login',
     description: 'Login to 42 intra',
+    dmPermission: false,
   })
   public async onLogin(@Context() [interaction]: SlashCommandContext) {
     try {

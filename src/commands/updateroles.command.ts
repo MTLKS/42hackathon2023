@@ -23,7 +23,8 @@ export class UpdateRolesCommand {
   @SlashCommand({
     name: 'updateroles',
     description: 'Update user roles!',
-    defaultMemberPermissions: ['Administrator']
+    defaultMemberPermissions: ['Administrator'],
+    dmPermission: false,
   })
   public async onExecute(@Context() [interaction]: SlashCommandContext) {
     function getRole(guild: Guild, roleName: string) {

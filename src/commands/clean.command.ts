@@ -13,7 +13,8 @@ export class CleanCommand {
 
   @SlashCommand({
     name: 'clean',
-    description: 'Clean the database'
+    description: 'Clean the database',
+    dmPermission: false,
   })
   public async onClean(@Context() [interaction]: SlashCommandContext) {
       const newEmbed = new EmbedBuilder()

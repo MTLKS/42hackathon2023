@@ -49,7 +49,7 @@ import { StudentService } from './StudentService';
   providers: [
     AppService,
     StudentService,
-    // PingCommand,
+    PingCommand,
     LoginCommand,
     HelpCommand,
     RushEvalCadetCommand,
