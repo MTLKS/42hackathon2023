@@ -119,8 +119,7 @@ export class RushEvalPiscinersButtonComponent {
     /* if student not found, prompt student intra login */
     if (student === null) {
       return interaction.reply(await LoginCommand.getLoginReply(
-        interaction.user.id,
-        interaction.user.username,
+        interaction.user,
         this.loginCodeModel,
         'New student detected'
       ));

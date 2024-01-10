@@ -93,8 +93,7 @@ export class RushEvalCadetFetchSlotsComponent {
     const student = await this.studentModel.findOne({ discordId: interaction.user.id }).exec();
     if (student === null) {
       return interaction.reply(await LoginCommand.getLoginReply(
-        interaction.user.id,
-        interaction.user.username,
+        interaction.user,
         this.loginCodeModel,
         'New student detected'
       ));

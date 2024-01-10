@@ -92,13 +92,8 @@ export class AppService {
         poolMonth: intraUserData.data.pool_month,
       });
     }
-    const discordUserData = await firstValueFrom(this.httpService.get(`https://discord.com/api/v10/users/${loginCode.discordId}`, {
-      headers: {
-        Authorization: `Bot ${process.env.DISCORD_TOKEN}`,
-      },
-    }));
     student.discordId = loginCode.discordId;
-    student.discordName = discordUserData.data.username;
+    student.discordName = loginCode.discordUsername;
     student.progressRole = role;
     student.coalitionRole = coalition;
     student.intraImageLink = intraUserData.data.image.link;
@@ -130,8 +125,8 @@ export class AppService {
           <div class="break"></div>
           <img src="https://64.media.tumblr.com/58a920b1da6459ad18274328dfe55784/tumblr_n2ykjx27uE1tqptlzo1_r1_500.gif" height="200px"></img>
           <div class="break"></div>
-          <img src="https://cdn.discordapp.com/avatars/${discordUserData.data.id}/${discordUserData.data.avatar}.png" height="200px" padding="20px"></img>
-          <img src="${intraUserData.data.image.link}" height="200px" padding="20px"></img>
+          <img src="${loginCode.discordAvatarUrl}" height="200px" padding="20px"></img>
+          <img src="${intraUserData.data.image.versions.medium}" height="200px" padding="20px"></img>
         </body>
       </html>
       `;

@@ -15,6 +15,9 @@ export class LoginCode {
   discordUsername: string;
 
   @Prop()
+  discordAvatarUrl: string;
+
+  @Prop()
   createdAt: Date;
 }
 

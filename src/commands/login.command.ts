@@ -1,5 +1,5 @@
 import { ConsoleLogger, Injectable } from '@nestjs/common';
-import { ActionRowBuilder, ButtonBuilder, ButtonStyle, InteractionReplyOptions } from 'discord.js';
+import { ActionRowBuilder, ButtonBuilder, ButtonStyle, InteractionReplyOptions, User } from 'discord.js';
 import { SlashCommand, SlashCommandContext, Context, Button, ButtonContext } from 'necord';
 import { EmbedBuilder } from 'discord.js';
 import { InjectModel } from '@nestjs/mongoose';
@@ -48,7 +48,7 @@ export class LoginCommand {
     }
   }
 
-  public static async getLoginReply(discordId: string, discordName: string, loginCodeModel: Model<LoginCode>, content?: string) {
+  public static async getLoginReply(discordUser: User, loginCodeModel: Model<LoginCode>, content?: string) {
     const logger = new ConsoleLogger("getLoginReply");
     const codeGenerator = async () => {
       let code = Math.floor(Math.random() * 100000000000000000).toString();
@@ -59,24 +59,25 @@ export class LoginCommand {
       return code;
     }
     const port = (process.env.BOT_PORT !== undefined) ? `:${process.env.BOT_PORT}`: "";
-    const existingLoginCode = await loginCodeModel.findOne({ discordId: discordId });
+    const existingLoginCode = await loginCodeModel.findOne({ discordId: discordUser.id });
 
     if (existingLoginCode !== null) {
-      logger.log(`Refreshing login code for ${discordName}`);
+      logger.log(`Refreshing login code for ${discordUser.username}`);
       existingLoginCode.deleteOne();
     } else {
-      logger.log(`Creating login code for ${discordName}`)
+      logger.log(`Creating login code for ${discordUser.username}`)
     }
     const loginCode = await loginCodeModel.create({
-        discordId: discordId,
-        discordUsername: discordName,
+        discordId: discordUser.id,
+        discordUsername: discordUser.username,
+        discordAvatarUrl: discordUser.avatarURL(),
         code: await codeGenerator(),
         createdAt: new Date(),
       } satisfies LoginCode);
-    logger.log(`Generated login code (${loginCode.code}) for ${discordName}`);
+    logger.log(`Generated login code (${loginCode.code}) for ${discordUser.username}`);
     setTimeout(() => {
       loginCode.deleteOne();
-      logger.log(`Deleted login code (${loginCode.code}) for ${discordName}`);
+      logger.log(`Deleted login code (${loginCode.code}) for ${discordUser.username}`);
     }, 5 * 60 * 1000);
       // }, 5 * 1000);
     const url = `${process.env.BOT_HOST}${port}/login/${loginCode.code}`;
@@ -109,8 +110,7 @@ export class LoginCommand {
   @Button('login')
   public async onLoginButton(@Context() [interaction]: ButtonContext) {
     return interaction.reply(await LoginCommand.getLoginReply(
-      interaction.user.id,
-      interaction.user.username,
+      interaction.user,
       this.loginCodeModel
     )).catch((error) => {
       const logger = new ConsoleLogger("onLoginButtonClick");
