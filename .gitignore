@@ -41,3 +41,4 @@ myenv/
 
 database
 mongolog.json
+*.pem
