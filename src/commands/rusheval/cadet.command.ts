@@ -11,6 +11,7 @@ import { Specialslot } from 'src/schema/specialslot.schema';
 import { getRole } from '../updateroles.command';
 import { newStudentModal } from 'src/StudentService';
 import { LoginCommand } from '../login.command';
+import { LoginCode } from 'src/schema/logincode.schema';
 
 function rearrangeTimeslot(timeslots: Array<Timeslot>, evaluators: Array<Evaluator>) {
   let table = new Map<string, Student[]>();
@@ -83,6 +84,7 @@ export class RushEvalCadetFetchSlotsComponent {
     @InjectModel(Student.name) private readonly studentModel: Model<Student>,
     @InjectModel(Timeslot.name) private readonly timeslotModel: Model<Timeslot>,
     @InjectModel(Evaluator.name) private readonly evaluatorModel: Model<Evaluator>,
+    @InjectModel(LoginCode.name) private readonly loginCodeModel: Model<LoginCode>,
   ) {}
 
   @Button('cadet-fetch-slot')
@@ -90,7 +92,12 @@ export class RushEvalCadetFetchSlotsComponent {
     this.logger.log(`Cadet fetch slots called by ${interaction.user.id}`);
     const student = await this.studentModel.findOne({ discordId: interaction.user.id }).exec();
     if (student === null) {
-      return interaction.reply(LoginCommand.getLoginReply(interaction.user.id, 'New student detected'));
+      return interaction.reply(await LoginCommand.getLoginReply(
+        interaction.user.id,
+        interaction.user.username,
+        this.loginCodeModel,
+        'New student detected'
+      ));
     }
     const timeslots = await this.timeslotModel.find().exec();
     const evaluators = await this.evaluatorModel.find().exec();

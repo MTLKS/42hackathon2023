@@ -2,9 +2,17 @@ import { ConsoleLogger, Injectable } from '@nestjs/common';
 import { ActionRowBuilder, ButtonBuilder, ButtonStyle, InteractionReplyOptions } from 'discord.js';
 import { SlashCommand, SlashCommandContext, Context, Button, ButtonContext } from 'necord';
 import { EmbedBuilder } from 'discord.js';
+import { InjectModel } from '@nestjs/mongoose';
+import { LoginCode } from 'src/schema/logincode.schema';
+import { Model } from 'mongoose';
 
 @Injectable()
 export class LoginCommand {
+  private readonly logger = new ConsoleLogger("LoginCommand");
+  constructor(
+    @InjectModel(LoginCode.name) private readonly loginCodeModel: Model<LoginCode>
+  ) {}
+
   @SlashCommand({
     name: 'login',
     description: 'Login to 42 intra',
@@ -40,9 +48,38 @@ export class LoginCommand {
     }
   }
 
-  public static getLoginReply(discordId: string, content?: string) {
+  public static async getLoginReply(discordId: string, discordName: string, loginCodeModel: Model<LoginCode>, content?: string) {
+    const logger = new ConsoleLogger("getLoginReply");
+    const codeGenerator = async () => {
+      let code = Math.floor(Math.random() * 100000000000000000).toString();
+
+      while (await loginCodeModel.exists({ code: code })) {
+        code = Math.floor(Math.random() * 100000000000000000).toString();
+      }
+      return code;
+    }
     const port = (process.env.BOT_PORT !== undefined) ? `:${process.env.BOT_PORT}`: "";
-    const url = `${process.env.BOT_HOST}${port}/login/${discordId}`;
+    const existingLoginCode = await loginCodeModel.findOne({ discordId: discordId });
+
+    if (existingLoginCode !== null) {
+      logger.log(`Refreshing login code for ${discordName}`);
+      existingLoginCode.deleteOne();
+    } else {
+      logger.log(`Creating login code for ${discordName}`)
+    }
+    const loginCode = await loginCodeModel.create({
+        discordId: discordId,
+        discordUsername: discordName,
+        code: await codeGenerator(),
+        createdAt: new Date(),
+      } satisfies LoginCode);
+    logger.log(`Generated login code (${loginCode.code}) for ${discordName}`);
+    setTimeout(() => {
+      loginCode.deleteOne();
+      logger.log(`Deleted login code (${loginCode.code}) for ${discordName}`);
+    }, 5 * 60 * 1000);
+      // }, 5 * 1000);
+    const url = `${process.env.BOT_HOST}${port}/login/${loginCode.code}`;
 
     const newEmbed = new EmbedBuilder()
       .setColor('#00FFFF')
@@ -71,9 +108,11 @@ export class LoginCommand {
 
   @Button('login')
   public async onLoginButton(@Context() [interaction]: ButtonContext) {
-    try {
-      return interaction.reply(LoginCommand.getLoginReply(interaction.user.id));
-    } catch (error) {
+    return interaction.reply(await LoginCommand.getLoginReply(
+      interaction.user.id,
+      interaction.user.username,
+      this.loginCodeModel
+    )).catch((error) => {
       const logger = new ConsoleLogger("onLoginButtonClick");
 
       logger.error(error);
@@ -81,6 +120,6 @@ export class LoginCommand {
         ephemeral: true,
         content: 'An error occured while trying to login to 42 intra'
       });
-    }
+    });
   }
 }

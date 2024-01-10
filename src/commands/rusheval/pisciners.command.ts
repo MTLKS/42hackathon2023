@@ -15,6 +15,7 @@ import { ApiManager, ProjectStatus } from 'src/ApiManager';
 import { AxiosError } from 'axios';
 import { StudentService, newStudentModal } from 'src/StudentService';
 import { LoginCommand } from '../login.command';
+import { LoginCode } from 'src/schema/logincode.schema';
 
 @RushEvalCommandDecorator()
 export class RushEvalPiscinersCommand {
@@ -96,6 +97,7 @@ export class RushEvalPiscinersButtonComponent {
     @InjectModel(Timeslot.name) private readonly timeslotModel: Model<Timeslot>,
     @InjectModel(Evaluator.name) private readonly evaluatorModel: Model<Evaluator>,
     @InjectModel(Team.name) private readonly teamModel: Model<Team>,
+    @InjectModel(LoginCode.name) private readonly loginCodeModel: Model<LoginCode>,
   ) { }
 
   private async fetchIntraGroup(projectSlugOrId: string | number, intraIdOrLogin: string | number) {
@@ -116,7 +118,12 @@ export class RushEvalPiscinersButtonComponent {
 
     /* if student not found, prompt student intra login */
     if (student === null) {
-      return interaction.reply(LoginCommand.getLoginReply(interaction.user.id, 'New student detected'));
+      return interaction.reply(await LoginCommand.getLoginReply(
+        interaction.user.id,
+        interaction.user.username,
+        this.loginCodeModel,
+        'New student detected'
+      ));
     } else if (student.discordId === undefined) {
       await StudentService.setStudentDiscordData(interaction.guild, interaction.user, student)
         .then(() => student.save());

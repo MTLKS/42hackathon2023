@@ -6,6 +6,7 @@ import { InjectModel } from '@nestjs/mongoose';
 import { Student } from './schema/student.schema';
 import { Model } from 'mongoose';
 import { ActivityType } from 'discord.js';
+import { LoginCode } from './schema/logincode.schema';
 
 function getCursusRole(cursus_users) {
   if (cursus_users.length == 1) {
@@ -28,7 +29,13 @@ function getCursusRole(cursus_users) {
 
 @Injectable()
 export class AppService {
-  constructor(private httpService: HttpService, @InjectModel(Student.name) private readonly studentModel: Model<Student>) {}
+  constructor(
+    private httpService: HttpService,
+    @InjectModel(Student.name) private readonly studentModel: Model<Student>,
+    @InjectModel(LoginCode.name) private readonly loginCodeModel: Model<LoginCode>,
+  ) {
+    this.loginCodeModel.deleteMany();
+  }
   private readonly logger = new Logger(AppService.name);
 
   @Once('ready')
@@ -45,10 +52,14 @@ export class AppService {
   }
 
   async getCode(@Request() request: any): Promise<string> {
-    if (request.query.code == null) {
+    const loginCode = await this.loginCodeModel.findOne({ code: request.cookies['code'] });
+
+    if (loginCode === null) {
+      return 'The link has either expired or is invalid';
+    }
+    if (request.query.code === null) {
       return 'No code provided';
     }
-
     let redirect_uri = process.env.BOT_HOST;
     if (process.env.BOT_PORT != undefined) {
       redirect_uri += `:${process.env.BOT_PORT}`;
@@ -63,7 +74,6 @@ export class AppService {
     }));
 
     const intraUserData = await firstValueFrom(this.httpService.get('https://api.intra.42.fr/v2/me', { headers: { Authorization: `Bearer ${data.access_token}` } }));
-    const discordId = request.cookies['id'];
     const intraId = intraUserData.data.id;
     let student = await this.studentModel.findOne({ intraId: intraId });
     const role = getCursusRole(intraUserData.data.cursus_users)
@@ -82,17 +92,17 @@ export class AppService {
         poolMonth: intraUserData.data.pool_month,
       });
     }
-    student.discordId = request.cookies['id'];
-    student.progressRole = role;
-    student.coalitionRole = coalition;
-    student.intraImageLink = intraUserData.data.image.link;
-
-    const discordUserData = await firstValueFrom(this.httpService.get(`https://discord.com/api/v10/users/${discordId}`, {
+    const discordUserData = await firstValueFrom(this.httpService.get(`https://discord.com/api/v10/users/${loginCode.discordId}`, {
       headers: {
         Authorization: `Bot ${process.env.DISCORD_TOKEN}`,
       },
     }));
+    student.discordId = loginCode.discordId;
     student.discordName = discordUserData.data.username;
+    student.progressRole = role;
+    student.coalitionRole = coalition;
+    student.intraImageLink = intraUserData.data.image.link;
+
     await student.save();
 
     return `

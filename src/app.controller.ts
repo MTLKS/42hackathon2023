@@ -11,9 +11,10 @@ export class AppController {
     return this.appService.getCode(request);
   }
 
-  @Get('login/:id')
-  async getId(@Param('id') id: string, @Res() response: Response): Promise<void> {
-    response.cookie('id', id);
+  @Get('login/:code')
+  async getId(@Param('code') code: string, @Res() response: Response): Promise<void> {
+
+    response.cookie('code', code);
 
     if (process.env.CLIENT_REDIRECT === undefined) {
       response.status(HttpStatus.INTERNAL_SERVER_ERROR).send('No redirect url provided');

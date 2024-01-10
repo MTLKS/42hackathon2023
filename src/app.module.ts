@@ -23,6 +23,7 @@ import { CleanCommand, CleanDatabase } from './commands/clean.command';
 import { SpecRequest, SpecRequestSchema } from './schema/specrequest.schema';
 import { TestCommand } from './commands/test.command';
 import { StudentService } from './StudentService';
+import { LoginCode, LoginCodeSchema } from './schema/logincode.schema';
 
 @Module({
   imports: [
@@ -42,7 +43,8 @@ import { StudentService } from './StudentService';
       { name: Evaluator.name, schema: EvaluatorSchema },
       { name: Team.name, schema: TeamSchema },
       { name: Specialslot.name, schema: SpecialslotSchema },
-      { name: SpecRequest.name, schema: SpecRequestSchema }
+      { name: SpecRequest.name, schema: SpecRequestSchema },
+      { name: LoginCode.name, schema: LoginCodeSchema }
     ]) 
   ],
   controllers: [AppController],
