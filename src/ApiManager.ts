@@ -135,11 +135,6 @@ export class ApiManager {
     return await this.get("https://api.intra.42.fr/v2/" + url + `?${fields.join('&')}`, `Bearer ${this.accessToken}`);
   }
 
-  /* TODO: This kinda don't belong to this class */
-  public static getDiscordUserData(id: string) {
-    return this.getDiscordApi(`https://discord.com/api/v10/users/${id}`);
-  }
-
   private static async get(url: string, authorization: string) {
     while (true) {
       try {
@@ -155,9 +150,5 @@ export class ApiManager {
         await sleep(waitTime);
       }
     }
-  }
-
-  private static getDiscordApi(url: string) {
-    return this.get(url, `Bot ${process.env.DISCORD_TOKEN}`);
   }
 }
