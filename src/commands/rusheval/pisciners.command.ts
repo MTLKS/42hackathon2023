@@ -30,7 +30,7 @@ export class RushEvalPiscinersCommand {
   })
   public async onExecute(@Context() [interaction]: SlashCommandContext) {
     const logger = new ConsoleLogger('RushEvalPiscinersCommand');
-    logger.log(`Pisciners command called by ${interaction.user.id}`);
+    logger.log(`Pisciners command called by ${interaction.user.username}`);
     const button = new ButtonBuilder()
       .setCustomId('piscinersButton')
       .setLabel('Get timeslots')
@@ -113,7 +113,7 @@ export class RushEvalPiscinersButtonComponent {
 
   @Button('piscinersButton')
   public async onButton(@Context() [interaction]: ButtonContext) {
-    this.logger.log(interaction.user.id);
+    this.logger.log(interaction.user.username);
     const student = await this.studentModel.findOne({ discordId: interaction.user.id }).exec();
 
     /* if student not found, prompt student intra login */
@@ -222,7 +222,7 @@ export class RushEvalPiscinersStringSelectComponent {
 
   @StringSelect('piscinersStringSelect')
   public async onStringSelect(@Context() [interaction]: StringSelectContext, @SelectedStrings() selected: string[]) {
-    this.logger.log(`${interaction.user.id} Selected timeslots: ${selected.map(t => t)}`);
+    this.logger.log(`${interaction.user.username} Selected timeslots: ${selected.map(t => t)}`);
     const student = await this.studentModel.findOne({ discordId: interaction.user.id }).exec();
     if (student === null) {
       return interaction.reply({content: 'Please try fetching slots and register yourself as new student again.', ephemeral: true});
@@ -240,7 +240,7 @@ export class RushEvalPiscinersStringSelectComponent {
     }
 
     if (finalCount == 0) {
-      this.logger.log(`${interaction.user.id} Selected timeslots: ${selected.map(t => t)} is full`);
+      this.logger.log(`${interaction.user.username} Selected timeslots: ${selected.map(t => t)} is full`);
       return interaction.update({ content: `Sorry, timeslot ${selected[0]} is full, please try again.`, components: [] });
     }
 

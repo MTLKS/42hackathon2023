@@ -42,7 +42,7 @@ export class RushEvalCadetCommand {
   })
   public async onExecute(@Context() [interaction]: SlashCommandContext) {
     const logger = new ConsoleLogger('RushEvalCadetCommand');
-    logger.log(`Cadet command called by ${interaction.user.id}`);
+    logger.log(`Cadet command called by ${interaction.user.username}`);
     const slotsButton = new ButtonBuilder()
       .setCustomId('cadet-fetch-slot')
       .setLabel('Open slots')
@@ -89,7 +89,7 @@ export class RushEvalCadetFetchSlotsComponent {
 
   @Button('cadet-fetch-slot')
   public async onExecute(@Context() [interaction]: ButtonContext) {
-    this.logger.log(`Cadet fetch slots called by ${interaction.user.id}`);
+    this.logger.log(`Cadet fetch slots called by ${interaction.user.username}`);
     const student = await this.studentModel.findOne({ discordId: interaction.user.id }).exec();
     if (student === null) {
       return interaction.reply(await LoginCommand.getLoginReply(
@@ -139,7 +139,7 @@ export class RushEvalCadetStringSelectComponent {
 
   @StringSelect('cadet-session-select')
   public async onStringSelect(@Context() [interaction]: StringSelectContext, @SelectedStrings() selected: string[]) {
-    this.logger.log(interaction.user.id);
+    this.logger.log(interaction.user.username);
     const student = await this.studentModel.findOne({ discordId: interaction.user.id }).exec();
     if (student === null) {
       return interaction.update({content: 'Please try fetching slots and register yourself as new student again.', components: []});
@@ -152,7 +152,7 @@ export class RushEvalCadetStringSelectComponent {
       /** Check if the chosen slots contain any overbooked sessions */
       const overBooked = selected.filter(session => !underBookedSessions.includes(session));
       if (overBooked.length) {
-        this.logger.log(`${interaction.user.id} Overbooked sessions: ${overBooked}`);
+        this.logger.log(`${interaction.user.username} Overbooked sessions: ${overBooked}`);
         return interaction.update({
             content: `**${overBooked}** are currently filled.
 Please regenerate your selection by clicking on the \`Open slots\` button one more time`,
@@ -168,7 +168,7 @@ Please regenerate your selection by clicking on the \`Open slots\` button one mo
     evaluator.timeslots = selectedTimeslots;
     evaluator.lastCreatedTimeslotsAt = new Date();
     await evaluator.save();
-    this.logger.log(`${interaction.user.id} Selected timeslots: ${selectedTimeslots.map(t => t.timeslot)}`);
+    this.logger.log(`${interaction.user.username} Selected timeslots: ${selectedTimeslots.map(t => t.timeslot)}`);
     return interaction.reply({
         content: ((selectedTimeslots.length === 0)
             ? 'You have canceled your timeslots'
