@@ -101,7 +101,6 @@ export class RushEvalMatchCommand {
     description: 'Lock in cadet and pisciner timeslots',
   })
   public async onMatch(@Context() [interaction]: SlashCommandContext) {
-    let replyContent = '';
     const projectSlug = 'c-piscine-rush-00';
 
     await interaction.deferReply({ephemeral: true});
@@ -112,8 +111,7 @@ export class RushEvalMatchCommand {
     } catch (error) {
       this.logger.error('Error occured while matching teams and evaluators');
       console.error(error);
-      replyContent += `Error occured while matching teams and evaluators\n`;
-      return interaction.editReply(replyContent);
+      return interaction.editReply('Error occured while matching teams and evaluators\n');
     }
     interaction.editReply('Looking for teams without evaluator...');
     this.logger.log('Looking for teams without evaluator...');
@@ -123,15 +121,13 @@ export class RushEvalMatchCommand {
       if (teamsWithoutEvaluator.length) {
         const embed = getMissingEvaluatorEmbeds(teamsWithoutEvaluator);
 
-        replyContent += `Below teams are missing evaluator: \n`;
         this.logger.log(`Below teams are missing evaluator: ${teamsWithoutEvaluator.map(team => team.name)}}`);
-        return interaction.editReply({ content: replyContent, embeds: embed});
+        return interaction.editReply({ content: 'Below teams are missing evaluator: \n', embeds: embed});
       }
     } catch (error) {
       this.logger.error('Error occured while checking teams without evaluator');
       console.error(error);
-      replyContent += `Error occured while checking teams without evaluator\n`;
-      return interaction.editReply(replyContent);
+      return interaction.editReply('Error occured while checking teams without evaluator\n');
     }
     interaction.editReply('Generating time table...');
     this.logger.log('Generating time table...');
@@ -146,28 +142,19 @@ export class RushEvalMatchCommand {
           console.error(stderr);
         }
       });
-    // interaction.guild.members.fetch({
-        // user: teams.map(team => team.evaluator.discordId),
-        // time: 10 * 1000,
-      // }).then(matchedEvaluatorsDc => {
-        child.on('exit', (code, signal) => {
-          if (code === 0) {
-            replyContent += `Rush evaluation time table for dear evaluators: ${getRole(interaction.guild, 'CADET')}\n`;
-            interaction.editReply('Done!');
-            this.logger.log('Done!');
-            return interaction.channel.send({content: replyContent, files: [outfile]})
-            // return interaction.editReply({content: replyContent, files: [outfile]})
-              .finally(() => unlink(outfile, ()=>{}));
-          } else {
-            replyContent += `Error occured while generating time table\n`;
-            this.logger.error('Error occured while generating time table');
-            return interaction.editReply(replyContent);
-          }
-        })
-      // }).catch(error => {
-        // console.error(error);
-        // return interaction.editReply({content: 'Timeout fetching guild members'});
-      // });
+      child.on('exit', (code, signal) => {
+        if (code === 0) {
+          const replyContent = `Rush evaluation time table for dear evaluators: ${getRole(interaction.guild, 'CADET')}\n`;
 
+          interaction.editReply('Done!');
+          this.logger.log('Done!');
+          return interaction.channel.send({content: replyContent, files: [outfile]})
+          // return interaction.editReply({content: replyContent, files: [outfile]})
+            .finally(() => unlink(outfile, ()=>{}));
+        } else {
+          this.logger.error('Error occured while generating time table');
+          return interaction.editReply('Error occured while generating time table\n');
+        }
+      });
   }
 }
