@@ -2,7 +2,7 @@ import { Subcommand, Context, SlashCommandContext, SelectedStrings, StringSelect
 import { RushEvalCommandDecorator } from './rusheval.command';
 import { ActionRowBuilder, ModalBuilder, TextInputBuilder } from '@discordjs/builders';
 import { ButtonBuilder, ButtonStyle, TextInputStyle } from 'discord.js';
-import { Injectable } from '@nestjs/common';
+import { ConsoleLogger, Injectable } from '@nestjs/common';
 import { InjectModel } from '@nestjs/mongoose';
 import { Model } from 'mongoose';
 import { Team } from 'src/schema/team.schema';
@@ -21,6 +21,8 @@ export class RushEvalFeedbackCommand {
     description: 'Get feedback from rush evaluators',
   })
   public async onPing(@Context() [interaction]: SlashCommandContext) {
+    const logger = new ConsoleLogger('RushEvalFeedbackCommand');
+    logger.log(`Feedback command called by ${interaction.user.id}`);
     const button = new ButtonBuilder()
       .setCustomId('feedback-button')
       .setStyle(ButtonStyle.Primary)
@@ -56,6 +58,8 @@ export class RushEvalFeedbackTeamSelectButton {
 
   @Button('feedback-button')
   public async onPress(@Context() [interaction]: ButtonContext) {
+    const logger = new ConsoleLogger('feedback-button');
+    logger.log(interaction.user.id);
     const student = await this.studentModel.findOne({ discordId: interaction.user.id }).exec();
     const team = await this.teamModel.find({ evaluator: student }).exec();
 
@@ -100,6 +104,8 @@ export class RushEvalFeedbackForm {
     // tryTeam.evaluator = evaluator;
     // await tryTeam.save();
 
+    const logger = new ConsoleLogger('feedback-team-select-button');
+    logger.log(interaction.user.id);
     const cadet = await this.studentModel.findOne({ discordId: interaction.user.id }).exec();
     const team = await this.teamModel.findOne({ evaluator: cadet }).exec();
     const teamMembersInput = new TextInputBuilder()
@@ -130,6 +136,8 @@ export class RushEvalFeedbackForm {
 
   @Modal('feedback')
   public async onSubmit(@Context() [interaction]: ModalContext) {
+    const logger = new ConsoleLogger('feedback submission');
+    logger.log(interaction.user.id);
     /** Post data to database
      * 
      * After post, send a ephemeral response to the user,

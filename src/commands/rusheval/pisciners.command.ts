@@ -28,6 +28,8 @@ export class RushEvalPiscinersCommand {
     description: 'Get pisciners to choose timeslots',
   })
   public async onExecute(@Context() [interaction]: SlashCommandContext) {
+    const logger = new ConsoleLogger('RushEvalPiscinersCommand');
+    logger.log(`Pisciners command called by ${interaction.user.id}`);
     const button = new ButtonBuilder()
       .setCustomId('piscinersButton')
       .setLabel('Get timeslots')
@@ -88,7 +90,7 @@ export class RushEvalPiscinersCommand {
 
 @Injectable()
 export class RushEvalPiscinersButtonComponent {
-  private readonly logger = new ConsoleLogger("RushEvalPiscinersButtonComponent");
+  private readonly logger = new ConsoleLogger("piscinerButton");
   constructor(
     @InjectModel(Student.name) private readonly studentModel: Model<Student>, 
     @InjectModel(Timeslot.name) private readonly timeslotModel: Model<Timeslot>,
@@ -97,6 +99,7 @@ export class RushEvalPiscinersButtonComponent {
   ) { }
 
   private async fetchIntraGroup(projectSlugOrId: string | number, intraIdOrLogin: string | number) {
+    this.logger.log(`Fetching intra group ${intraIdOrLogin} for ${projectSlugOrId}`);
     const intraTeam = await ApiManager.getUserTeam(intraIdOrLogin, projectSlugOrId);
 
     if (intraTeam === null) {
@@ -108,6 +111,7 @@ export class RushEvalPiscinersButtonComponent {
 
   @Button('piscinersButton')
   public async onButton(@Context() [interaction]: ButtonContext) {
+    this.logger.log(interaction.user.id);
     const student = await this.studentModel.findOne({ discordId: interaction.user.id }).exec();
 
     /* if student not found, prompt student intra login */
@@ -120,6 +124,7 @@ export class RushEvalPiscinersButtonComponent {
     const projectSlug = 'c-piscine-rush-00';
     await interaction.deferReply({ephemeral: true});
     interaction.editReply(`Looking for ${student.intraName} team...`);
+    this.logger.log(`Looking for ${student.intraName} team...`);
     /* if recognise student, look for their team */
     const team = await this.teamModel.findOne({ $or: [
         {teamLeader: student},
@@ -139,9 +144,11 @@ export class RushEvalPiscinersButtonComponent {
 If you're certain you've signed up for this project, please contact BOCAL for it.
 `;
 
+      this.logger.log(`Did not find ${student.intraName} record of ${projectSlug}}`);
       return interaction.editReply(content);
     }
     interaction.editReply('Looking for available timeslot...');
+    this.logger.log('Looking for available timeslot...');
     let reply = '';
     const leader = team.teamLeader;
     if (student.intraName !== leader.intraName) {
@@ -165,6 +172,7 @@ If you're certain you've signed up for this project, please contact BOCAL for it
     const row = new ActionRowBuilder<StringSelectMenuBuilder>()
       .addComponents(stringSelect);
 
+    this.logger.log('Returning available session');
     reply += 'Please select your timeslot for the next rush defense';
     return interaction.editReply({
         content: reply,
@@ -198,6 +206,7 @@ If you're certain you've signed up for this project, please contact BOCAL for it
 
 @Injectable()
 export class RushEvalPiscinersStringSelectComponent {
+  private readonly logger = new ConsoleLogger("piscinerStringSelect");
   constructor(
     @InjectModel(Student.name) private readonly studentModel: Model<Student>, 
     @InjectModel(Timeslot.name) private readonly timeslotModel: Model<Timeslot>,
@@ -207,6 +216,7 @@ export class RushEvalPiscinersStringSelectComponent {
 
   @StringSelect('piscinersStringSelect')
   public async onStringSelect(@Context() [interaction]: StringSelectContext, @SelectedStrings() selected: string[]) {
+    this.logger.log(`${interaction.user.id} Selected timeslots: ${selected.map(t => t)}`);
     const student = await this.studentModel.findOne({ discordId: interaction.user.id }).exec();
     if (student === null) {
       return interaction.reply({content: 'Please try fetching slots and register yourself as new student again.', ephemeral: true});
@@ -224,6 +234,7 @@ export class RushEvalPiscinersStringSelectComponent {
     }
 
     if (finalCount == 0) {
+      this.logger.log(`${interaction.user.id} Selected timeslots: ${selected.map(t => t)} is full`);
       return interaction.update({ content: `Sorry, timeslot ${selected[0]} is full, please try again.`, components: [] });
     }
 

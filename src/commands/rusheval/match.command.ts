@@ -10,6 +10,7 @@ import { APIEmbedField, EmbedBuilder } from 'discord.js';
 import { getRole } from '../updateroles.command';
 import { Student } from 'src/schema/student.schema';
 import { randomInt } from 'crypto';
+import { ConsoleLogger } from '@nestjs/common';
 
 function getMissingEvaluatorEmbeds(teamsWithoutEvaluator: Team[]) {
   const teamsNoRegister = teamsWithoutEvaluator.filter(team => team.timeslot === undefined);
@@ -42,6 +43,7 @@ function getMissingEvaluatorEmbeds(teamsWithoutEvaluator: Team[]) {
 
 @RushEvalCommandDecorator()
 export class RushEvalMatchCommand {
+  private readonly logger = new ConsoleLogger('RushEvalMatchCommand');
 
   constructor(
     @InjectModel(Student.name) private readonly studentModel: Model<Student>,
@@ -104,14 +106,17 @@ export class RushEvalMatchCommand {
 
     await interaction.deferReply({ephemeral: true});
     interaction.editReply('Matching rush teams and evaluators...');
+    this.logger.log('Matching rush teams and evaluators...');
     try {
       await this.matching(projectSlug);
     } catch (error) {
+      this.logger.error('Error occured while matching teams and evaluators');
       console.error(error);
       replyContent += `Error occured while matching teams and evaluators\n`;
       return interaction.editReply(replyContent);
     }
     interaction.editReply('Looking for teams without evaluator...');
+    this.logger.log('Looking for teams without evaluator...');
     try {
       const teamsWithoutEvaluator = await this.teamModel.find({evaluator: undefined}).exec();
 
@@ -119,14 +124,17 @@ export class RushEvalMatchCommand {
         const embed = getMissingEvaluatorEmbeds(teamsWithoutEvaluator);
 
         replyContent += `Below teams are missing evaluator: \n`;
+        this.logger.log(`Below teams are missing evaluator: ${teamsWithoutEvaluator.map(team => team.name)}}`);
         return interaction.editReply({ content: replyContent, embeds: embed});
       }
     } catch (error) {
+      this.logger.error('Error occured while checking teams without evaluator');
       console.error(error);
       replyContent += `Error occured while checking teams without evaluator\n`;
       return interaction.editReply(replyContent);
     }
     interaction.editReply('Generating time table...');
+    this.logger.log('Generating time table...');
     const outfile = 'rush_evaluation_time_table.jpg';
     const child = exec(`python rusheval_time_table.py ${outfile}`, (error, stdout, stderr) => {
         if (stdout) {
@@ -146,11 +154,13 @@ export class RushEvalMatchCommand {
           if (code === 0) {
             replyContent += `Rush evaluation time table for dear evaluators: ${getRole(interaction.guild, 'CADET')}\n`;
             interaction.editReply('Done!');
+            this.logger.log('Done!');
             return interaction.channel.send({content: replyContent, files: [outfile]})
             // return interaction.editReply({content: replyContent, files: [outfile]})
               .finally(() => unlink(outfile, ()=>{}));
           } else {
             replyContent += `Error occured while generating time table\n`;
+            this.logger.error('Error occured while generating time table');
             return interaction.editReply(replyContent);
           }
         })
