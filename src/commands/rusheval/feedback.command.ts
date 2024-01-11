@@ -1,4 +1,4 @@
-import { Subcommand, Context, SlashCommandContext, SelectedStrings, StringSelect, StringSelectContext, ButtonContext, Button, ModalContext, Modal } from 'necord';
+import { Subcommand, Context, SlashCommandContext, ButtonContext, Button, ModalContext, Modal, ModalParam, ComponentParam } from 'necord';
 import { RushEvalCommandDecorator } from './rusheval.command';
 import { ActionRowBuilder, ModalBuilder, TextInputBuilder } from '@discordjs/builders';
 import { ButtonBuilder, ButtonStyle, TextInputStyle } from 'discord.js';
@@ -24,7 +24,7 @@ export class RushEvalFeedbackCommand {
     const logger = new ConsoleLogger('RushEvalFeedbackCommand');
     logger.log(`Feedback command called by ${interaction.user.username}`);
     const button = new ButtonBuilder()
-      .setCustomId('feedback-button')
+      .setCustomId('feedback-fetch-team')
       .setStyle(ButtonStyle.Primary)
       .setLabel('Rush feedback')
       ;
@@ -56,13 +56,13 @@ export class RushEvalFeedbackTeamSelectButton {
     @InjectModel(Student.name) private readonly studentModel: Model<Student>,
   ) { }
 
-  @Button('feedback-button')
+  @Button('feedback-fetch-team')
   public async onPress(@Context() [interaction]: ButtonContext) {
-    const logger = new ConsoleLogger('feedback-button');
-    logger.log(interaction.user.username);
+    const logger = new ConsoleLogger('feedback-fetch-team');
     const student = await this.studentModel.findOne({ discordId: interaction.user.id }).exec();
     const team = await this.teamModel.find({ evaluator: student }).exec();
 
+    logger.log(`${student.intraName} fetched for their teams to feedback`);
     if (team.length === 0) {
       return interaction.reply({
         content: 'There are no teams assigned to you.',
@@ -71,7 +71,7 @@ export class RushEvalFeedbackTeamSelectButton {
     }
     const buttons = team.map(team => {
       const button = new ButtonBuilder()
-        .setCustomId('feedback-team-select-button')
+        .setCustomId(`feedback-team-select-button/${team.name}`)
         .setLabel(team.name)
         .setStyle(team.feedbackAt ? ButtonStyle.Success : ButtonStyle.Secondary)
         ;
@@ -92,25 +92,20 @@ export class RushEvalFeedbackTeamSelectButton {
 
 @Injectable()
 export class RushEvalFeedbackForm {
+  private readonly logger = new ConsoleLogger('RushEvalFeedbackForm');
   constructor(
     @InjectModel(Team.name) private readonly teamModel: Model<Team>,
     @InjectModel(Student.name) private readonly studentModel: Model<Student>,
   ) { }
 
-  @Button('feedback-team-select-button')
-  public async onSelection(@Context() [interaction]: ButtonContext) {
-    // const tryTeam = await this.teamModel.findOne({})
-    // const evaluator = await this.studentModel.findOne({ intraName: 'maliew' }).exec();
-    // tryTeam.evaluator = evaluator;
-    // await tryTeam.save();
-
-    const logger = new ConsoleLogger('feedback-team-select-button');
-    logger.log(interaction.user.username);
+  @Button('feedback-team-select-button/:teamName')
+  public async onSelection(@Context() [interaction]: ButtonContext, @ComponentParam('teamName') teamName: string) {
     const cadet = await this.studentModel.findOne({ discordId: interaction.user.id }).exec();
-    const team = await this.teamModel.findOne({ evaluator: cadet }).exec();
+
+    this.logger.log(`${cadet.intraName} chose ${teamName} to feedback`);
     const teamMembersInput = new TextInputBuilder()
       .setStyle(TextInputStyle.Paragraph)
-      .setCustomId(team.name)
+      .setCustomId(teamName)
       .setLabel(`Overview of team members`)
       ;
     const notesInput = new TextInputBuilder()
@@ -119,34 +114,37 @@ export class RushEvalFeedbackForm {
       .setLabel('Notes')
       ;
 
+    const team = await this.teamModel.findOne({ name: teamName }).exec();
     if (team.feedbackAt) {
-      teamMembersInput.setValue(team.feedback.get(team.name));
+      teamMembersInput.setValue(team.feedback.get(teamName));
       notesInput.setValue(team.feedback.get('notes'));
+    } else {
+      teamMembersInput.setPlaceholder(team.teamMembers.map(member => member.intraName).join('\n\n') + '\n');
+      notesInput.setPlaceholder('Anything worth noting about the team?');
     }
     const components = [teamMembersInput, notesInput]
-      .map(member => new ActionRowBuilder<TextInputBuilder>().addComponents(member));
+      .map(input => new ActionRowBuilder<TextInputBuilder>().addComponents(input));
 
     const modal = new ModalBuilder()
-      .setCustomId('feedback')
-      .setTitle(`Evaluation notes for ${team.name}`)
+      .setCustomId(`feedback/${teamName}`)
+      .setTitle(`Evaluation notes for ${teamName}`)
       .addComponents(components)
       ;
     return interaction.showModal(modal);
   }
 
-  @Modal('feedback')
-  public async onSubmit(@Context() [interaction]: ModalContext) {
-    const logger = new ConsoleLogger('feedback submission');
-    logger.log(interaction.user.username);
+  @Modal('feedback/:teamName')
+  public async onSubmit(@Context() [interaction]: ModalContext, @ModalParam('teamName') teamName: string) {
     /** Post data to database
      * 
      * After post, send a ephemeral response to the user,
      * saying that the feedback has been successfully recorded,
      * or a markdown of written feedback?
-     */
+    */
     try {
-      const teamName = interaction.fields.fields.first().customId;
+      const student = await this.studentModel.findOne({ discordId: interaction.user.id }).exec();
       const team = await this.teamModel.findOne({ name: teamName }).exec();
+      this.logger.log(`${student.intraName} submitted feedback for ${teamName}`);
 
       team.feedback = new Map(interaction.fields.fields.map((value, key) => [key, value.value]));
       team.feedbackAt = new Date();
