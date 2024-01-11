@@ -119,8 +119,9 @@ export class RushEvalFeedbackForm {
       teamMembersInput.setValue(team.feedback.get(teamName));
       notesInput.setValue(team.feedback.get('notes'));
     } else {
-      teamMembersInput.setPlaceholder(team.teamMembers.map(member => member.intraName).join('\n\n') + '\n');
-      notesInput.setPlaceholder('Anything worth noting about the team?');
+      /* For any future maintainer, placeholder has 100 chars limit (last update at 10/1/2024) */
+      teamMembersInput.setPlaceholder('Including their backgrounds, contributions to the team, and any other impressions.');
+      notesInput.setPlaceholder('How did the evaluation went overall?');
     }
     const components = [teamMembersInput, notesInput]
       .map(input => new ActionRowBuilder<TextInputBuilder>().addComponents(input));
