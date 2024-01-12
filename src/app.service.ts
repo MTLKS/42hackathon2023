@@ -91,12 +91,15 @@ export class AppService {
 
     console.log(request.cookies);
     if (!code) {
-      return getResponse(`<img src="https://i.pinimg.com/originals/49/b7/93/49b793ae912e181461e1fe87530f1818.gif" height="200px"></img>`);
+      return getResponse(`<img src="https://i.pinimg.com/originals/49/b7/93/49b793ae912e181461e1fe87530f1818.gif" height="200px">`);
     }
     const loginCode = await this.loginCodeModel.findOne({ code: code });
 
     if (loginCode === null || loginCode.intraCode !== undefined) {
-      return getResponse('<h1>The link has either expired or is invalid/used</h1>');
+      return getResponse(`<h1>The link has either expired or is invalid/used</h1>
+      <div class="break"></div>
+      <img src="https://media1.tenor.com/m/L4OqCI0rthEAAAAd/hatsune-miku-chair.gif" height="200px">
+    `);
     }
     loginCode.intraCode = request.query.code as string;
     loginCode.save();
@@ -105,7 +108,10 @@ export class AppService {
       return null;
     });
     if (access_token === null) {
-      return getResponse('<h1>Code expired</h1>');
+      return getResponse(`<h1>Code expired</h1>
+      <div class="break"></div>
+      <img src="https://media1.tenor.com/m/QONGo5d2GdIAAAAd/hatsune-miku-miku-hatsune.gif" height="200px">
+    `);
     }
     const api = new ApiManager(access_token);
     const intraUserData = await api.get('me');
@@ -131,14 +137,13 @@ export class AppService {
     student.coalitionRole = coalition;
     student.intraImageLink = intraUserData.image.link;
     await student.save();
-
     return getResponse(`
   <h1>You are now logged in to THILA Bot</h1>
   <div class="break"></div>
-  <img src="https://64.media.tumblr.com/58a920b1da6459ad18274328dfe55784/tumblr_n2ykjx27uE1tqptlzo1_r1_500.gif" height="200px"></img>
+  <img src="https://64.media.tumblr.com/58a920b1da6459ad18274328dfe55784/tumblr_n2ykjx27uE1tqptlzo1_r1_500.gif" height="200px">
   <div class="break"></div>
-  <img src="${loginCode.discordAvatarUrl}" height="200px" padding="20px"></img>
-  <img src="${intraUserData.image.versions.medium}" height="200px" padding="20px"></img>
+  <img src="${loginCode.discordAvatarUrl}" height="200px" padding="20px">
+  <img src="${intraUserData.image.versions.medium}" height="200px" padding="20px">
 `);
   }
 }
