@@ -53,7 +53,7 @@ import { LoginCode, LoginCodeSchema } from './schema/logincode.schema';
     StudentService,
     PingCommand,
     LoginCommand,
-    HelpCommand,
+    // HelpCommand,
     RushEvalCadetCommand,
     RushEvalCadetFetchSlotsComponent,
     RushEvalCadetStringSelectComponent,
