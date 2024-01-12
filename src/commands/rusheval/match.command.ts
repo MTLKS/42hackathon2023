@@ -66,6 +66,7 @@ export class RushEvalMatchCommand {
       throw new Error(`Unknown rush project slug: ${rushProjectSlug}`);
     }
 
+
     // const logEvaluator = (evaluator: Evaluator) => {
     //   const student = evaluator.student;
     //   return {
@@ -79,6 +80,8 @@ export class RushEvalMatchCommand {
     // console.log("teams: ", teams.map(t => t.timeslot.timeslot));
     const matchPromises = teams.map(t => {
       t.evaluator = undefined;
+      t.feedback = undefined;
+      t.feedbackAt = undefined;
       const evaluatorsWithMatchingTimelot = evaluators.filter(e => e.timeslots.find(slot => slot.timeslot === t.timeslot.timeslot));
 
       // console.log("evaluatorsWithMatchingTimelot: ", evaluatorsWithMatchingTimelot.map(logEvaluator));
@@ -87,7 +90,7 @@ export class RushEvalMatchCommand {
         /* prefer the first 50% of sorted evaluators */
         const matchedEvaluator = evaluatorsWithMatchingTimelot[randomInt(Math.round(len / 2))];
         const slot = matchedEvaluator.timeslots.find(slot => slot.timeslot === t.timeslot.timeslot);
-        t.timeslot = slot;
+
         t.evaluator = matchedEvaluator.student;
         matchedEvaluator.timeslots.splice(matchedEvaluator.timeslots.indexOf(slot), 1);
       }
@@ -104,6 +107,11 @@ export class RushEvalMatchCommand {
     const projectSlug = 'c-piscine-rush-00';
 
     await interaction.deferReply({ephemeral: true});
+    if (await this.teamModel.count({ feedbackAt: {$ne: undefined}}).exec() !== 0) {
+      this.logger.error(`${interaction.user.username} attempted to match after feedback has been given.`);
+      return interaction.editReply('Error: Some feedback has been given to teams, doing so may result in loses in feedback.\n'
+      + "If you deem it's necessary, please notify qixeo to disable this failsafe.\n");
+    }
     interaction.editReply('Matching rush teams and evaluators...');
     this.logger.log('Matching rush teams and evaluators...');
     try {
@@ -142,19 +150,19 @@ export class RushEvalMatchCommand {
           console.error(stderr);
         }
       });
-      child.on('exit', (code, signal) => {
-        if (code === 0) {
-          const replyContent = `Rush evaluation time table for dear evaluators: ${getRole(interaction.guild, 'CADET')}\n`;
+    child.on('exit', (code, signal) => {
+      if (code === 0) {
+        const replyContent = `Rush evaluation time table for dear evaluators: ${getRole(interaction.guild, 'CADET')}\n`;
 
-          interaction.editReply('Done!');
-          this.logger.log('Done!');
-          return interaction.channel.send({content: replyContent, files: [outfile]})
-          // return interaction.editReply({content: replyContent, files: [outfile]})
-            .finally(() => unlink(outfile, ()=>{}));
-        } else {
-          this.logger.error('Error occured while generating time table');
-          return interaction.editReply('Error occured while generating time table\n');
-        }
-      });
+        interaction.editReply('Done!');
+        this.logger.log('Done!');
+        return interaction.channel.send({content: replyContent, files: [outfile]})
+        // return interaction.editReply({content: replyContent, files: [outfile]})
+          .finally(() => unlink(outfile, ()=>{}));
+      } else {
+        this.logger.error('Error occured while generating time table');
+        return interaction.editReply('Error occured while generating time table\n');
+      }
+    });
   }
 }
