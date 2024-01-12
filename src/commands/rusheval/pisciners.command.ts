@@ -73,9 +73,9 @@ export class RushEvalPiscinersCommand {
   }
 
   private async fetchOngoingRush(projectSlugOrId: string | number) {
-    const intraRushTeams = await ApiManager.getProjectTeams(projectSlugOrId,
-      `filter[status]=${ProjectStatus.WaitingForCorrection}`
-      );
+    const intraRushTeams = await ApiManager.getDefaultInstance().getProjectTeams(projectSlugOrId, {
+      'filter[status]': ProjectStatus.WaitingForCorrection,
+    });
     if (intraRushTeams.length === 0) {
       return intraRushTeams;
     }
@@ -102,7 +102,7 @@ export class RushEvalPiscinersButtonComponent {
 
   private async fetchIntraGroup(projectSlugOrId: string | number, intraIdOrLogin: string | number) {
     this.logger.log(`Fetching intra group ${intraIdOrLogin} for ${projectSlugOrId}`);
-    const intraTeam = await ApiManager.getUserTeam(intraIdOrLogin, projectSlugOrId);
+    const intraTeam = await ApiManager.getDefaultInstance().getUserTeam(intraIdOrLogin, projectSlugOrId);
 
     if (intraTeam === null) {
       return null;

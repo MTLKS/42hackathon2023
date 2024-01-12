@@ -75,7 +75,7 @@ export class StudentService {
   }
 
   public static async fetchStudent(intraIdOrLogin: number | string) {
-    const intraData = await ApiManager.getUser(intraIdOrLogin);
+    const intraData = await ApiManager.getDefaultInstance().getUser(intraIdOrLogin);
     const student: Student = {
       intraId: intraData.id,
       intraName: intraData.login,

@@ -31,7 +31,7 @@ async function bootstrap() {
     return ;
   }
   try {
-    await ApiManager.init();
+    await ApiManager.initDefaultInstance();
   } catch (error) {
     const logger = new ConsoleLogger("main");
     logger.fatal(`Failed to get access token from 42 API: ${error.response.data.error_description}`);

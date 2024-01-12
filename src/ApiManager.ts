@@ -4,6 +4,7 @@ import { Model } from "mongoose";
 import { firstValueFrom } from "rxjs";
 import { Student } from "./schema/student.schema";
 import { Team } from "./schema/team.schema";
+import axios, { AxiosError } from "axios";
 
 export type ProjectIdentifier = string | number;
 
@@ -20,86 +21,69 @@ function sleep(ms: number): Promise<void> {
 }
 
 export class ApiManager {
+  /* left hardcoded as such
+    since it doesn't make sense for a single instance to deal with multiple campuses rush evaluations
+  */
   public static readonly CAMPUS_ID = 34; // 42 Kuala Lumpur
-  private static accessToken: string;
-  private static readonly httpService = new HttpService();
-  private static readonly logger = new Logger(ApiManager.name);
+  private static defaultInstance: ApiManager;
 
-  private constructor () { }
+  public constructor (
+    private readonly accessToken: string,
+    private readonly httpService = new HttpService(),
+    private readonly logger = new Logger(ApiManager.name),
+  ) { }
 
-  public static async init() {
-    this.accessToken = await this.getAccessToken();
+  public static async initDefaultInstance() {
+    if (this.defaultInstance !== undefined) {
+      return ;
+    }
+    this.defaultInstance = new ApiManager(await this.getAccessToken());
+  }
+
+  public static getDefaultInstance() {
+    if (this.defaultInstance === undefined) {
+      throw new Error('Default instance not initialized');
+    }
+    return this.defaultInstance;
   }
 
   public static async getAccessToken(code?: string): Promise<string> {
-    let redirect_uri = process.env.HOST;
-    if (process.env.BOT_PORT !== undefined) {
-      redirect_uri += `:${process.env.BOT_PORT}`;
+    const params = {
+      grant_type: 'client_credentials',
+      client_id: process.env.API_UID,
+      client_secret: process.env.API_SECRET,
+      code: code,
+      redirect_uri: undefined
     }
 
-    const url = `https://api.intra.42.fr/oauth/token?grant_type=client_credentials&client_id=${process.env.API_UID}&client_secret=${process.env.API_SECRET}`;
-    const { data } = await firstValueFrom(ApiManager.httpService.post(url));
-    // let { data } = await firstValueFrom(ApiManager.httpService.post('https://api.intra.42.fr/oauth/token', {
-    //   'grant_type': 'authorization_code',
-    //   'client_id': process.env.API_UID,
-    //   'client_secret': process.env.API_SECRET,
-    //   'code': code,
-    //   'redirect_uri': redirect_uri
-    // }));
+    if (code !== undefined) {
+      params.grant_type = 'authorization_code';
 
-    return data.access_token;
-  }
-
-  public static getUser(intraIdOrLogin: string | number) {
-    return this.get42Api(`users/${intraIdOrLogin}`);
-  }
-
-  public static async getUserInCampus(intraIdOrLogin: string | number) {
-    const filterField = (typeof intraIdOrLogin === 'string' ? 'login' : 'id');
-    const response: any[] = await this.get42Api(`campus/${this.CAMPUS_ID}/users`,
-      `filter[${filterField}]=${intraIdOrLogin}`
-    );
-
-    if (response.length === 0) {
-      return null;
-    } else if (response.length > 1) {
-      this.logger.warn(`Multiple users found for ${intraIdOrLogin}`);
+      let redirect_uri = process.env.HOST;
+      if (process.env.BOT_PORT !== undefined) {
+        redirect_uri += `:${process.env.BOT_PORT}`;
+      }
+      params.redirect_uri = redirect_uri;
     }
-    return response[0];
-  }
 
-  public static async getCoalitionRole(intraIdOrLogin: string): Promise<string> {
-    const response = await this.get42Api(`users/${intraIdOrLogin}/coalitions`);
-    return response.data[0].name;
-  }
+    try {
+      const { data } = await axios.post('https://api.intra.42.fr/oauth/token',
+        undefined,
+        { params: params }
+      );
 
-  public static getProjectUsers(projectSlugOrId: string | number, intraId: number): Promise<Array<any>> {
-    return this.get42Api(`projects/${projectSlugOrId}/projects_users`,
-      `filter[user_id]=${intraId}`,
-      `filter[campus]=${this.CAMPUS_ID}`
-    );
-  }
+      return data.access_token;
+    } catch (e) {
+      const error = e as AxiosError;
 
-  public static getProjectTeams(projectSlugOrId: string | number, ...fields: string[]): Promise<Array<any>> {
-    return this.get42Api(`projects/${projectSlugOrId}/teams`, ...fields,
-      `page[size]=100`,
-      `filter[campus]=${this.CAMPUS_ID}`
-    );
-  }
+      if (error.response?.status !== HttpStatus.TOO_MANY_REQUESTS) {
+        throw error;
+      }
+      const waitTime = parseInt(error.response.headers['retry-after']) * 1000;
 
-  public static getTeam(teamId: number, ...fields: string[]) {
-    return this.get42Api(`teams/${teamId}`);
-  }
-
-  public static async getUserTeam(intraIdOrLogin: number | string, projectSlugOrId: string | number) {
-    const response = await this.get42Api(`users/${intraIdOrLogin}/projects/${projectSlugOrId}/teams`);
-
-    if (response.length === 0) {
-      return null;
-    } else if (response.length > 1) {
-      this.logger.warn(`User ${intraIdOrLogin} has more than one team in project ${projectSlugOrId}`);
+      await sleep(waitTime);
+      return await this.getAccessToken(code);
     }
-    return response[0];
   }
 
   public static async intraTeamToTeam(intraTeam, studentModel: Model<Student>) {
@@ -128,17 +112,69 @@ export class ApiManager {
     return team;
   }
 
-  public static async get42Api(url: string, ...fields: string[]) {
-    if (this.accessToken === undefined) {
-      this.accessToken = await this.getAccessToken();
-    }
-    return await this.get("https://api.intra.42.fr/v2/" + url + `?${fields.join('&')}`, `Bearer ${this.accessToken}`);
+  public getUser(intraIdOrLogin: string | number) {
+    return this.get(`users/${intraIdOrLogin}`);
   }
 
-  private static async get(url: string, authorization: string) {
+  public async getUserInCampus(intraIdOrLogin: string | number) {
+    const filterField = (typeof intraIdOrLogin === 'string' ? 'login' : 'id');
+    const params = {};
+
+    params[`filter[${filterField}]`] = intraIdOrLogin;
+    console.log('params in getUserInCampus', params);
+    const response: any[] = await this.get(`campus/${ApiManager.CAMPUS_ID}/users`, params);
+
+    if (response.length === 0) {
+      return null;
+    } else if (response.length > 1) {
+      this.logger.warn(`Multiple users found for ${intraIdOrLogin}`);
+    }
+    return response[0];
+  }
+
+  public async getCoalitionRole(intraIdOrLogin: string): Promise<string> {
+    const response = await this.get(`users/${intraIdOrLogin}/coalitions`);
+    return response.data[0].name;
+  }
+
+  public getProjectUsers(projectSlugOrId: string | number, intraId: number): Promise<Array<any>> {
+    return this.get(`projects/${projectSlugOrId}/projects_users`, {
+      'filter[user_id]': intraId,
+      'filter[campus]': ApiManager.CAMPUS_ID
+    });
+  }
+
+  public getProjectTeams(projectSlugOrId: string | number, params?: any): Promise<Array<any>> {
+    if (params === undefined) {
+      params = {};
+    }
+    params['page[size]'] = params['page[size]'] ?? 100;
+    params['filter[campus]'] = ApiManager.CAMPUS_ID;
+    return this.get(`projects/${projectSlugOrId}/teams`, params);
+  }
+
+  public getTeam(teamId: number, params?: any) {
+    return this.get(`teams/${teamId}`, params);
+  }
+
+  public async getUserTeam(intraIdOrLogin: number | string, projectSlugOrId: string | number) {
+    const response = await this.get(`users/${intraIdOrLogin}/projects/${projectSlugOrId}/teams`);
+
+    if (response.length === 0) {
+      return null;
+    } else if (response.length > 1) {
+      this.logger.warn(`User ${intraIdOrLogin} has more than one team in project ${projectSlugOrId}`);
+    }
+    return response[0];
+  }
+
+  public async get(url: string, params?: any) {
     while (true) {
       try {
-        const { data } = await firstValueFrom(this.httpService.get(url, { headers: { Authorization: authorization } }));
+        const { data } = await firstValueFrom(this.httpService.get("https://api.intra.42.fr/v2/" + url, {
+          headers: { Authorization: `Bearer ${this.accessToken}` },
+          params: params,
+        }));
         return data;
       } catch (error) {
         if (error.response.status !== HttpStatus.TOO_MANY_REQUESTS) {
