@@ -59,7 +59,7 @@ export class ApiManager {
     if (code !== undefined) {
       params.grant_type = 'authorization_code';
 
-      let redirect_uri = process.env.HOST;
+      let redirect_uri = process.env.BOT_HOST;
       if (process.env.BOT_PORT !== undefined) {
         redirect_uri += `:${process.env.BOT_PORT}`;
       }
