@@ -1,6 +1,6 @@
 import { Injectable } from '@nestjs/common';
 import { SlashCommand, SlashCommandContext, Context, CommandsService } from 'necord';
-import { Embed, EmbedBuilder, embedLength } from 'discord.js';
+import { EmbedBuilder } from 'discord.js';
 
 @Injectable()
 export class HelpCommand {

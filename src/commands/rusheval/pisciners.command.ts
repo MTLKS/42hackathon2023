@@ -6,14 +6,14 @@ import { Student } from '../../schema/student.schema';
 import { Timeslot } from 'src/schema/timeslot.schema';
 import { Evaluator } from 'src/schema/evaluator.schema';
 import { ButtonBuilder, ActionRowBuilder, ButtonStyle, StringSelectMenuBuilder, ModalBuilder, TextInputBuilder, TextInputStyle, EmbedBuilder } from 'discord.js';
-import { ConsoleLogger, Inject, Injectable } from '@nestjs/common';
+import { ConsoleLogger, Injectable } from '@nestjs/common';
 import { Team } from 'src/schema/team.schema';
 import { getRole } from '../updateroles.command';
 import { SpecRequest } from 'src/schema/specrequest.schema';
 import { Specialslot } from 'src/schema/specialslot.schema';
 import { ApiManager, ProjectStatus } from 'src/ApiManager';
 import { AxiosError } from 'axios';
-import { StudentService, newStudentModal } from 'src/StudentService';
+import { StudentService } from 'src/StudentService';
 import { LoginCommand } from '../login.command';
 import { LoginCode } from 'src/schema/logincode.schema';
 

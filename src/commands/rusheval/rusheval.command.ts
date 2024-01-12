@@ -1,4 +1,3 @@
-import { InteractionReplyOptions } from 'discord.js';
 import { createCommandGroupDecorator } from 'necord';
 
 export const RushEvalCommandDecorator = createCommandGroupDecorator({

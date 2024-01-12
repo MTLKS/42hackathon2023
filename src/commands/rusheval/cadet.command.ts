@@ -9,7 +9,6 @@ import { Timeslot } from 'src/schema/timeslot.schema';
 import { Evaluator } from 'src/schema/evaluator.schema';
 import { Specialslot } from 'src/schema/specialslot.schema';
 import { getRole } from '../updateroles.command';
-import { newStudentModal } from 'src/StudentService';
 import { LoginCommand } from '../login.command';
 import { LoginCode } from 'src/schema/logincode.schema';
 

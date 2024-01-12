@@ -1,7 +1,6 @@
 import { Injectable, Logger, Req } from '@nestjs/common';
 import { Once, Context, ContextOf } from 'necord';
 import { HttpService } from '@nestjs/axios';
-import { firstValueFrom } from 'rxjs';
 import { InjectModel } from '@nestjs/mongoose';
 import { Student } from './schema/student.schema';
 import { Model } from 'mongoose';
