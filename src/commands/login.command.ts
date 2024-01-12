@@ -76,8 +76,7 @@ export class LoginCommand {
       } satisfies LoginCode);
     logger.log(`Generated login code (${loginCode.code}) for ${discordUser.username}`);
     setTimeout(() => {
-      loginCode.deleteOne();
-      logger.log(`Deleted login code (${loginCode.code}) for ${discordUser.username}`);
+      loginCode.deleteOne().then(() => logger.log(`Deleted login code (${loginCode.code}) for ${discordUser.username}`));
     }, 5 * 60 * 1000);
       // }, 5 * 1000);
     const url = `${process.env.BOT_HOST}${port}/login/${loginCode.code}`;

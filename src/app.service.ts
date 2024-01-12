@@ -1,4 +1,4 @@
-import { Injectable, Logger, Request } from '@nestjs/common';
+import { Injectable, Logger, Req } from '@nestjs/common';
 import { Once, Context, ContextOf } from 'necord';
 import { HttpService } from '@nestjs/axios';
 import { firstValueFrom } from 'rxjs';
@@ -7,6 +7,8 @@ import { Student } from './schema/student.schema';
 import { Model } from 'mongoose';
 import { ActivityType } from 'discord.js';
 import { LoginCode } from './schema/logincode.schema';
+import { ApiManager } from './ApiManager';
+import { Request } from 'express';
 
 function getCursusRole(cursus_users) {
   if (cursus_users.length == 1) {
@@ -25,6 +27,39 @@ function getCursusRole(cursus_users) {
     else
       return 'RESERVISTS';
   }
+}
+
+function getResponse(body: string): string {
+  return `
+<html>
+<head>
+<title>THILA Bot</title>
+<style>
+  body {
+    background-color: #222222;
+    display: flex;
+    flex-wrap: wrap;
+    justify-content: center;
+    align-items: center;
+    align-content: center;
+    font-family: Arial, Helvetica, sans-serif;
+  }
+
+  .break {
+    flex-basis: 100%;
+    height: 0;
+  }
+
+  h1 {
+    color: #FFFFFF;
+  }
+</style>
+</head>
+<body>
+${body}
+</body>
+</html>
+`;
 }
 
 @Injectable()
@@ -51,84 +86,59 @@ export class AppService {
     });
   }
 
-  async getCode(@Request() request: any): Promise<string> {
-    const loginCode = await this.loginCodeModel.findOne({ code: request.cookies['code'] });
+  async getCode(@Req() request: Request): Promise<string> {
+    const code = request.cookies['code'];
 
-    if (loginCode === null) {
-      return 'The link has either expired or is invalid';
+    console.log(request.cookies);
+    if (!code) {
+      return getResponse(`<img src="https://i.pinimg.com/originals/49/b7/93/49b793ae912e181461e1fe87530f1818.gif" height="200px"></img>`);
     }
-    if (request.query.code === null) {
-      return 'No code provided';
+    const loginCode = await this.loginCodeModel.findOne({ code: code });
+
+    if (loginCode === null || loginCode.intraCode !== undefined) {
+      return getResponse('<h1>The link has either expired or is invalid/used</h1>');
     }
-    let redirect_uri = process.env.BOT_HOST;
-    if (process.env.BOT_PORT != undefined) {
-      redirect_uri += `:${process.env.BOT_PORT}`;
+    loginCode.intraCode = request.query.code as string;
+    loginCode.save();
+    const access_token = await ApiManager.getAccessToken(loginCode.intraCode).catch((error) => {
+      this.logger.error(`${loginCode.discordUsername}: ${error.data.error_description}`);
+      return null;
+    });
+    if (access_token === null) {
+      return getResponse('<h1>Code expired</h1>');
     }
-
-    let { data } = await firstValueFrom(this.httpService.post('https://api.intra.42.fr/oauth/token', {
-      'grant_type': 'authorization_code',
-      'client_id': process.env.API_UID,
-      'client_secret': process.env.API_SECRET,
-      'code': request.query.code,
-      'redirect_uri': redirect_uri
-    }));
-
-    const intraUserData = await firstValueFrom(this.httpService.get('https://api.intra.42.fr/v2/me', { headers: { Authorization: `Bearer ${data.access_token}` } }));
-    const intraId = intraUserData.data.id;
-    let student = await this.studentModel.findOne({ intraId: intraId });
-    const role = getCursusRole(intraUserData.data.cursus_users)
-
+    const api = new ApiManager(access_token);
+    const intraUserData = await api.get('me');
+    const intraId = intraUserData.id;
+    const role = getCursusRole(intraUserData.cursus_users)
+    
     let coalition = '';
-    if (role == 'SPECIALIZATION' || role == 'CADET') {
-      let coalitionResponse = await firstValueFrom(this.httpService.get(`https://api.intra.42.fr/v2/users/${intraId}/coalitions`, { headers: { Authorization: `Bearer ${data.access_token}` } }));
-      coalition = coalitionResponse.data[0].name;
+    if (role === 'SPECIALIZATION' || role === 'CADET') {
+      const coalitionResponse = await api.get(`users/${intraId}/coalitions`);
+      coalition = coalitionResponse[0].name;
     }
-
-    if (student == null) {
-      student = new this.studentModel({
+    const student = await this.studentModel.findOne({ intraId: intraId })
+      ?? new this.studentModel({
         intraId: intraId,
-        intraName: intraUserData.data.login,
-        poolYear: intraUserData.data.pool_year,
-        poolMonth: intraUserData.data.pool_month,
+        intraName: intraUserData.login,
+        poolYear: intraUserData.pool_year,
+        poolMonth: intraUserData.pool_month,
       });
-    }
+
     student.discordId = loginCode.discordId;
     student.discordName = loginCode.discordUsername;
     student.progressRole = role;
     student.coalitionRole = coalition;
-    student.intraImageLink = intraUserData.data.image.link;
-
+    student.intraImageLink = intraUserData.image.link;
     await student.save();
 
-    return `
-      <html>
-        <head>
-          <title>THILA Bot</title>
-        </head>
-        <body>
-        <style>
-          body {
-            background-color: #222222;
-            display: flex;
-            flex-wrap: wrap;
-            justify-content: center;
-            align-items: center;
-            align-content: center;
-            font-family: Arial, Helvetica, sans-serif;
-          }
-          .break {
-            flex-basis: 100%;
-            height: 0;
-          }
-        </style>
-          <h1 style="color: #FFFFFF">You are now logged in to THILA Bot</h1>
-          <div class="break"></div>
-          <img src="https://64.media.tumblr.com/58a920b1da6459ad18274328dfe55784/tumblr_n2ykjx27uE1tqptlzo1_r1_500.gif" height="200px"></img>
-          <div class="break"></div>
-          <img src="${loginCode.discordAvatarUrl}" height="200px" padding="20px"></img>
-          <img src="${intraUserData.data.image.versions.medium}" height="200px" padding="20px"></img>
-        </body>
-      </html>
-      `;
+    return getResponse(`
+  <h1>You are now logged in to THILA Bot</h1>
+  <div class="break"></div>
+  <img src="https://64.media.tumblr.com/58a920b1da6459ad18274328dfe55784/tumblr_n2ykjx27uE1tqptlzo1_r1_500.gif" height="200px"></img>
+  <div class="break"></div>
+  <img src="${loginCode.discordAvatarUrl}" height="200px" padding="20px"></img>
+  <img src="${intraUserData.image.versions.medium}" height="200px" padding="20px"></img>
+`);
   }
 }
