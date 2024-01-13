@@ -142,8 +142,8 @@ export class RushEvalFeedbackForm {
      * saying that the feedback has been successfully recorded,
      * or a markdown of written feedback?
     */
+   const student = await this.studentModel.findOne({ discordId: interaction.user.id }).exec();
     try {
-      const student = await this.studentModel.findOne({ discordId: interaction.user.id }).exec();
       const team = await this.teamModel.findOne({ name: teamName }).exec();
       this.logger.log(`${student.intraName} submitted feedback for ${teamName}`);
 
@@ -151,6 +151,7 @@ export class RushEvalFeedbackForm {
       team.feedbackAt = new Date();
       await team.save();
     } catch (error) {
+      this.logger.log(`Something went wrong saving ${teamName} feedback by ${student.intraName}`);
       console.error(error);
       return interaction.reply({
         content: 'Something went wrong. Please try again.',

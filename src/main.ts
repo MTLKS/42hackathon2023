@@ -42,4 +42,4 @@ async function bootstrap() {
   await app.listen(process.env.BOT_PORT || 80);
 }
 
-bootstrap().catch(error => console.error(error));
+bootstrap().catch(error => console.error('bootstrap:' ,error));
