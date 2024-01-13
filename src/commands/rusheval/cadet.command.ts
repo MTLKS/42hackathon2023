@@ -98,10 +98,10 @@ export class RushEvalCadetFetchSlotsComponent {
     }
     this.logger.log(`${student.intraName} fetched for available slot`);
     const timeslots = await this.timeslotModel.find().exec();
-    const evaluators = await this.evaluatorModel.find().exec();
-    const underBookedSessions = getUnderBookedSessions(timeslots, evaluators);
     const evaluator = await this.evaluatorModel.findOne({student: student}).exec()
       ?? await this.evaluatorModel.create({ student: student });
+    const evaluators = await this.evaluatorModel.find({student: {$ne: student}}).exec();
+    const underBookedSessions = getUnderBookedSessions(timeslots, evaluators);
     const selectMap = (time: string) => ({label: time, value: time});
     const availableOptions = (underBookedSessions.length
         ? underBookedSessions.map(selectMap)
@@ -142,9 +142,9 @@ export class RushEvalCadetStringSelectComponent {
     if (student === null) {
       return interaction.update({content: 'Please try fetching slots and register yourself as new student again.', components: []});
     }
-    this.logger.log(`${student.intraName} Selected: ${selected}`)
+    this.logger.log(`${student.intraName} Selected: ${selected}`);
     const timeslots = await this.timeslotModel.find().exec();
-    const evaluators = await this.evaluatorModel.find().exec();
+    const evaluators = await this.evaluatorModel.find({student: {$ne: student}}).exec();
     const underBookedSessions = getUnderBookedSessions(timeslots, evaluators);
 
     if (underBookedSessions.length) {
