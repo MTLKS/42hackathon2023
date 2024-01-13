@@ -100,13 +100,14 @@ export class RushEvalCadetFetchSlotsComponent {
     const timeslots = await this.timeslotModel.find().exec();
     const evaluator = await this.evaluatorModel.findOne({student: student}).exec()
       ?? await this.evaluatorModel.create({ student: student });
-    const evaluators = await this.evaluatorModel.find({student: {$ne: student}}).exec();
-    const underBookedSessions = getUnderBookedSessions(timeslots, evaluators);
+    // const evaluators = await this.evaluatorModel.find({student: {$ne: student}}).exec();
+    // const underBookedSessions = getUnderBookedSessions(timeslots, evaluators);
     const selectMap = (time: string) => ({label: time, value: time});
-    const availableOptions = (underBookedSessions.length
-        ? underBookedSessions.map(selectMap)
-        : timeslots.map(timeslot => selectMap(timeslot.timeslot)))
-      ;
+    // const availableOptions = (underBookedSessions.length
+    //     ? underBookedSessions.map(selectMap)
+    //     : timeslots.map(timeslot => selectMap(timeslot.timeslot)))
+    //   ;
+    const availableOptions = timeslots.map(timeslot => selectMap(timeslot.timeslot));
     const selectedOptions = evaluator.timeslots.map(t => t.timeslot);
     const stringSelect = new StringSelectMenuBuilder()
       .setCustomId('cadet-session-select')
