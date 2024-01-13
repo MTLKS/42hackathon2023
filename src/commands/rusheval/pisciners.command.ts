@@ -50,7 +50,7 @@ export class RushEvalPiscinersCommand {
       ;
 
     const embed = new EmbedBuilder()
-      .setTitle("Please select your timeslot for the next rush defense")
+      .setTitle("Please select your timeslot for the rush defense")
       .setColor('#00FFFF')
       ;
 
@@ -101,7 +101,7 @@ export class RushEvalPiscinersButtonComponent {
   ) { }
 
   private async fetchIntraGroup(projectSlugOrId: string | number, intraIdOrLogin: string | number) {
-    this.logger.log(`Fetching intra group ${intraIdOrLogin} for ${projectSlugOrId}`);
+    this.logger.warn(`Fetching intra group ${intraIdOrLogin} for ${projectSlugOrId}`);
     const intraTeam = await ApiManager.getDefaultInstance().getUserTeam(intraIdOrLogin, projectSlugOrId);
 
     if (intraTeam === null) {
@@ -113,7 +113,6 @@ export class RushEvalPiscinersButtonComponent {
 
   @Button('piscinersButton')
   public async onButton(@Context() [interaction]: ButtonContext) {
-    this.logger.log(interaction.user.username);
     const student = await this.studentModel.findOne({ discordId: interaction.user.id }).exec();
 
     /* if student not found, prompt student intra login */
@@ -127,12 +126,12 @@ export class RushEvalPiscinersButtonComponent {
       await StudentService.setStudentDiscordData(interaction.guild, interaction.user, student)
         .then(() => student.save());
     }
+    this.logger.log(`${student.intraName} is fetching for timeslot`);
     const projectSlug = 'c-piscine-rush-00';
     await interaction.deferReply({ephemeral: true});
     interaction.editReply(`Looking for ${student.intraName} team...`);
-    this.logger.log(`Looking for ${student.intraName} team...`);
     /* if recognise student, look for their team */
-    const team = await this.teamModel.findOne({ $or: [
+    const team: Team = await this.teamModel.findOne({ $or: [
         {teamLeader: student},
         {teamMembers: { $in: [student] }}]
       }).exec()
@@ -154,7 +153,6 @@ If you're certain you've signed up for this project, please contact BOCAL for it
       return interaction.editReply(content);
     }
     interaction.editReply('Looking for available timeslot...');
-    this.logger.log('Looking for available timeslot...');
     let reply = '';
     const leader = team.teamLeader;
     if (student.intraName !== leader.intraName) {
@@ -165,7 +163,7 @@ If you're certain you've signed up for this project, please contact BOCAL for it
     if (timeslotOptions.length === 0) {
       /* Should notify the admin that there is no available session for pisciner */
       this.logger.error(`No available session`);
-      reply += 'There\'s no available session at the moment.';
+      reply += 'There\'s no available session at the moment. Please try again later.';
       return interaction.editReply(reply);
     }
     const stringSelect = new StringSelectMenuBuilder()
@@ -177,8 +175,7 @@ If you're certain you've signed up for this project, please contact BOCAL for it
 
     const row = new ActionRowBuilder<StringSelectMenuBuilder>()
       .addComponents(stringSelect);
-
-    this.logger.log('Returning available session');
+    this.logger.log(`${student.intraName} (leader: ${student.intraName === leader.intraName}) got ${timeslotOptions.map(t => t.value)} as options`);
     reply += 'Please select your timeslot for the next rush defense';
     return interaction.editReply({
         content: reply,
@@ -222,11 +219,11 @@ export class RushEvalPiscinersStringSelectComponent {
 
   @StringSelect('piscinersStringSelect')
   public async onStringSelect(@Context() [interaction]: StringSelectContext, @SelectedStrings() selected: string[]) {
-    this.logger.log(`${interaction.user.username} Selected timeslots: ${selected.map(t => t)}`);
     const student = await this.studentModel.findOne({ discordId: interaction.user.id }).exec();
     if (student === null) {
       return interaction.reply({content: 'Please try fetching slots and register yourself as new student again.', ephemeral: true});
     }
+    this.logger.log(`${student.intraName} selected timeslot: ${selected}`);
     const availableCount = await this.evaluatorModel.aggregate([{$unwind: '$timeslots'},{$group: {_id: '$timeslots.timeslot',count: { $sum: 1 }}},{$project: {_id: 0,timeslot: '$_id',count: 1}}]);
     const unavailableCount = await this.teamModel.aggregate([{$unwind: '$timeslot'},{$group: {_id: '$timeslot.timeslot',count: { $sum: 1 }}},{$project: {_id: 0,timeslot: '$_id',count: 1}}]);
     let currentAvailable = availableCount.find((timeslot) => timeslot.timeslot === selected[0]);
@@ -240,7 +237,7 @@ export class RushEvalPiscinersStringSelectComponent {
     }
 
     if (finalCount == 0) {
-      this.logger.log(`${interaction.user.username} Selected timeslots: ${selected.map(t => t)} is full`);
+      this.logger.log(`${student.intraName} Selected timeslots: ${selected} is full`);
       return interaction.update({ content: `Sorry, timeslot ${selected[0]} is full, please try again.`, components: [] });
     }
 

@@ -26,8 +26,8 @@ function rearrangeTimeslot(timeslots: Array<Timeslot>, evaluators: Array<Evaluat
 function getUnderBookedSessions(timeslots: Timeslot[], evaluators: Evaluator[]) {
   const timeTable = rearrangeTimeslot(timeslots, evaluators);
   const underBookedSessions = [...timeTable.entries()]
-    .filter(([time, evaluators]) => evaluators.length < 3)
-    .map(([time, evaluators]) => time)
+    .filter(([_, evaluators]) => evaluators.length < 3)
+    .map(([time, _]) => time)
   ;
 
   return underBookedSessions;
@@ -88,7 +88,6 @@ export class RushEvalCadetFetchSlotsComponent {
 
   @Button('cadet-fetch-slot')
   public async onExecute(@Context() [interaction]: ButtonContext) {
-    this.logger.log(`Cadet fetch slots called by ${interaction.user.username}`);
     const student = await this.studentModel.findOne({ discordId: interaction.user.id }).exec();
     if (student === null) {
       return interaction.reply(await LoginCommand.getLoginReply(
@@ -97,6 +96,7 @@ export class RushEvalCadetFetchSlotsComponent {
         'New student detected'
       ));
     }
+    this.logger.log(`${student.intraName} fetched for available slot`);
     const timeslots = await this.timeslotModel.find().exec();
     const evaluators = await this.evaluatorModel.find().exec();
     const underBookedSessions = getUnderBookedSessions(timeslots, evaluators);
@@ -138,11 +138,11 @@ export class RushEvalCadetStringSelectComponent {
 
   @StringSelect('cadet-session-select')
   public async onStringSelect(@Context() [interaction]: StringSelectContext, @SelectedStrings() selected: string[]) {
-    this.logger.log(interaction.user.username);
     const student = await this.studentModel.findOne({ discordId: interaction.user.id }).exec();
     if (student === null) {
       return interaction.update({content: 'Please try fetching slots and register yourself as new student again.', components: []});
     }
+    this.logger.log(`${student.intraName} Selected: ${selected}`)
     const timeslots = await this.timeslotModel.find().exec();
     const evaluators = await this.evaluatorModel.find().exec();
     const underBookedSessions = getUnderBookedSessions(timeslots, evaluators);
@@ -151,7 +151,7 @@ export class RushEvalCadetStringSelectComponent {
       /** Check if the chosen slots contain any overbooked sessions */
       const overBooked = selected.filter(session => !underBookedSessions.includes(session));
       if (overBooked.length) {
-        this.logger.log(`${interaction.user.username} Overbooked sessions: ${overBooked}`);
+        this.logger.log(`${student.intraName} selected overbooked sessions: ${overBooked}`);
         return interaction.update({
             content: `**${overBooked}** are currently filled.
 Please regenerate your selection by clicking on the \`Open slots\` button one more time`,
@@ -167,7 +167,7 @@ Please regenerate your selection by clicking on the \`Open slots\` button one mo
     evaluator.timeslots = selectedTimeslots;
     evaluator.lastCreatedTimeslotsAt = new Date();
     await evaluator.save();
-    this.logger.log(`${interaction.user.username} Selected timeslots: ${selectedTimeslots.map(t => t.timeslot)}`);
+    this.logger.log(`${student.intraName} Selected timeslots: ${selectedTimeslots.map(t => t.timeslot)}`);
     return interaction.reply({
         content: ((selectedTimeslots.length === 0)
             ? 'You have canceled your timeslots'

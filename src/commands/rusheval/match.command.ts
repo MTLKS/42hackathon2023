@@ -106,6 +106,7 @@ export class RushEvalMatchCommand {
   public async onMatch(@Context() [interaction]: SlashCommandContext) {
     const projectSlug = 'c-piscine-rush-00';
 
+    this.logger.log(`${interaction.user.username} attempted to match teams and evaluators`);
     await interaction.deferReply({ephemeral: true});
     if (await this.teamModel.count({ feedbackAt: {$ne: undefined}}).exec() !== 0) {
       this.logger.error(`${interaction.user.username} attempted to match after feedback has been given.`);
@@ -155,7 +156,7 @@ export class RushEvalMatchCommand {
         const replyContent = `Rush evaluation time table for dear evaluators: ${getRole(interaction.guild, 'CADET')}\n`;
 
         interaction.editReply('Done!');
-        this.logger.log('Done!');
+        this.logger.log('Generated time table');
         return interaction.channel.send({content: replyContent, files: [outfile]})
         // return interaction.editReply({content: replyContent, files: [outfile]})
           .finally(() => unlink(outfile, ()=>{}));
