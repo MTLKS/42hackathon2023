@@ -28,7 +28,7 @@ function getCursusRole(cursus_users) {
   }
 }
 
-function getResponse(body: string): string {
+function thilaBotResponse(body: string): string {
   return `
 <html>
 <head>
@@ -88,26 +88,30 @@ export class AppService {
   async getCode(@Req() request: Request): Promise<string> {
     const code = request.cookies['code'];
 
-    console.log(request.cookies);
     if (!code) {
-      return getResponse(`<img src="https://i.pinimg.com/originals/49/b7/93/49b793ae912e181461e1fe87530f1818.gif" height="200px">`);
+      return thilaBotResponse(`<img src="https://i.pinimg.com/originals/49/b7/93/49b793ae912e181461e1fe87530f1818.gif" height="200px">`);
     }
     const loginCode = await this.loginCodeModel.findOne({ code: code });
-
-    if (loginCode === null || loginCode.intraCode !== undefined) {
-      return getResponse(`<h1>The link has either expired or is invalid/used</h1>
+    
+    if (loginCode === null) {
+      return thilaBotResponse(`<h1>The link has either expired or is invalid</h1>
       <div class="break"></div>
       <img src="https://media1.tenor.com/m/L4OqCI0rthEAAAAd/hatsune-miku-chair.gif" height="200px">
-    `);
+      `);
+    }
+    this.logger.log(`${loginCode.discordUsername} attempted to login`);
+    if (loginCode.intraCode !== undefined) {
+      return thilaBotResponse(`<img src="https://i.pinimg.com/originals/49/b7/93/49b793ae912e181461e1fe87530f1818.gif" height="200px">`);
     }
     loginCode.intraCode = request.query.code as string;
-    loginCode.save();
+    await loginCode.save();
     const access_token = await ApiManager.getAccessToken(loginCode.intraCode).catch((error) => {
       this.logger.error(`${loginCode.discordUsername}: ${error.data.error_description}`);
       return null;
     });
     if (access_token === null) {
-      return getResponse(`<h1>Code expired</h1>
+      this.logger.debug(`${loginCode.discordUsername}'s code expired, presumably before the loginCode timeout (5min)`);
+      return thilaBotResponse(`<h1>Code expired. Please try creating a new link.</h1>
       <div class="break"></div>
       <img src="https://media1.tenor.com/m/QONGo5d2GdIAAAAd/hatsune-miku-miku-hatsune.gif" height="200px">
     `);
@@ -136,7 +140,8 @@ export class AppService {
     student.coalitionRole = coalition;
     student.intraImageLink = intraUserData.image.link;
     await student.save();
-    return getResponse(`
+    this.logger.log(`Registered ${loginCode.discordUsername} as ${student.intraName}`);
+    return thilaBotResponse(`
   <h1>You are now logged in to THILA Bot</h1>
   <div class="break"></div>
   <img src="https://64.media.tumblr.com/58a920b1da6459ad18274328dfe55784/tumblr_n2ykjx27uE1tqptlzo1_r1_500.gif" height="200px">
