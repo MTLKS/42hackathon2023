@@ -145,21 +145,21 @@ export class RushEvalCadetStringSelectComponent {
     }
     this.logger.log(`${student.intraName} Selected: ${selected}`);
     const timeslots = await this.timeslotModel.find().exec();
-    const evaluators = await this.evaluatorModel.find({student: {$ne: student}}).exec();
-    const underBookedSessions = getUnderBookedSessions(timeslots, evaluators);
+    // const evaluators = await this.evaluatorModel.find({student: {$ne: student}}).exec();
+//     const underBookedSessions = getUnderBookedSessions(timeslots, evaluators);
 
-    if (underBookedSessions.length) {
-      /** Check if the chosen slots contain any overbooked sessions */
-      const overBooked = selected.filter(session => !underBookedSessions.includes(session));
-      if (overBooked.length) {
-        this.logger.log(`${student.intraName} selected overbooked sessions: ${overBooked}`);
-        return interaction.update({
-            content: `**${overBooked}** are currently filled.
-Please regenerate your selection by clicking on the \`Open slots\` button one more time`,
-            components: []
-          });
-      }
-    }
+//     if (underBookedSessions.length) {
+//       /** Check if the chosen slots contain any overbooked sessions */
+//       const overBooked = selected.filter(session => !underBookedSessions.includes(session));
+//       if (overBooked.length) {
+//         this.logger.log(`${student.intraName} selected overbooked sessions: ${overBooked}`);
+//         return interaction.update({
+//             content: `**${overBooked}** are currently filled.
+// Please regenerate your selection by clicking on the \`Open slots\` button one more time`,
+//             components: []
+//           });
+//       }
+//     }
 
     const selectedTimeslots = timeslots.filter(timeslot => selected.includes(timeslot.timeslot));
     const evaluator = await this.evaluatorModel.findOne({ student: student }).exec()
