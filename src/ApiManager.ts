@@ -28,7 +28,7 @@ export class ApiManager {
   private static defaultInstance: ApiManager;
 
   public constructor (
-    private readonly accessToken: string,
+    private accessToken: string,
     private readonly httpService = new HttpService(),
     private readonly logger = new Logger(ApiManager.name),
   ) { }
@@ -177,13 +177,15 @@ export class ApiManager {
         }));
         return data;
       } catch (error) {
-        if (error.response.status !== HttpStatus.TOO_MANY_REQUESTS) {
+        if (error.response.status === HttpStatus.TOO_MANY_REQUESTS) {
+          const waitTime = parseInt(error.response.headers['retry-after']) * 1000;
+          await sleep(waitTime);
+        } else if (error.response.status === HttpStatus.UNAUTHORIZED) {
+          this.accessToken = await ApiManager.getAccessToken();
+        } else {
           this.logger.error(`Failed to get ${url}: ${error.message}`);
           throw error;
         }
-        const waitTime = parseInt(error.response.headers['retry-after']) * 1000;
-
-        await sleep(waitTime);
       }
     }
   }
