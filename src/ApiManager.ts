@@ -181,6 +181,7 @@ export class ApiManager {
           const waitTime = parseInt(error.response.headers['retry-after']) * 1000;
           await sleep(waitTime);
         } else if (error.response.status === HttpStatus.UNAUTHORIZED) {
+          this.logger.log('Refreshing access token');
           this.accessToken = await ApiManager.getAccessToken();
         } else {
           this.logger.error(`Failed to get ${url}: ${error.message}`);
