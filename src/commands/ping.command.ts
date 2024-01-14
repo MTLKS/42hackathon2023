@@ -1,9 +1,10 @@
-import { Injectable } from '@nestjs/common';
+import { ConsoleLogger, Injectable } from '@nestjs/common';
 import { EmbedBuilder } from 'discord.js';
 import { SlashCommand, SlashCommandContext, Context } from 'necord';
 
 @Injectable()
 export class PingCommand {
+  private readonly logger = new ConsoleLogger(PingCommand.name);
 	@SlashCommand({
 		name: 'ping',
 		description: 'Ping!',
@@ -15,6 +16,7 @@ export class PingCommand {
       .setColor('#00FFFF')
       .setTitle(':ping_pong:   Pong!')
 
+    this.logger.debug(`${interaction.user.username} Pinged!`);
     return interaction.reply({ content: '', ephemeral: true, embeds: [newEmbed]});
 	}
 }
