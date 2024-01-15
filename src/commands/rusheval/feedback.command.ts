@@ -62,6 +62,13 @@ export class RushEvalFeedbackTeamSelectButton {
     const student = await this.studentModel.findOne({ discordId: interaction.user.id }).exec();
     const team = await this.teamModel.find({ evaluator: student }).exec();
 
+    if (student === null) {
+      logger.log(`${interaction.user.username} is not registered`);
+      return interaction.reply({
+        content: `Trying funny thing?`,
+        ephemeral: true
+      });
+    }
     logger.log(`${student.intraName} fetched for their teams to feedback`);
     if (team.length === 0) {
       return interaction.reply({
@@ -102,6 +109,13 @@ export class RushEvalFeedbackForm {
   public async onSelection(@Context() [interaction]: ButtonContext, @ComponentParam('teamName') teamName: string) {
     const cadet = await this.studentModel.findOne({ discordId: interaction.user.id }).exec();
 
+    if (cadet === null) {
+      this.logger.warn(`${interaction.user.username} is not registered`);
+      return interaction.reply({
+        content: `Something must have went wrong if you're seeing this. Please contact an admin.`,
+        ephemeral: true
+      });
+    }
     this.logger.log(`${cadet.intraName} chose ${teamName} to feedback`);
     const teamMembersInput = new TextInputBuilder()
       .setStyle(TextInputStyle.Paragraph)
