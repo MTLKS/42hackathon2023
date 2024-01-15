@@ -45,7 +45,7 @@ import { LoginCode, LoginCodeSchema } from './schema/logincode.schema';
       { name: Specialslot.name, schema: SpecialslotSchema },
       { name: SpecRequest.name, schema: SpecRequestSchema },
       { name: LoginCode.name, schema: LoginCodeSchema }
-    ]) 
+    ])
   ],
   controllers: [AppController],
   providers: [
@@ -77,4 +77,4 @@ import { LoginCode, LoginCodeSchema } from './schema/logincode.schema';
     // TestCommand,
   ],
 })
-export class AppModule {}
+export class AppModule { }

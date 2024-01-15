@@ -27,7 +27,7 @@ export class ApiManager {
   public static readonly CAMPUS_ID = 34; // 42 Kuala Lumpur
   private static defaultInstance: ApiManager;
 
-  public constructor (
+  public constructor(
     private accessToken: string,
     private readonly httpService = new HttpService(),
     private readonly logger = new Logger(ApiManager.name),
@@ -35,7 +35,7 @@ export class ApiManager {
 
   public static async initDefaultInstance() {
     if (this.defaultInstance !== undefined) {
-      return ;
+      return;
     }
     this.defaultInstance = new ApiManager(await this.getAccessToken());
   }

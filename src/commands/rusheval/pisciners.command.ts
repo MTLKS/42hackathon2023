@@ -35,7 +35,7 @@ export class RushEvalPiscinersCommand {
       .setCustomId('piscinersButton')
       .setLabel('Get timeslots')
       .setStyle(ButtonStyle.Primary)
-    ;
+      ;
 
     // const specialButton = new ButtonBuilder()
     //   .setCustomId('piscinersSpecialButton')
@@ -54,7 +54,7 @@ export class RushEvalPiscinersCommand {
       .setColor('#00FFFF')
       ;
 
-    await interaction.reply({content: 'Fetching ongoing rush teams...', ephemeral: true});
+    await interaction.reply({ content: 'Fetching ongoing rush teams...', ephemeral: true });
     const projectSlug = 'c-piscine-rush-00';
     const teams = await this.fetchOngoingRush(projectSlug);
 
@@ -85,7 +85,7 @@ export class RushEvalPiscinersCommand {
     return await Promise.all(allRushTeams
       .filter(intra => !localTeams.find(local => local.intraId === intra.intraId))
       .map(intra => this.teamModel.create(intra))
-      );
+    );
   }
 }
 
@@ -93,7 +93,7 @@ export class RushEvalPiscinersCommand {
 export class RushEvalPiscinersButtonComponent {
   private readonly logger = new ConsoleLogger("piscinerButton");
   constructor(
-    @InjectModel(Student.name) private readonly studentModel: Model<Student>, 
+    @InjectModel(Student.name) private readonly studentModel: Model<Student>,
     @InjectModel(Timeslot.name) private readonly timeslotModel: Model<Timeslot>,
     @InjectModel(Evaluator.name) private readonly evaluatorModel: Model<Evaluator>,
     @InjectModel(Team.name) private readonly teamModel: Model<Team>,
@@ -128,14 +128,15 @@ export class RushEvalPiscinersButtonComponent {
     }
     this.logger.log(`${student.intraName} is fetching for timeslot`);
     const projectSlug = 'c-piscine-rush-00';
-    await interaction.deferReply({ephemeral: true});
+    await interaction.deferReply({ ephemeral: true });
     interaction.editReply(`Looking for ${student.intraName} team...`);
     /* if recognise student, look for their team */
-    const team: Team = await this.teamModel.findOne({ $or: [
-        {teamLeader: student},
-        {teamMembers: { $in: [student] }}]
-      }).exec()
-    /* if team not found, fetch from intra */
+    const team: Team = await this.teamModel.findOne({
+      $or: [
+        { teamLeader: student },
+        { teamMembers: { $in: [student] } }]
+    }).exec()
+      /* if team not found, fetch from intra */
       ?? await this.fetchIntraGroup(projectSlug, student.intraName).catch((error: AxiosError) => {
         if (error.response?.status !== 404) {
           this.logger.error(error.message);
@@ -178,15 +179,22 @@ If you're certain you've signed up for this project, please contact BOCAL for it
     this.logger.log(`${student.intraName} (leader: ${student.intraName === leader.intraName}) got ${timeslotOptions.map(t => t.value)} as options`);
     reply += 'Please select your timeslot for the next rush defense';
     return interaction.editReply({
-        content: reply,
-        components: [row]
-      });
+      content: reply,
+      components: [row]
+    });
   }
 
   private async getTimeslotOptions() {
     const timeslots = await this.timeslotModel.find().exec();
-    const availableCount = await this.evaluatorModel.aggregate([{$unwind: '$timeslots'},{$group: {_id: '$timeslots.timeslot',count: { $sum: 1 }}},{$project: {_id: 0,timeslot: '$_id',count: 1}}]);
-    const unavailableCount = await this.teamModel.aggregate([{$unwind: '$timeslot'},{$group: {_id: '$timeslot.timeslot',count: { $sum: 1 }}},{$project: {_id: 0,timeslot: '$_id',count: 1}}]);
+    const availableCount = await this.evaluatorModel.aggregate([
+      { $unwind: '$timeslots' },
+      { $group: { _id: '$timeslots.timeslot', count: { $sum: 1 } } },
+      { $project: { _id: 0, timeslot: '$_id', count: 1 } }
+    ]);
+    const unavailableCount = await this.teamModel.aggregate([{ $unwind: '$timeslot' }, { $group: { _id: '$timeslot.timeslot', count: { $sum: 1 } } }, { $project: { _id: 0, timeslot: '$_id', count: 1 } }]);
+
+    console.log(availableCount);
+    console.log(unavailableCount);
     var timeslotOptions = [];
     timeslots.forEach(timeslot => {
       let currentAvailable = availableCount.find((timeslotCount) => timeslotCount.timeslot === timeslot.timeslot);
@@ -211,7 +219,7 @@ If you're certain you've signed up for this project, please contact BOCAL for it
 export class RushEvalPiscinersStringSelectComponent {
   private readonly logger = new ConsoleLogger("piscinerStringSelect");
   constructor(
-    @InjectModel(Student.name) private readonly studentModel: Model<Student>, 
+    @InjectModel(Student.name) private readonly studentModel: Model<Student>,
     @InjectModel(Timeslot.name) private readonly timeslotModel: Model<Timeslot>,
     @InjectModel(Evaluator.name) private readonly evaluatorModel: Model<Evaluator>,
     @InjectModel(Team.name) private readonly teamModel: Model<Team>,
@@ -221,11 +229,11 @@ export class RushEvalPiscinersStringSelectComponent {
   public async onStringSelect(@Context() [interaction]: StringSelectContext, @SelectedStrings() selected: string[]) {
     const student = await this.studentModel.findOne({ discordId: interaction.user.id }).exec();
     if (student === null) {
-      return interaction.reply({content: 'Please try fetching slots and register yourself as new student again.', ephemeral: true});
+      return interaction.reply({ content: 'Please try fetching slots and register yourself as new student again.', ephemeral: true });
     }
     this.logger.log(`${student.intraName} selected timeslot: ${selected}`);
-    const availableCount = await this.evaluatorModel.aggregate([{$unwind: '$timeslots'},{$group: {_id: '$timeslots.timeslot',count: { $sum: 1 }}},{$project: {_id: 0,timeslot: '$_id',count: 1}}]);
-    const unavailableCount = await this.teamModel.aggregate([{$unwind: '$timeslot'},{$group: {_id: '$timeslot.timeslot',count: { $sum: 1 }}},{$project: {_id: 0,timeslot: '$_id',count: 1}}]);
+    const availableCount = await this.evaluatorModel.aggregate([{ $unwind: '$timeslots' }, { $group: { _id: '$timeslots.timeslot', count: { $sum: 1 } } }, { $project: { _id: 0, timeslot: '$_id', count: 1 } }]);
+    const unavailableCount = await this.teamModel.aggregate([{ $unwind: '$timeslot' }, { $group: { _id: '$timeslot.timeslot', count: { $sum: 1 } } }, { $project: { _id: 0, timeslot: '$_id', count: 1 } }]);
     let currentAvailable = availableCount.find((timeslot) => timeslot.timeslot === selected[0]);
     let currentUnavailable = unavailableCount.find((timeslot) => timeslot.timeslot === selected[0]);
 
@@ -242,9 +250,10 @@ export class RushEvalPiscinersStringSelectComponent {
     }
 
     const selectedTimeslot = await this.timeslotModel.findOne({ timeslot: selected[0] }).exec();
-    const team = await this.teamModel.findOne({ $or: [
-      {teamLeader: student},
-      {teamMembers: { $in: [student] }}]
+    const team = await this.teamModel.findOne({
+      $or: [
+        { teamLeader: student },
+        { teamMembers: { $in: [student] } }]
     }).exec();
     // const team = await this.teamModel.findOne({ teamLeader: student }).exec();
 
@@ -264,7 +273,7 @@ export class RushEvalPiscinersSpecialButtonComponent {
     const modal = new ModalBuilder()
       .setCustomId('special-request-modal')
       .setTitle('Request for special timeslot')
-    ;
+      ;
 
     const reasonInput = new TextInputBuilder()
       .setStyle(TextInputStyle.Paragraph)
@@ -272,10 +281,10 @@ export class RushEvalPiscinersSpecialButtonComponent {
       .setLabel('You must provide me a really solid reason')
       .setPlaceholder('Enter your reason here')
       .setRequired(true)
-    ;
+      ;
 
     modal.addComponents(new ActionRowBuilder<TextInputBuilder>().addComponents(reasonInput));
-    
+
     return interaction.showModal(modal);
   }
 }
@@ -283,7 +292,7 @@ export class RushEvalPiscinersSpecialButtonComponent {
 @Injectable()
 export class RushEvalPiscinersSpecialModalComponent {
   constructor(
-    @InjectModel(Student.name) private readonly studentModel: Model<Student>, 
+    @InjectModel(Student.name) private readonly studentModel: Model<Student>,
     @InjectModel(SpecRequest.name) private readonly specRequestModel: Model<SpecRequest>,
   ) { }
 
@@ -300,14 +309,14 @@ export class RushEvalPiscinersSpecialModalComponent {
       );
 
     const approvedButton = new ButtonBuilder()
-        .setCustomId('special-request-modal-approved')
-        .setLabel('Approve')
-        .setStyle(ButtonStyle.Success);
+      .setCustomId('special-request-modal-approved')
+      .setLabel('Approve')
+      .setStyle(ButtonStyle.Success);
 
     const row = new ActionRowBuilder<ButtonBuilder>()
-        .addComponents(approvedButton);
+      .addComponents(approvedButton);
 
-    interaction.guild.channels.fetch('1161720663401304155').then(async(channel) => {
+    interaction.guild.channels.fetch('1161720663401304155').then(async (channel) => {
       if (channel.isTextBased()) {
         const message = await channel.send({ content: `<@&1158623712136921098>`, embeds: [embed], components: [row] });
         const newSpecRequest = new this.specRequestModel({ messageId: message.id, student: student });
@@ -315,10 +324,10 @@ export class RushEvalPiscinersSpecialModalComponent {
         console.log(message.id);
         interaction.reply({ content: 'Your request has been sent to the admins, please wait for their response.', ephemeral: true, components: [] });
       } else {
-        interaction.reply({ content: 'Hmm, something went wrong, please contact the BOCALs.', ephemeral: true , components: [] });
+        interaction.reply({ content: 'Hmm, something went wrong, please contact the BOCALs.', ephemeral: true, components: [] });
       }
     }).catch(error => {
-      interaction.reply({ content: 'Hmm, something went wrong, please contact the BOCALs.', ephemeral: true , components: [] });
+      interaction.reply({ content: 'Hmm, something went wrong, please contact the BOCALs.', ephemeral: true, components: [] });
     });
   }
 }
@@ -334,8 +343,8 @@ export class RushEvalPiscinersSpecialApproveButtonComponent {
   public async onButton(@Context() [interaction]: ButtonContext) {
     const specRequest = await this.specRequestModel.findOne({ messageId: interaction.message.id }).exec();
     const student = specRequest.student;
-    interaction.guild.members.fetch(student.discordId).then(async(member) => {
-      const specialslots = await this.specialslotModel.aggregate([{$unwind: '$evaluators'},{$group: {_id: '$timeslot',count: { $sum: 1 }}},{$project: {_id: 0,timeslot: '$_id',count: 1}}])
+    interaction.guild.members.fetch(student.discordId).then(async (member) => {
+      const specialslots = await this.specialslotModel.aggregate([{ $unwind: '$evaluators' }, { $group: { _id: '$timeslot', count: { $sum: 1 } } }, { $project: { _id: 0, timeslot: '$_id', count: 1 } }])
       console.log(specialslots);
       let timeslotOptions = [];
       specialslots.forEach(specialslot => {
@@ -353,14 +362,14 @@ export class RushEvalPiscinersSpecialApproveButtonComponent {
       member.send({ content: "Hi, the BOCALs have approved your request, please pick one below", components: [new ActionRowBuilder<StringSelectMenuBuilder>().addComponents(stringSelect)] });
     });
     console.log(interaction.message.id);
-    interaction.update({ content: 'You have approved the request.',  components: [] });
+    interaction.update({ content: 'You have approved the request.', components: [] });
   }
 }
 
 @Injectable()
 export class RushEvalPiscinersSpecialStringSelectComponent {
   constructor(
-    @InjectModel(Student.name) private readonly studentModel: Model<Student>, 
+    @InjectModel(Student.name) private readonly studentModel: Model<Student>,
     @InjectModel(Specialslot.name) private readonly specialslotModel: Model<Specialslot>,
   ) { }
 

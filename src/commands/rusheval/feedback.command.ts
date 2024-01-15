@@ -156,7 +156,7 @@ export class RushEvalFeedbackForm {
      * saying that the feedback has been successfully recorded,
      * or a markdown of written feedback?
     */
-   const student = await this.studentModel.findOne({ discordId: interaction.user.id }).exec();
+    const student = await this.studentModel.findOne({ discordId: interaction.user.id }).exec();
     try {
       const team = await this.teamModel.findOne({ name: teamName }).exec();
       this.logger.log(`${student.intraName} submitted feedback for ${teamName}`);
@@ -194,7 +194,7 @@ export class RushEvalFeedbackForm {
     //   console.log('The file has been saved!');
     // });
     return interaction.reply({
-      content: 'Thanks for submitting your feedback!',
+      content: `Your feedback for ${teamName} has been recorded.`,
       ephemeral: true
     });
   }

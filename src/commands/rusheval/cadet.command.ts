@@ -17,9 +17,9 @@ function rearrangeTimeslot(timeslots: Array<Timeslot>, evaluators: Array<Evaluat
 
   timeslots.forEach(timeslot => table.set(timeslot.timeslot, []));
   evaluators.forEach(evaluator => {
-      evaluator.timeslots.forEach(slot =>
-        table.get(slot.timeslot).push(evaluator['student']));
-    });
+    evaluator.timeslots.forEach(slot =>
+      table.get(slot.timeslot).push(evaluator['student']));
+  });
   return table;
 }
 
@@ -28,7 +28,7 @@ function getUnderBookedSessions(timeslots: Timeslot[], evaluators: Evaluator[]) 
   const underBookedSessions = [...timeTable.entries()]
     .filter(([_, evaluators]) => evaluators.length < 3)
     .map(([time, _]) => time)
-  ;
+    ;
 
   return underBookedSessions;
 }
@@ -69,22 +69,22 @@ export class RushEvalCadetCommand {
     await interaction.deferReply({ ephemeral: true });
     await interaction.deleteReply();
     return interaction.channel.send({
-        content: `Dear ${getRole(interaction.guild, "CADET")}s`,
-        embeds: [embed],
-        components: [row]
-      });
+      content: `Dear ${getRole(interaction.guild, "CADET")}s`,
+      embeds: [embed],
+      components: [row]
+    });
   }
 }
 
 @Injectable()
-export class RushEvalCadetFetchSlotsComponent { 
+export class RushEvalCadetFetchSlotsComponent {
   private readonly logger = new ConsoleLogger('RushEvalCadetFetchSlots');
   constructor(
     @InjectModel(Student.name) private readonly studentModel: Model<Student>,
     @InjectModel(Timeslot.name) private readonly timeslotModel: Model<Timeslot>,
     @InjectModel(Evaluator.name) private readonly evaluatorModel: Model<Evaluator>,
     @InjectModel(LoginCode.name) private readonly loginCodeModel: Model<LoginCode>,
-  ) {}
+  ) { }
 
   @Button('cadet-fetch-slot')
   public async onExecute(@Context() [interaction]: ButtonContext) {
@@ -98,11 +98,11 @@ export class RushEvalCadetFetchSlotsComponent {
     }
     this.logger.log(`${student.intraName} fetched for available slot`);
     const timeslots = await this.timeslotModel.find().exec();
-    const evaluator = await this.evaluatorModel.findOne({student: student}).exec()
+    const evaluator = await this.evaluatorModel.findOne({ student: student }).exec()
       ?? await this.evaluatorModel.create({ student: student });
     // const evaluators = await this.evaluatorModel.find({student: {$ne: student}}).exec();
     // const underBookedSessions = getUnderBookedSessions(timeslots, evaluators);
-    const selectMap = (time: string) => ({label: time, value: time});
+    const selectMap = (time: string) => ({ label: time, value: time });
     // const availableOptions = (underBookedSessions.length
     //     ? underBookedSessions.map(selectMap)
     //     : timeslots.map(timeslot => selectMap(timeslot.timeslot)))
@@ -121,10 +121,10 @@ export class RushEvalCadetFetchSlotsComponent {
       ;
 
     return interaction.reply({
-        content: 'Please select your timeslot for the next rush defense.',
-        ephemeral: true,
-        components: [row],
-      });
+      content: 'Please select your timeslot for the next rush defense.',
+      ephemeral: true,
+      components: [row],
+    });
   }
 }
 
@@ -141,25 +141,25 @@ export class RushEvalCadetStringSelectComponent {
   public async onStringSelect(@Context() [interaction]: StringSelectContext, @SelectedStrings() selected: string[]) {
     const student = await this.studentModel.findOne({ discordId: interaction.user.id }).exec();
     if (student === null) {
-      return interaction.update({content: 'Please try fetching slots and register yourself as new student again.', components: []});
+      return interaction.update({ content: 'Please try fetching slots and register yourself as new student again.', components: [] });
     }
     this.logger.log(`${student.intraName} Selected: ${selected}`);
     const timeslots = await this.timeslotModel.find().exec();
     // const evaluators = await this.evaluatorModel.find({student: {$ne: student}}).exec();
-//     const underBookedSessions = getUnderBookedSessions(timeslots, evaluators);
+    //     const underBookedSessions = getUnderBookedSessions(timeslots, evaluators);
 
-//     if (underBookedSessions.length) {
-//       /** Check if the chosen slots contain any overbooked sessions */
-//       const overBooked = selected.filter(session => !underBookedSessions.includes(session));
-//       if (overBooked.length) {
-//         this.logger.log(`${student.intraName} selected overbooked sessions: ${overBooked}`);
-//         return interaction.update({
-//             content: `**${overBooked}** are currently filled.
-// Please regenerate your selection by clicking on the \`Open slots\` button one more time`,
-//             components: []
-//           });
-//       }
-//     }
+    //     if (underBookedSessions.length) {
+    //       /** Check if the chosen slots contain any overbooked sessions */
+    //       const overBooked = selected.filter(session => !underBookedSessions.includes(session));
+    //       if (overBooked.length) {
+    //         this.logger.log(`${student.intraName} selected overbooked sessions: ${overBooked}`);
+    //         return interaction.update({
+    //             content: `**${overBooked}** are currently filled.
+    // Please regenerate your selection by clicking on the \`Open slots\` button one more time`,
+    //             components: []
+    //           });
+    //       }
+    //     }
 
     const selectedTimeslots = timeslots.filter(timeslot => selected.includes(timeslot.timeslot));
     const evaluator = await this.evaluatorModel.findOne({ student: student }).exec()
@@ -170,11 +170,11 @@ export class RushEvalCadetStringSelectComponent {
     await evaluator.save();
     this.logger.log(`${student.intraName} Selected timeslots: ${selectedTimeslots.map(t => t.timeslot)}`);
     return interaction.reply({
-        content: ((selectedTimeslots.length === 0)
-            ? 'You have canceled your timeslots'
-            : `You have selected ${selectedTimeslots.map(t => t.timeslot)}`),
-        ephemeral: true
-      });
+      content: ((selectedTimeslots.length === 0)
+        ? 'You have canceled your timeslots'
+        : `You have selected ${selectedTimeslots.map(t => t.timeslot)}`),
+      ephemeral: true
+    });
   }
 }
 
@@ -183,7 +183,7 @@ export class RushEvalCadetFetchSpecialSlotsComponent {
   constructor(
     @InjectModel(Specialslot.name) private readonly specialslotModel: Model<Specialslot>,
     @InjectModel(Evaluator.name) private readonly evaluatorModel: Model<Evaluator>,
-  ) {}
+  ) { }
 
   @Button('cadet-fetch-special')
   public async onExecute(@Context() [interaction]: ButtonContext) {
@@ -196,17 +196,17 @@ export class RushEvalCadetFetchSpecialSlotsComponent {
       .setMinValues(0)
       .setMaxValues(availableOptions.length)
       .setOptions(availableOptions)
-    ;
+      ;
 
     const row = new ActionRowBuilder<StringSelectMenuBuilder>()
       .addComponents(stringSelect)
-    ;
+      ;
 
     return interaction.reply({
-        content: 'Please select your special timeslot for the next rush defense, keep in mind that this is only for special cases.',
-        ephemeral: true,
-        components: [row],
-      });
+      content: 'Please select your special timeslot for the next rush defense, keep in mind that this is only for special cases.',
+      ephemeral: true,
+      components: [row],
+    });
   }
 }
 
@@ -231,10 +231,10 @@ export class RushEvalCadetSpecialStringSelectComponent {
       await timeslot.save();
     }
     return interaction.reply({
-        content: ((selected.length === 0)
-            ? 'You have not selected any timeslots'
-            : `You have selected ${selected}`),
-        ephemeral: true
-      });
+      content: ((selected.length === 0)
+        ? 'You have not selected any timeslots'
+        : `You have selected ${selected}`),
+      ephemeral: true
+    });
   }
 }

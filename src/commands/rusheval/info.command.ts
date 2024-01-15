@@ -10,9 +10,9 @@ import { EmbedBuilder } from 'discord.js';
 
 export class TimeslotDto {
   @StringOption({
-      name: 'timeslot',
-      description: 'Timeslot to query',
-      required: false
+    name: 'timeslot',
+    description: 'Timeslot to query',
+    required: false
   })
   timeslot: string;
 }
@@ -20,7 +20,7 @@ export class TimeslotDto {
 @RushEvalCommandDecorator()
 export class RushEvalInfoCommand {
   constructor(
-    @InjectModel(Student.name) private readonly studentModel: Model<Student>, 
+    @InjectModel(Student.name) private readonly studentModel: Model<Student>,
     @InjectModel(Timeslot.name) private readonly timeslotModel: Model<Timeslot>,
     @InjectModel(Evaluator.name) private readonly evaluatorModel: Model<Evaluator>,
     @InjectModel(Team.name) private readonly teamModel: Model<Team>,
@@ -53,8 +53,8 @@ export class RushEvalInfoCommand {
       return interaction.reply({ content: '', ephemeral: true, embeds: [newEmbed] });
     } else {
       const timeslots = await this.timeslotModel.find().exec();
-      const openCount = await this.evaluatorModel.aggregate([{$unwind: '$timeslots'},{$group: {_id: '$timeslots.timeslot',count: { $sum: 1 }}},{$project: {_id: 0,timeslot: '$_id',count: 1}}]);
-      const takenCount = await this.teamModel.aggregate([{$unwind: '$timeslot'},{$group: {_id: '$timeslot.timeslot',count: { $sum: 1 }}},{$project: {_id: 0,timeslot: '$_id',count: 1}}]);
+      const openCount = await this.evaluatorModel.aggregate([{ $unwind: '$timeslots' }, { $group: { _id: '$timeslots.timeslot', count: { $sum: 1 } } }, { $project: { _id: 0, timeslot: '$_id', count: 1 } }]);
+      const takenCount = await this.teamModel.aggregate([{ $unwind: '$timeslot' }, { $group: { _id: '$timeslot.timeslot', count: { $sum: 1 } } }, { $project: { _id: 0, timeslot: '$_id', count: 1 } }]);
       var timeslotsData = [];
       timeslots.forEach(timeslot => {
         let currentOpen = openCount.find((timeslotCount) => timeslotCount.timeslot === timeslot.timeslot);
@@ -72,10 +72,12 @@ export class RushEvalInfoCommand {
           currentClosedCount = 0;
           finalCount = currentOpen.count;
         }
-        
-        timeslotsData.push({ name: `|  __${timeslot.timeslot}__ \n| Opened:                          ${currentOpenCount}\n| Taken:                              ${currentClosedCount}\n| Available:                       ${finalCount}\n\u200b\u200b\n\n`,
-                              value: '\n',
-                              inline: true });
+
+        timeslotsData.push({
+          name: `|  __${timeslot.timeslot}__ \n| Opened:                          ${currentOpenCount}\n| Taken:                              ${currentClosedCount}\n| Available:                       ${finalCount}\n\u200b\u200b\n\n`,
+          value: '\n',
+          inline: true
+        });
       });
 
       const newEmbed = new EmbedBuilder()

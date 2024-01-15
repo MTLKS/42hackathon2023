@@ -19,7 +19,7 @@ export class TestCommand {
     @InjectModel(Specialslot.name) private readonly specialslotModel: Model<Specialslot>,
     @InjectModel(SpecRequest.name) private readonly specRequestModel: Model<SpecRequest>,
     @InjectModel(Team.name) private readonly teamModel: Model<Team>,
-  ) {}
+  ) { }
 
   @SlashCommand({
     name: 'test',
@@ -144,7 +144,7 @@ export class TestCommand {
         await this.studentModel.findOne({ intraName: 'maliew' }),
         await this.studentModel.findOne({ intraName: 'zah' })
       ],
-      timeslot: {timeslot: ''}
+      timeslot: { timeslot: '' }
     });
     testteam.save();
 

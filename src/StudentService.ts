@@ -33,7 +33,7 @@ export class StudentService {
   constructor(
     @InjectModel(Student.name) private readonly studentModel: Model<Student>,
     @InjectModel(Evaluator.name) private readonly evaluatorModel: Model<Evaluator>
-    ) { }
+  ) { }
 
   public static getCursusRole(cursus_users: any[]) {
     if (cursus_users.length === 0) {
@@ -47,7 +47,7 @@ export class StudentService {
       } else {
         return 'FLOATY';
       }
-    } else if (cursus_users.length !== 2){
+    } else if (cursus_users.length !== 2) {
       this.logger.warn('Unknown cursus_users length: ' + cursus_users.length);
     }
     const core = cursus_users[1];

@@ -49,10 +49,10 @@ export class RushEvalMatchCommand {
     @InjectModel(Student.name) private readonly studentModel: Model<Student>,
     @InjectModel(Team.name) private readonly teamModel: Model<Team>,
     @InjectModel(Evaluator.name) private readonly evaluatorModel: Model<Evaluator>,
-  ) {}
+  ) { }
 
   private async matching(rushProjectSlug: string) {
-    let teams = await this.teamModel.find({ timeslot: {$ne: undefined}}).exec();
+    let teams = await this.teamModel.find({ timeslot: { $ne: undefined } }).exec();
     let evaluators = await this.evaluatorModel.find().exec();
 
     /* wanna sort the evaluator by their pool year */
@@ -107,11 +107,11 @@ export class RushEvalMatchCommand {
     const projectSlug = 'c-piscine-rush-00';
 
     this.logger.log(`${interaction.user.username} attempted to match teams and evaluators`);
-    await interaction.deferReply({ephemeral: true});
-    if (await this.teamModel.count({ feedbackAt: {$ne: undefined}}).exec() !== 0) {
+    await interaction.deferReply({ ephemeral: true });
+    if (await this.teamModel.count({ feedbackAt: { $ne: undefined } }).exec() !== 0) {
       this.logger.error(`${interaction.user.username} attempted to match after feedback has been given.`);
       return interaction.editReply('Error: Some feedback has been given to teams, doing so may result in loses in feedback.\n'
-      + "If you deem it's necessary, please notify qixeo to disable this failsafe.\n");
+        + "If you deem it's necessary, please notify qixeo to disable this failsafe.\n");
     }
     interaction.editReply('Matching rush teams and evaluators...');
     this.logger.log('Matching rush teams and evaluators...');
@@ -125,13 +125,13 @@ export class RushEvalMatchCommand {
     interaction.editReply('Looking for teams without evaluator...');
     this.logger.log('Looking for teams without evaluator...');
     try {
-      const teamsWithoutEvaluator = await this.teamModel.find({evaluator: undefined}).exec();
+      const teamsWithoutEvaluator = await this.teamModel.find({ evaluator: undefined }).exec();
 
       if (teamsWithoutEvaluator.length) {
         const embed = getMissingEvaluatorEmbeds(teamsWithoutEvaluator);
 
         this.logger.log(`Below teams are missing evaluator: ${teamsWithoutEvaluator.map(team => team.name)}}`);
-        return interaction.editReply({ content: 'Below teams are missing evaluator: \n', embeds: embed});
+        return interaction.editReply({ content: 'Below teams are missing evaluator: \n', embeds: embed });
       }
     } catch (error) {
       this.logger.error('Error occured while checking teams without evaluator');
@@ -142,24 +142,24 @@ export class RushEvalMatchCommand {
     this.logger.log('Generating time table...');
     const outfile = 'rush_evaluation_time_table.jpg';
     const child = exec(`python rusheval_time_table.py ${outfile}`, (error, stdout, stderr) => {
-        if (stdout) {
-          console.log(stdout);
-        }
-        if (error) {
-          console.error(error);
-        } else if (stderr) {
-          console.error(stderr);
-        }
-      });
+      if (stdout) {
+        console.log(stdout);
+      }
+      if (error) {
+        console.error(error);
+      } else if (stderr) {
+        console.error(stderr);
+      }
+    });
     child.on('exit', (code, signal) => {
       if (code === 0) {
         const replyContent = `Rush evaluation time table for dear evaluators: ${getRole(interaction.guild, 'CADET')}\n`;
 
         interaction.editReply('Done!');
         this.logger.log('Generated time table');
-        return interaction.channel.send({content: replyContent, files: [outfile]})
-        // return interaction.editReply({content: replyContent, files: [outfile]})
-          .finally(() => unlink(outfile, ()=>{}));
+        return interaction.channel.send({ content: replyContent, files: [outfile] })
+          // return interaction.editReply({content: replyContent, files: [outfile]})
+          .finally(() => unlink(outfile, () => { }));
       } else {
         this.logger.error('Error occured while generating time table');
         return interaction.editReply('Error occured while generating time table\n');

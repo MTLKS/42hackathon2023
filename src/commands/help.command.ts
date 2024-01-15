@@ -4,11 +4,11 @@ import { EmbedBuilder } from 'discord.js';
 
 @Injectable()
 export class HelpCommand {
-	@SlashCommand({
-		name: 'help',
-		description: 'an overview',
-	})
-	public async onHelp(@Context() [interaction]: SlashCommandContext) {
+  @SlashCommand({
+    name: 'help',
+    description: 'an overview',
+  })
+  public async onHelp(@Context() [interaction]: SlashCommandContext) {
 
     const commands = new Map<string, string>()
       .set('**/ping**', 'Pong (for testing)')
@@ -20,7 +20,7 @@ export class HelpCommand {
       .set('**/rusheval feedback**', 'Get feedback from rush evaluators')
       .set('**/updateroles**', 'Update user roles')
       .set('**/clean**', 'Clean the database')
-    ;
+      ;
     const newEmbed = new EmbedBuilder()
       .setColor('#00FFFF')
       .setTitle('__Available Commands__')
@@ -36,6 +36,6 @@ export class HelpCommand {
           inline: true
         }
       )
-    return interaction.reply({embeds: [newEmbed], ephemeral: true});
+    return interaction.reply({ embeds: [newEmbed], ephemeral: true });
   }
 }

@@ -11,7 +11,7 @@ export class LoginCommand {
   private readonly logger = new ConsoleLogger("LoginCommand");
   constructor(
     @InjectModel(LoginCode.name) private readonly loginCodeModel: Model<LoginCode>
-  ) {}
+  ) { }
 
   @SlashCommand({
     name: 'login',
@@ -35,7 +35,7 @@ export class LoginCommand {
       });
     } catch (error) {
       const logger = new ConsoleLogger("LoginButton");
-      
+
       logger.error(error);
       if (interaction.replied === true) {
         logger.debug('Premature reply going on?');
@@ -58,7 +58,7 @@ export class LoginCommand {
       }
       return code;
     }
-    const port = (process.env.BOT_PORT !== undefined) ? `:${process.env.BOT_PORT}`: "";
+    const port = (process.env.BOT_PORT !== undefined) ? `:${process.env.BOT_PORT}` : "";
     const existingLoginCode = await loginCodeModel.findOne({ discordId: discordUser.id });
 
     if (existingLoginCode !== null) {
@@ -68,17 +68,17 @@ export class LoginCommand {
       logger.log(`Creating login code for ${discordUser.username}`)
     }
     const loginCode = await loginCodeModel.create({
-        discordId: discordUser.id,
-        discordUsername: discordUser.username,
-        discordAvatarUrl: discordUser.avatarURL(),
-        code: await codeGenerator(),
-        createdAt: new Date(),
-      } satisfies LoginCode);
+      discordId: discordUser.id,
+      discordUsername: discordUser.username,
+      discordAvatarUrl: discordUser.avatarURL(),
+      code: await codeGenerator(),
+      createdAt: new Date(),
+    } satisfies LoginCode);
     logger.log(`Generated login code (${loginCode.code}) for ${discordUser.username}`);
     setTimeout(() => {
       loginCode.deleteOne().then(() => logger.log(`Deleted login code (${loginCode.code}) for ${discordUser.username}`));
     }, 5 * 60 * 1000);
-      // }, 5 * 1000);
+    // }, 5 * 1000);
     const url = `${process.env.BOT_HOST}${port}/login/${loginCode.code}`;
 
     const newEmbed = new EmbedBuilder()

@@ -29,20 +29,20 @@ export class UpdateRolesCommand {
     function getRole(guild: Guild, roleName: string) {
       return guild.roles.cache.find((r) => r.name === roleName);
     }
-    
+
     const roleMap = new Map<string, Role>([
-        'PISCINER',
-        'FLOATY',
-        'CADET',
-        'SPECIALIZATION'
-      ].map(value => [value, getRole(interaction.guild, value)])
+      'PISCINER',
+      'FLOATY',
+      'CADET',
+      'SPECIALIZATION'
+    ].map(value => [value, getRole(interaction.guild, value)])
     );
     const coalitionMap = new Map<string, Role>([
-        'Segmentation Slayers',
-        'Bug Busters',
-        'Kernel Kamikazes',
-        'Unix Unicorns'
-      ].map(value => [value, getRole(interaction.guild, value)])
+      'Segmentation Slayers',
+      'Bug Busters',
+      'Kernel Kamikazes',
+      'Unix Unicorns'
+    ].map(value => [value, getRole(interaction.guild, value)])
     );
     const everyRoles = [...roleMap.values(), ...coalitionMap.values()];
 
@@ -53,7 +53,7 @@ export class UpdateRolesCommand {
 
       if (student.progressRole === 'SPECIALIZATION') {
         rolesAdd.push(roleMap.get('CADET'));
-      } 
+      }
       if (roleMap.has(student.progressRole)) {
         rolesAdd.push(roleMap.get(student.progressRole));
       }
@@ -70,7 +70,7 @@ export class UpdateRolesCommand {
     for (let [id, member] of members) {
       const student = await this.studentModel.findOne({ discordId: id });
       if (student === null)
-        continue ;
+        continue;
       const roles = getMemberRoles(student);
 
       // interaction.editReply({ content: `Assigning ${member} as ${roles}` });
@@ -79,8 +79,8 @@ export class UpdateRolesCommand {
     }
 
     const newEmbed = new EmbedBuilder()
-    .setColor('#00FFFF')
-    .setTitle('All member roles have been updated!');
+      .setColor('#00FFFF')
+      .setTitle('All member roles have been updated!');
 
     return interaction.editReply({ content: '', embeds: [newEmbed] });
   }

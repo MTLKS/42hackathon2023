@@ -17,28 +17,28 @@ export class CleanCommand {
     dmPermission: false,
   })
   public async onClean(@Context() [interaction]: SlashCommandContext) {
-      const newEmbed = new EmbedBuilder()
-        .setColor('#00FFFF')
-        .setTitle('This will clear every data in the database. Are you sure?')
-        ;
-      const yes = new ButtonBuilder()
-        .setCustomId('clean-database-confirmed')
-        .setLabel('Yes')
-        .setStyle(ButtonStyle.Danger)
-        ;
-      const no = new ButtonBuilder()
-        .setCustomId('clean-database-rejected')
-        .setLabel('No')
-        .setStyle(ButtonStyle.Success)
-        ;
-      const row = new ActionRowBuilder<ButtonBuilder>()
-        .addComponents([yes, no]);
-  
-      return interaction.reply({
-        components: [row],
-        embeds: [newEmbed],
-        ephemeral: true,
-      });
+    const newEmbed = new EmbedBuilder()
+      .setColor('#00FFFF')
+      .setTitle('This will clear every data in the database. Are you sure?')
+      ;
+    const yes = new ButtonBuilder()
+      .setCustomId('clean-database-confirmed')
+      .setLabel('Yes')
+      .setStyle(ButtonStyle.Danger)
+      ;
+    const no = new ButtonBuilder()
+      .setCustomId('clean-database-rejected')
+      .setLabel('No')
+      .setStyle(ButtonStyle.Success)
+      ;
+    const row = new ActionRowBuilder<ButtonBuilder>()
+      .addComponents([yes, no]);
+
+    return interaction.reply({
+      components: [row],
+      embeds: [newEmbed],
+      ephemeral: true,
+    });
   }
 }
 
@@ -49,7 +49,7 @@ export class CleanDatabase {
     @InjectModel(Evaluator.name) private readonly evaluatorModel: Model<Evaluator>,
     @InjectModel(Specialslot.name) private readonly specialslotModel: Model<Specialslot>,
     @InjectModel(Student.name) private readonly studentModel: Model<Student>,
-  ){}
+  ) { }
 
   @Button('clean-database-confirmed')
   public async onComfirmation(@Context() [interaction]: ButtonContext) {
@@ -61,21 +61,21 @@ export class CleanDatabase {
     let specialSlots = await this.specialslotModel.find().exec();
 
     specialSlots.forEach(s => {
-        s.evaluators = [];
-        s.save();
-      });
+      s.evaluators = [];
+      s.save();
+    });
     const cleared = await Promise.all(promises);
     const embed = new EmbedBuilder()
       .setTitle("Clear Report")
       .addFields({
-          name: 'Collection Name',
-          value: ['team', 'evaluator', 'student'].join('\n'),
-          inline: true
-        }, {
-          name: 'Amount Cleared',
-          value: cleared.map(c => c.deletedCount).join('\n'),
-          inline: true
-        }
+        name: 'Collection Name',
+        value: ['team', 'evaluator', 'student'].join('\n'),
+        inline: true
+      }, {
+        name: 'Amount Cleared',
+        value: cleared.map(c => c.deletedCount).join('\n'),
+        inline: true
+      }
       );
 
     return interaction.update({

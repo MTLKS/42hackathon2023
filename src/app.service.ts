@@ -92,7 +92,7 @@ export class AppService {
       return thilaBotResponse(`<img src="https://i.pinimg.com/originals/49/b7/93/49b793ae912e181461e1fe87530f1818.gif" height="200px">`);
     }
     const loginCode = await this.loginCodeModel.findOne({ code: code });
-    
+
     if (loginCode === null) {
       return thilaBotResponse(`<h1>The link has either expired or is invalid</h1>
       <div class="break"></div>
@@ -120,7 +120,7 @@ export class AppService {
     const intraUserData = await api.get('me');
     const intraId = intraUserData.id;
     const role = getCursusRole(intraUserData.cursus_users)
-    
+
     let coalition = '';
     if (role === 'SPECIALIZATION' || role === 'CADET') {
       const coalitionResponse = await api.get(`users/${intraId}/coalitions`);
