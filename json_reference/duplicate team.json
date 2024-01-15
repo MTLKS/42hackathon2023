@@ -1,0 +1,102 @@
+[
+  {
+    "_id": "ObjectId(65a383cf5114b0bddcd48b6f)",
+    "intraId": 5404174,
+    "name": "amohd-to's group",
+    "teamLeader": {
+      "intraId": 172815,
+      "intraName": "amohd-to",
+      "_id": "ObjectId(65a383cf5114b0bddcd48b6d)"
+    },
+    "teamMembers": [
+      {
+        "intraId": 172796,
+        "intraName": "dirman",
+        "_id": "ObjectId(65a383cf5114b0bddcd48b6b)",
+        "__v": 0
+      },
+      {
+        "_id": "ObjectId(65a383c35114b0bddcd48b58)",
+        "intraId": 172805,
+        "intraName": "ppfeiffe",
+        "poolYear": "2024",
+        "poolMonth": "january",
+        "discordId": "318009294270365697",
+        "discordName": "itsgerri",
+        "progressRole": "PISCINER",
+        "coalitionRole": "",
+        "intraImageLink": "https://cdn.intra.42.fr/users/48efb2d5433388a7466a4c0692d9369d/ppfeiffe.jpg",
+        "__v": 0
+      }
+    ],
+    "__v": 0,
+    "chosenTimeslotAt": "ISODate(2024-01-14T06:49:31.123Z)",
+    "chosenTimeslotBy": {
+      "intraId": 172805,
+      "intraName": "ppfeiffe",
+      "poolYear": "2024",
+      "poolMonth": "january",
+      "discordId": "318009294270365697",
+      "discordName": "itsgerri",
+      "progressRole": "PISCINER",
+      "coalitionRole": "",
+      "intraImageLink": "https://cdn.intra.42.fr/users/48efb2d5433388a7466a4c0692d9369d/ppfeiffe.jpg",
+      "_id": "ObjectId(65a383c35114b0bddcd48b58)"
+    },
+    "timeslot": { "timeslot": "11:00AM", "_id": "ObjectId(659d4fdb1658948acefb9627)" },
+    "evaluator": {
+      "intraId": 106789,
+      "intraName": "chenlee",
+      "poolYear": "2022",
+      "poolMonth": "february",
+      "discordId": "399211704250007562",
+      "discordName": "sirhcofe",
+      "progressRole": "CADET",
+      "coalitionRole": "Kernel Kamikazes",
+      "intraImageLink": "https://cdn.intra.42.fr/users/a1207ff1c1f466802aee0c439e33d78b/chenlee.jpg",
+      "_id": "ObjectId(65a36fe8898d61213553625f)"
+    }
+  },
+  {
+    "_id": "ObjectId(65a3963729e4ed5ce0f4a8d6)",
+    "intraId": 5404174,
+    "name": "amohd-to's group",
+    "teamLeader": {
+      "intraId": 172815,
+      "intraName": "amohd-to",
+      "discordId": "703378856584675458",
+      "discordName": "freeshavocadoo.",
+      "progressRole": "PISCINER",
+      "coalitionRole": "",
+      "intraImageLink": "https://cdn.intra.42.fr/users/7ea349e4b69ebdc54c0e1a2f04573a74/amohd-to.jpg",
+      "_id": "ObjectId(65a383cf5114b0bddcd48b6d)"
+    },
+    "teamMembers": [
+      {
+        "_id": "ObjectId(65a383cf5114b0bddcd48b6b)",
+        "intraId": 172796,
+        "intraName": "dirman",
+        "__v": 0,
+        "coalitionRole": "",
+        "discordId": "1183610230643368007",
+        "discordName": "dahri_chan13",
+        "intraImageLink": "https://cdn.intra.42.fr/users/fd45940190a4d7795f73eb660f7923c8/dirman.jpg",
+        "progressRole": "PISCINER"
+      },
+      {
+        "_id": "ObjectId(65a383c35114b0bddcd48b58)",
+        "intraId": 172805,
+        "intraName": "ppfeiffe",
+        "poolYear": "2024",
+        "poolMonth": "january",
+        "discordId": "318009294270365697",
+        "discordName": "itsgerri",
+        "progressRole": "PISCINER",
+        "coalitionRole": "",
+        "intraImageLink": "https://cdn.intra.42.fr/users/48efb2d5433388a7466a4c0692d9369d/ppfeiffe.jpg",
+        "__v": 0
+      }
+    ],
+    "__v": 0
+  }
+]
