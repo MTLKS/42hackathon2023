@@ -62,7 +62,13 @@ export class RushEvalExportFeedbackCommand {
     interaction.deferReply({ephemeral: true});
     const teams = await this.teamModel.find().exec();
     const outfile = "feedbacks.pdf";
-    await this.exportFeedbacks(outfile, teams);
+    try {
+      await this.exportFeedbacks(outfile, teams);
+    } catch (error) {
+      this.logger.error(error);
+      console.error(error);
+      return interaction.editReply({content: "Failed to export feedbacks"});
+    }
     const getReplyContent = () => {
       if (force !== true) {
         return `Exported ${teams.length} teams with feedbacks`;
@@ -91,7 +97,8 @@ export class RushEvalExportFeedbackCommand {
       color: #FFFFFF;
       text-align: center;
       font-family: Arial, Helvetica, sans-serif;
-      font-size: 2.5vw;
+      font-size: 2.2vw;
+      margin: 2vw;
     }
 
     a {
@@ -102,6 +109,12 @@ export class RushEvalExportFeedbackCommand {
 
     h3 {
       margin-bottom: 0;
+    }
+
+    .essay {
+      font-size: 2vw;
+      text-align: left;
+      font-family: Calibri;
     }
 
   </style>
@@ -118,10 +131,10 @@ export class RushEvalExportFeedbackCommand {
     <p>${team.evaluator?.intraName}</p>
     <h3>Members Overview</h3>
     <hr>
-    <p>${team.feedback?.get(team.name)}</p>
+    <p class="essay">${team.feedback?.get(team.name).replaceAll("\n", "<br>\n") ?? ''}</p>
     <h3>Notes</h3>
     <hr>
-    <p>${team.feedback?.get("notes")}</p>
+    <p class="essay">${team.feedback?.get("notes").replaceAll("\n", "<br>\n") ?? ''}</p>
   `).join("")}
   </body>
   </html>
@@ -133,5 +146,4 @@ export class RushEvalExportFeedbackCommand {
     this.logger.log(`Closing browser`);
     await browser.close();
   }
-
 }
