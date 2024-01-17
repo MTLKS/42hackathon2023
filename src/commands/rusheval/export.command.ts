@@ -77,6 +77,7 @@ export class RushEvalExportFeedbackCommand {
         return `Exported ${teamWithFeedbackCount}/${teams.length} teams with feedbacks`;
       }
     }
+    this.logger.log(getReplyContent());
     return interaction.editReply({
       content: getReplyContent(),
       files: [outfile]
@@ -181,7 +182,6 @@ export class RushEvalExportFeedbackCommand {
     await page.setContent(content);
     this.logger.log(`Exporting to ${filename}`)
     await page.pdf({path: filename, printBackground: true, format: "A4"});
-    this.logger.log(`Closing browser`);
-    await browser.close();
+    browser.close().catch((err) => {this.logger.error(err, "Close Browser");});
   }
 }
