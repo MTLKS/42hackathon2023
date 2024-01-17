@@ -28,6 +28,7 @@
     "axios": "^1.5.1",
     "cookie-parser": "^1.4.6",
     "discord.js": "^14.12.1",
+    "jspdf": "^2.5.1",
     "luxon": "^3.4.3",
     "mongoose": "^7.6.0",
     "necord": "^6.1.7",
