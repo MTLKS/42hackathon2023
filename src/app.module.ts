@@ -24,6 +24,7 @@ import { SpecRequest, SpecRequestSchema } from './schema/specrequest.schema';
 import { TestCommand } from './commands/test.command';
 import { StudentService } from './StudentService';
 import { LoginCode, LoginCodeSchema } from './schema/logincode.schema';
+import { RushEvalExportFeedbackCommand } from './commands/rusheval/export.command';
 
 @Module({
   imports: [
@@ -73,6 +74,7 @@ import { LoginCode, LoginCodeSchema } from './schema/logincode.schema';
     RushEvalFeedbackForm,
     CleanCommand,
     CleanDatabase,
+    RushEvalExportFeedbackCommand,
     // UpdateRolesCommand,
     // TestCommand,
   ],
