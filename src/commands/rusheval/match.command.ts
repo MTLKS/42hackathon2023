@@ -51,6 +51,17 @@ export class RushEvalMatchCommand {
     @InjectModel(Evaluator.name) private readonly evaluatorModel: Model<Evaluator>,
   ) { }
 
+  private async clearMatch() {
+    const teams = await this.teamModel.find().exec();
+
+    await Promise.all(teams.map(t => {
+      t.evaluator = undefined;
+      t.feedback = undefined;
+      t.feedbackAt = undefined;
+      return t.save();
+    }));
+  }
+
   private async matching(rushProjectSlug: string) {
     let teams = await this.teamModel.find({ timeslot: { $ne: undefined } }).exec();
     let evaluators = await this.evaluatorModel.find().exec();
@@ -66,7 +77,6 @@ export class RushEvalMatchCommand {
       throw new Error(`Unknown rush project slug: ${rushProjectSlug}`);
     }
 
-
     // const logEvaluator = (evaluator: Evaluator) => {
     //   const student = evaluator.student;
     //   return {
@@ -78,10 +88,7 @@ export class RushEvalMatchCommand {
     // };
     // console.log("evaluators: ", evaluators.map(logEvaluator));
     // console.log("teams: ", teams.map(t => t.timeslot.timeslot));
-    const matchPromises = teams.map(t => {
-      t.evaluator = undefined;
-      t.feedback = undefined;
-      t.feedbackAt = undefined;
+    return await Promise.all(teams.map(t => {
       const evaluatorsWithMatchingTimelot = evaluators.filter(e => e.timeslots.find(slot => slot.timeslot === t.timeslot.timeslot));
 
       // console.log("evaluatorsWithMatchingTimelot: ", evaluatorsWithMatchingTimelot.map(logEvaluator));
@@ -95,8 +102,7 @@ export class RushEvalMatchCommand {
         matchedEvaluator.timeslots.splice(matchedEvaluator.timeslots.indexOf(slot), 1);
       }
       return t.save();
-    });
-    await Promise.all(matchPromises);
+    }));
   }
 
   @Subcommand({
@@ -115,6 +121,7 @@ export class RushEvalMatchCommand {
     }
     interaction.editReply('Matching rush teams and evaluators...');
     this.logger.log('Matching rush teams and evaluators...');
+    await this.clearMatch();
     try {
       await this.matching(projectSlug);
     } catch (error) {
@@ -130,6 +137,7 @@ export class RushEvalMatchCommand {
       if (teamsWithoutEvaluator.length) {
         const embed = getMissingEvaluatorEmbeds(teamsWithoutEvaluator);
 
+        this.clearMatch();
         this.logger.log(`Below teams are missing evaluator: ${teamsWithoutEvaluator.map(team => team.name)}}`);
         return interaction.editReply({ content: 'Below teams are missing evaluator: \n', embeds: embed });
       }
@@ -140,7 +148,7 @@ export class RushEvalMatchCommand {
     }
     interaction.editReply('Generating time table...');
     this.logger.log('Generating time table...');
-    const outfile = 'rush_evaluation_time_table.jpg';
+    const outfile = `rush${projectSlug.substr(-2)}_evaluation_time_table.jpg`;
     const child = exec(`python rusheval_time_table.py ${outfile}`, (error, stdout, stderr) => {
       if (stdout) {
         console.log(stdout);
