@@ -5,7 +5,7 @@ import { RushEvalCommandDecorator } from "./rusheval.command";
 import { Team } from "src/schema/team.schema";
 import puppeteer from "puppeteer";
 import { EmbedBuilder } from "discord.js";
-import { unlink } from "fs";
+import { unlink, writeFile } from "fs";
 import { ConsoleLogger } from "@nestjs/common";
 
 class ForceDto {
@@ -90,7 +90,7 @@ export class RushEvalExportFeedbackCommand {
 
     return navTeams.map(({time, teams}) => `
       <h4>${time}</h4>
-      ${teams.map(team => `<a class="nav" href="#${team.name}">${team.name}: ${team.evaluator}</a>`).join("<br>\n")}
+      ${teams.map(team => `<a class="nav" href="#${team.name}">${team.name}: <small>${team.evaluator}</small></a>`).join("<br>\n")}
     `).join("\n<br>\n<br>\n");
   }
 
@@ -125,7 +125,8 @@ export class RushEvalExportFeedbackCommand {
     .nav {
       text-decoration: none;
       color: #AAFFFF;
-      background-color: #AAAAAAA;
+      display: inline-block;
+      margin: .5vw;
     }
 
     h3, h4 {
@@ -177,6 +178,7 @@ ${teams.map(team => `
 </body>
 </html>
 `);
+    // writeFile("debug.html", await page.content(), () => {});
     this.logger.log(`Exporting to ${filename}`);
     await page.pdf({path: filename, printBackground: true, format: "A4", timeout: timeout});
     browser.close().catch((err) => {this.logger.error(err, "Close Browser");});
