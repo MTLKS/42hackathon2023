@@ -56,7 +56,7 @@ export class CleanDatabase {
     const promises = [
       this.teamModel.deleteMany({}),
       this.evaluatorModel.deleteMany({}),
-      this.studentModel.deleteMany({})
+      // this.studentModel.deleteMany({})
     ];
     let specialSlots = await this.specialslotModel.find().exec();
 
