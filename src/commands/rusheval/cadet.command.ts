@@ -102,7 +102,6 @@ export class RushEvalCadetFetchSlotsComponent {
       ?? await this.evaluatorModel.create({ student: student });
     const slotStatus = new Map<string, object>(
       (await this.evaluatorModel.aggregate([
-        {$match: {student: {$ne: student}}},
         {$unwind: "$timeslots"},
         {$group: {_id: "$timeslots.timeslot", count: {$sum: 1}}},
         {$project: {time: "$_id", openedCount: "$count", _id: 0}},
@@ -110,9 +109,11 @@ export class RushEvalCadetFetchSlotsComponent {
       .map(({time, openedCount}) => [time, openedCount])
     );
 
-    const availableOptions = timeslots.map(timeslot => timeslot.timeslot)
-      .map((time: string): SelectMenuComponentOptionData => ({
-        label: time, value: time, description: `${slotStatus.get(time) ?? 0} Opened`
+    const availableOptions = timeslots.map(({timeslot: time}): SelectMenuComponentOptionData => ({
+        label: time,
+        value: time,
+        description: `${slotStatus.get(time) ?? 0} Opened`,
+        emoji: evaluator.timeslots.find(({timeslot: t}) => t === time) ? '✅' : undefined,
       })
     );
     const selectedOptions = evaluator.timeslots.map(t => t.timeslot);
@@ -152,22 +153,6 @@ export class RushEvalCadetStringSelectComponent {
     }
     this.logger.log(`${student.intraName} Selected: ${selected}`);
     const timeslots = await this.timeslotModel.find().exec();
-    // const evaluators = await this.evaluatorModel.find({student: {$ne: student}}).exec();
-    //     const underBookedSessions = getUnderBookedSessions(timeslots, evaluators);
-
-    //     if (underBookedSessions.length) {
-    //       /** Check if the chosen slots contain any overbooked sessions */
-    //       const overBooked = selected.filter(session => !underBookedSessions.includes(session));
-    //       if (overBooked.length) {
-    //         this.logger.log(`${student.intraName} selected overbooked sessions: ${overBooked}`);
-    //         return interaction.update({
-    //             content: `**${overBooked}** are currently filled.
-    // Please regenerate your selection by clicking on the \`Open slots\` button one more time`,
-    //             components: []
-    //           });
-    //       }
-    //     }
-
     const selectedTimeslots = timeslots.filter(timeslot => selected.includes(timeslot.timeslot));
     const evaluator = await this.evaluatorModel.findOne({ student: student }).exec()
       ?? await this.evaluatorModel.create({ student: student });
