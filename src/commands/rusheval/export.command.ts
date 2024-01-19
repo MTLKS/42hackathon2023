@@ -51,7 +51,7 @@ export class RushEvalExportFeedbackCommand {
         const embed = new EmbedBuilder()
           .setTitle("Teams without feedback")
           .setFields(teamNoFeedback.map(t => ({
-            name: t.evaluator,
+            name: t.evaluator ?? "Unknown",
             value: t.teams.map(t => `${t.name} (${t.timeslot})`).join("\n"),
           })))
           .setColor("#00FFFF")
@@ -91,6 +91,7 @@ export class RushEvalExportFeedbackCommand {
     const page = await browser.newPage();
 
     this.logger.log(`Setting content`);
+    teams.sort((a, b) => a.timeslot?.timeslot.localeCompare(b.timeslot?.timeslot));
     await page.setContent(`
 <!DOCTYPE html>
 <html lang="en">
