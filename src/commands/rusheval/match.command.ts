@@ -110,7 +110,7 @@ export class RushEvalMatchCommand {
     description: 'Lock in cadet and pisciner timeslots',
   })
   public async onMatch(@Context() [interaction]: SlashCommandContext) {
-    const projectSlug = 'c-piscine-rush-00';
+    const projectSlug = 'c-piscine-rush-01';
 
     this.logger.log(`${interaction.user.username} attempted to match teams and evaluators`);
     await interaction.deferReply({ ephemeral: true });
@@ -138,7 +138,7 @@ export class RushEvalMatchCommand {
         const embed = getMissingEvaluatorEmbeds(teamsWithoutEvaluator);
 
         this.clearMatch();
-        this.logger.log(`Below teams are missing evaluator: ${teamsWithoutEvaluator.map(team => team.name)}}`);
+        this.logger.log(`Below teams are missing evaluator: ${teamsWithoutEvaluator.map(team => team.name)}`);
         return interaction.editReply({ content: 'Below teams are missing evaluator: \n', embeds: embed });
       }
     } catch (error) {

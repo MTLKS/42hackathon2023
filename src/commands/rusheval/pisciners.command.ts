@@ -50,12 +50,12 @@ export class RushEvalPiscinersCommand {
       ;
 
     const embed = new EmbedBuilder()
-      .setTitle("Please select your timeslot for the rush defense")
+      .setTitle("Please select your timeslot for the rush01 defense")
       .setColor('#00FFFF')
       ;
 
-    await interaction.reply({ content: 'Fetching ongoing rush teams...', ephemeral: true });
-    const projectSlug = 'c-piscine-rush-00';
+    const projectSlug = 'c-piscine-rush-01';
+    await interaction.reply({ content: `Fetching ongoing ${projectSlug} teams...`, ephemeral: true });
 
     await this.fetchOngoingRush(projectSlug).then(newTeams => {
       if (newTeams.length) {
@@ -63,7 +63,7 @@ export class RushEvalPiscinersCommand {
         interaction.editReply(`Found ${newTeams.length} ongoing ${projectSlug} teams`);
       } else {
         logger.log(`All ongoing ${projectSlug} teams are already registered`);
-        interaction.editReply(`All ongoing ${projectSlug} teams are already registered}`);
+        interaction.editReply(`All ongoing ${projectSlug} teams are already registered`);
       }
     }).catch(error => {
       logger.warn(error.message);
@@ -134,7 +134,7 @@ export class RushEvalPiscinersButtonComponent {
         .then(() => student.save());
     }
     this.logger.log(`${student.intraName} is fetching for timeslot`);
-    const projectSlug = 'c-piscine-rush-00';
+    const projectSlug = 'c-piscine-rush-01';
     await interaction.deferReply({ ephemeral: true });
     interaction.editReply(`Looking for ${student.intraName} team...`);
     /* if recognise student, look for their team */
@@ -157,7 +157,7 @@ export class RushEvalPiscinersButtonComponent {
 If you're certain you've signed up for this project, please contact BOCAL for it.
 `;
 
-      this.logger.log(`Did not find ${student.intraName} record of ${projectSlug}}`);
+      this.logger.log(`Did not find ${student.intraName} record of ${projectSlug}`);
       return interaction.editReply(content);
     }
     interaction.editReply('Looking for available timeslot...');
@@ -184,7 +184,7 @@ If you're certain you've signed up for this project, please contact BOCAL for it
     const row = new ActionRowBuilder<StringSelectMenuBuilder>()
       .addComponents(stringSelect);
     this.logger.log(`${student.intraName} (leader: ${student.intraName === leader.intraName}) got ${timeslotOptions.map(t => t.value)} as options`);
-    reply += 'Please select your timeslot for the next rush defense';
+    reply += 'Please select your timeslot for the next rush-01 defense';
     return interaction.editReply({
       content: reply,
       components: [row]
