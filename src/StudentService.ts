@@ -91,6 +91,7 @@ export class StudentService {
     return student;
   }
 
+  /* deprecated */
   @Modal('new-student-modal')
   public async onNewStudent([interaction]: ModalContext) {
     const login = interaction.fields.getField('login').value;

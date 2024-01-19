@@ -60,7 +60,7 @@ export class RushEvalFeedbackTeamSelectButton {
   public async onPress(@Context() [interaction]: ButtonContext) {
     const logger = new ConsoleLogger('feedback-fetch-team');
     const student = await this.studentModel.findOne({ discordId: interaction.user.id }).exec();
-    const team = await this.teamModel.find({ evaluator: student }).exec();
+    const teams = await this.teamModel.find({ evaluator: student }).exec();
 
     if (student === null) {
       logger.log(`${interaction.user.username} is not registered`);
@@ -70,13 +70,13 @@ export class RushEvalFeedbackTeamSelectButton {
       });
     }
     logger.log(`${student.intraName} fetched for their teams to feedback`);
-    if (team.length === 0) {
+    if (teams.length === 0) {
       return interaction.reply({
         content: 'There are no teams assigned to you.',
         ephemeral: true
       });
     }
-    const buttons = team.map(team => {
+    const buttons = teams.map(team => {
       const button = new ButtonBuilder()
         .setCustomId(`feedback-team-select-button/${team.name}`)
         .setLabel(team.name)

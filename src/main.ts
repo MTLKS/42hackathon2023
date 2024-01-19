@@ -12,8 +12,8 @@ function checkEnv() {
     ['DISCORD_TOKEN', process.env.DISCORD_TOKEN],
   );
   const missingEnv = requiredEnv
-    .filter(([msg, value]) => value === undefined)
-    .map(([msg, value]) => msg)
+    .filter(([_, value]) => value === undefined)
+    .map(([msg, _]) => msg)
     ;
 
   if (missingEnv.length > 0) {
