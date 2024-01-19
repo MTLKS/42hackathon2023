@@ -1,6 +1,6 @@
 import { Subcommand, Context, SlashCommandContext, StringSelectContext, SelectedStrings, StringSelect, Button, ButtonContext } from 'necord';
 import { RushEvalCommandDecorator } from './rusheval.command';
-import { StringSelectMenuBuilder, ActionRowBuilder, ButtonBuilder, ButtonStyle, EmbedBuilder } from 'discord.js';
+import { StringSelectMenuBuilder, ActionRowBuilder, ButtonBuilder, ButtonStyle, EmbedBuilder, SelectMenuComponentOptionData } from 'discord.js';
 import { ConsoleLogger, Injectable } from '@nestjs/common';
 import { InjectModel } from '@nestjs/mongoose';
 import { Model } from 'mongoose';
@@ -100,20 +100,27 @@ export class RushEvalCadetFetchSlotsComponent {
     const timeslots = await this.timeslotModel.find().exec();
     const evaluator = await this.evaluatorModel.findOne({ student: student }).exec()
       ?? await this.evaluatorModel.create({ student: student });
-    // const evaluators = await this.evaluatorModel.find({student: {$ne: student}}).exec();
-    // const underBookedSessions = getUnderBookedSessions(timeslots, evaluators);
-    const selectMap = (time: string) => ({ label: time, value: time });
-    // const availableOptions = (underBookedSessions.length
-    //     ? underBookedSessions.map(selectMap)
-    //     : timeslots.map(timeslot => selectMap(timeslot.timeslot)))
-    //   ;
-    const availableOptions = timeslots.map(timeslot => selectMap(timeslot.timeslot));
+    const slotStatus = new Map<string, object>(
+      (await this.evaluatorModel.aggregate([
+        {$match: {student: {$ne: student}}},
+        {$unwind: "$timeslots"},
+        {$group: {_id: "$timeslots.timeslot", count: {$sum: 1}}},
+        {$project: {time: "$_id", openedCount: "$count", _id: 0}},
+      ]).exec())
+      .map(({time, openedCount}) => [time, openedCount])
+    );
+
+    const availableOptions = timeslots.map(timeslot => timeslot.timeslot)
+      .map((time: string): SelectMenuComponentOptionData => ({
+        label: time, value: time, description: `${slotStatus.get(time) ?? 0} Opened`
+      })
+    );
     const selectedOptions = evaluator.timeslots.map(t => t.timeslot);
     const stringSelect = new StringSelectMenuBuilder()
       .setCustomId('cadet-session-select')
       .setPlaceholder(`Selected: ${selectedOptions.length ? selectedOptions : 'None'}`)
       .setMinValues(0)
-      .setMaxValues(Math.min(availableOptions.length, 2))
+      .setMaxValues(2)
       .setOptions(availableOptions)
       ;
     const row = new ActionRowBuilder<StringSelectMenuBuilder>()
