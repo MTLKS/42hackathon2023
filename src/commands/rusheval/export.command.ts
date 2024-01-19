@@ -85,6 +85,7 @@ export class RushEvalExportFeedbackCommand {
     const navTeams = await this.teamModel.aggregate([
       {$group: {_id: "$timeslot.timeslot", teams: {$push: {name: "$name", evaluator: "$evaluator.intraName"} }}},
       {$project: {time: "$_id", teams: "$teams", _id: 0}},
+      {$sort: {time: 1}}, // bug prone
     ]).exec();
 
     return navTeams.map(({time, teams}) => `
