@@ -16,8 +16,7 @@ function countTeamSizes() {
 function showFeedbackGroup() {
   const aggregation = (matchFeedback) => [
     { $match: { feedback: matchFeedback } },
-    { $project: { _id: 0, name: 1, evaluator: "$evaluator.intraName", timeslot: "$timeslot.timeslot", feedbackAt: "$feedbackAt" } },
-    { $group: { _id: "$evaluator", teams: { $push: { name: "$name", timeslot: "$timeslot", feedbackAt: "$feedbackAt" } } } },
+    { $group: { _id: "$evaluator.intraName", teams: { $push: { name: "$name", timeslot: "$timeslot.timeslot", feedbackAt: "$feedbackAt" } } } },
     { $project: { evaluator: "$_id", teams: "$teams", _id: 0 } },
   ];
   const hasFeedback = db.teams.aggregate(aggregation({ $ne: undefined }));
