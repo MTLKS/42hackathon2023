@@ -1,0 +1,457 @@
+{
+  "_id": {
+    "$oid": "659d03cd78594360df738575"
+  },
+  "intraId": 4140761,
+  "name": "mshahari's group",
+  "teamLeader": {
+    "intraId": 112146,
+    "intraName": "mshahari",
+    "_id": {
+      "$oid": "659d03cd78594360df738573"
+    }
+  },
+  "teamMembers": [
+    {
+      "intraId": 111870,
+      "intraName": "harafi",
+      "_id": {
+        "$oid": "659d03cd78594360df73856f"
+      },
+      "__v": 0
+    },
+    {
+      "_id": {
+        "$oid": "659d03c378594360df73855a"
+      },
+      "intraId": 111871,
+      "intraName": "maliew",
+      "poolYear": "2022",
+      "poolMonth": "may",
+      "discordId": "387502639350284288",
+      "discordName": "qixeo",
+      "discordServerName": "Qixeo | MikuPrettyQ",
+      "progressRole": "CADET",
+      "__v": 0
+    },
+    {
+      "intraId": 111896,
+      "intraName": "snaidu",
+      "_id": {
+        "$oid": "659d03cd78594360df738571"
+      },
+      "__v": 0
+    }
+  ],
+  "__v": 0,
+  "chosenTimeslotAt": {
+    "$date": "2024-01-09T08:29:06.095Z"
+  },
+  "chosenTimeslotBy": {
+    "intraId": 111871,
+    "intraName": "maliew",
+    "poolYear": "2022",
+    "poolMonth": "may",
+    "discordId": "387502639350284288",
+    "discordName": "qixeo",
+    "discordServerName": "Qixeo | MikuPrettyQ",
+    "progressRole": "CADET",
+    "_id": {
+      "$oid": "659d03c378594360df73855a"
+    }
+  },
+  "timeslot": {
+    "timeslot": "4:00PM",
+    "_id": {
+      "$oid": "653cf4ef303d0e468e0c1e98"
+    }
+  }
+}
+{
+  "_id": {
+    "$oid": "659d04c778594360df7385f5"
+  },
+  "intraId": 4140757,
+  "name": "eslim's group",
+  "teamLeader": {
+    "intraId": 111906,
+    "intraName": "eslim",
+    "_id": {
+      "$oid": "659d04c778594360df7385f1"
+    }
+  },
+  "teamMembers": [
+    {
+      "_id": {
+        "$oid": "659d045578594360df7385d1"
+      },
+      "intraId": 111856,
+      "intraName": "schuah",
+      "poolYear": "2022",
+      "poolMonth": "may",
+      "discordId": "387502639350284288",
+      "discordName": "qixeo",
+      "discordServerName": "Qixeo | MikuPrettyQ",
+      "progressRole": "SPECIALIZATION",
+      "__v": 0
+    },
+    {
+      "intraId": 111875,
+      "intraName": "nchoo",
+      "_id": {
+        "$oid": "659d04c778594360df7385ef"
+      },
+      "__v": 0
+    },
+    {
+      "intraId": 112175,
+      "intraName": "tjia-xie",
+      "_id": {
+        "$oid": "659d04c778594360df7385f3"
+      },
+      "__v": 0
+    }
+  ],
+  "__v": 0,
+  "chosenTimeslotAt": {
+    "$date": "2024-01-09T08:33:15.429Z"
+  },
+  "chosenTimeslotBy": {
+    "intraId": 111856,
+    "intraName": "schuah",
+    "poolYear": "2022",
+    "poolMonth": "may",
+    "discordId": "387502639350284288",
+    "discordName": "qixeo",
+    "discordServerName": "Qixeo | MikuPrettyQ",
+    "progressRole": "SPECIALIZATION",
+    "_id": {
+      "$oid": "659d045578594360df7385d1"
+    }
+  },
+  "timeslot": {
+    "timeslot": "4:00PM",
+    "_id": {
+      "$oid": "653cf4fe303d0e468e0c1e99"
+    }
+  }
+}
+{
+  "_id": {
+    "$oid": "659d051b78594360df738621"
+  },
+  "intraId": 3689731,
+  "name": "nabdul-r's group",
+  "teamLeader": {
+    "intraId": 93736,
+    "intraName": "nabdul-r",
+    "_id": {
+      "$oid": "659d051b78594360df73861f"
+    }
+  },
+  "teamMembers": [
+    {
+      "intraId": 93705,
+      "intraName": "catan",
+      "_id": {
+        "$oid": "659d051b78594360df73861d"
+      },
+      "__v": 0
+    },
+    {
+      "intraId": 93731,
+      "intraName": "tgan",
+      "_id": {
+        "$oid": "659d051b78594360df73861b"
+      },
+      "__v": 0
+    },
+    {
+      "_id": {
+        "$oid": "659d051478594360df738606"
+      },
+      "intraId": 93784,
+      "intraName": "jthor",
+      "poolYear": "2021",
+      "poolMonth": "august",
+      "discordId": "387502639350284288",
+      "discordName": "qixeo",
+      "discordServerName": "Qixeo | MikuPrettyQ",
+      "progressRole": "CADET",
+      "__v": 0
+    }
+  ],
+  "__v": 0,
+  "chosenTimeslotAt": {
+    "$date": "2024-01-09T08:34:41.939Z"
+  },
+  "chosenTimeslotBy": {
+    "intraId": 93784,
+    "intraName": "jthor",
+    "poolYear": "2021",
+    "poolMonth": "august",
+    "discordId": "387502639350284288",
+    "discordName": "qixeo",
+    "discordServerName": "Qixeo | MikuPrettyQ",
+    "progressRole": "CADET",
+    "_id": {
+      "$oid": "659d051478594360df738606"
+    }
+  },
+  "timeslot": {
+    "timeslot": "4:00PM",
+    "_id": {
+      "$oid": "653cf4fe303d0e468e0c1e99"
+    }
+  }
+}
+{
+  "_id": {
+    "$oid": "659d05df78594360df738656"
+  },
+  "intraId": 4140753,
+  "name": "zcheah-m's group",
+  "teamLeader": {
+    "intraId": 111888,
+    "intraName": "zcheah-m",
+    "poolYear": "2022",
+    "poolMonth": "may",
+    "progressRole": "FLOATY",
+    "_id": {
+      "$oid": "659ca78c04516ee4b399141c"
+    }
+  },
+  "teamMembers": [
+    {
+      "_id": {
+        "$oid": "659ca78a04516ee4b399141a"
+      },
+      "intraId": 111858,
+      "intraName": "lguan-xi",
+      "poolYear": "2022",
+      "poolMonth": "may",
+      "progressRole": "BLACKHOLED",
+      "__v": 0
+    },
+    {
+      "_id": {
+        "$oid": "659ca775e437b7c570ef22ba"
+      },
+      "intraId": 111882,
+      "intraName": "hqixeo",
+      "poolYear": "2022",
+      "poolMonth": "may",
+      "discordId": "387502639350284288",
+      "discordName": "qixeo",
+      "discordServerName": "Qixeo | MikuPrettyQ",
+      "progressRole": "CADET",
+      "__v": 0,
+      "coalitionRole": "Segmentation Slayers",
+      "intraImageLink": "https://cdn.intra.42.fr/users/bf9767b1aa6a9b40f78f3e526a84f293/hqixeo.jpg"
+    },
+    {
+      "_id": {
+        "$oid": "659ca78d04516ee4b3991420"
+      },
+      "intraId": 111891,
+      "intraName": "zting",
+      "poolYear": "2022",
+      "poolMonth": "may",
+      "progressRole": "BLACKHOLED",
+      "__v": 0
+    },
+    {
+      "_id": {
+        "$oid": "659ca78c04516ee4b399141e"
+      },
+      "intraId": 111988,
+      "intraName": "tjien-ji",
+      "poolYear": "2022",
+      "poolMonth": "may",
+      "progressRole": "CADET",
+      "__v": 0
+    }
+  ],
+  "__v": 0,
+  "chosenTimeslotAt": {
+    "$date": "2024-01-19T15:37:08.564Z"
+  },
+  "chosenTimeslotBy": {
+    "intraId": 111882,
+    "intraName": "hqixeo",
+    "poolYear": "2022",
+    "poolMonth": "may",
+    "discordId": "387502639350284288",
+    "discordName": "qixeo",
+    "progressRole": "CADET",
+    "coalitionRole": "Segmentation Slayers",
+    "intraImageLink": "https://cdn.intra.42.fr/users/bf9767b1aa6a9b40f78f3e526a84f293/hqixeo.jpg",
+    "_id": {
+      "$oid": "65a2b4f8c8183d23bcbfb342"
+    }
+  },
+  "timeslot": {
+    "timeslot": "4:00PM",
+    "_id": {
+      "$oid": "653cf4ef303d0e468e0c1e98"
+    }
+  }
+}
+{
+  "_id": {
+    "$oid": "659d065878594360df738686"
+  },
+  "intraId": 4140758,
+  "name": "mfahmy's group",
+  "teamLeader": {
+    "intraId": 112143,
+    "intraName": "mfahmy",
+    "_id": {
+      "$oid": "659d065878594360df738684"
+    }
+  },
+  "teamMembers": [
+    {
+      "_id": {
+        "$oid": "659d065278594360df738677"
+      },
+      "intraId": 111876,
+      "intraName": "yichan",
+      "poolYear": "2022",
+      "poolMonth": "may",
+      "discordId": "387502639350284288",
+      "discordName": "qixeo",
+      "discordServerName": "Qixeo | MikuPrettyQ",
+      "progressRole": "CADET",
+      "__v": 0
+    },
+    {
+      "intraId": 111901,
+      "intraName": "fothman",
+      "_id": {
+        "$oid": "659d065878594360df738680"
+      },
+      "__v": 0
+    },
+    {
+      "intraId": 111965,
+      "intraName": "mong",
+      "_id": {
+        "$oid": "659d065878594360df738682"
+      },
+      "__v": 0
+    }
+  ],
+  "__v": 0,
+  "chosenTimeslotAt": {
+    "$date": "2024-01-09T08:39:55.55Z"
+  },
+  "chosenTimeslotBy": {
+    "intraId": 111876,
+    "intraName": "yichan",
+    "poolYear": "2022",
+    "poolMonth": "may",
+    "discordId": "387502639350284288",
+    "discordName": "qixeo",
+    "discordServerName": "Qixeo | MikuPrettyQ",
+    "progressRole": "CADET",
+    "_id": {
+      "$oid": "659d065278594360df738677"
+    }
+  },
+  "timeslot": {
+    "timeslot": "4:00PM",
+    "_id": {
+      "$oid": "653cf4ef303d0e468e0c1e98"
+    }
+  }
+}
+{
+  "_id": {
+    "$oid": "659d077e78594360df7386d6"
+  },
+  "intraId": 3998428,
+  "name": "wricky-t's group",
+  "teamLeader": {
+    "intraId": 106435,
+    "intraName": "wricky-t",
+    "poolYear": "2022",
+    "poolMonth": "february",
+    "discordId": "387502639350284288",
+    "discordName": "qixeo",
+    "discordServerName": "Qixeo | MikuPrettyQ",
+    "progressRole": "CADET",
+    "_id": {
+      "$oid": "659d077378594360df7386bb"
+    }
+  },
+  "teamMembers": [
+    {
+      "intraId": 106417,
+      "intraName": "eyak",
+      "_id": {
+        "$oid": "659d077e78594360df7386d0"
+      },
+      "__v": 0
+    },
+    {
+      "intraId": 106449,
+      "intraName": "ttshung-",
+      "_id": {
+        "$oid": "659d077e78594360df7386d2"
+      },
+      "__v": 0
+    },
+    {
+      "intraId": 106750,
+      "intraName": "jotan",
+      "_id": {
+        "$oid": "659d077e78594360df7386d4"
+      },
+      "__v": 0
+    }
+  ],
+  "__v": 0,
+  "chosenTimeslotAt": {
+    "$date": "2024-01-09T08:50:01.101Z"
+  },
+  "chosenTimeslotBy": {
+    "intraId": 106435,
+    "intraName": "wricky-t",
+    "poolYear": "2022",
+    "poolMonth": "february",
+    "discordId": "387502639350284288",
+    "discordName": "qixeo",
+    "discordServerName": "Qixeo | MikuPrettyQ",
+    "progressRole": "CADET",
+    "_id": {
+      "$oid": "659d077378594360df7386bb"
+    }
+  },
+  "timeslot": {
+    "timeslot": "4:00PM",
+    "_id": {
+      "$oid": "653cf4fe303d0e468e0c1e99"
+    }
+  }
+}
+{
+  "_id": {
+    "$oid": "65a0527d2f59fa9fe805bd41"
+  },
+  "name": "hmiku's group",
+  "timeslot": {
+    "timeslot": "5:00PM",
+    "_id": {
+      "$oid": "653cf4fe303d0e468e0c1e99"
+    }
+  },
+  "teamLeader": {
+    "intraName": "hmiku",
+    "_id": {
+      "$oid": "65a0562630c57e17fc7f9f6a"
+    }
+  },
+  "__v": 1,
+  "teamMembers": []
+}
