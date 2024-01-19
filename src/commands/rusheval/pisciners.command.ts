@@ -56,13 +56,20 @@ export class RushEvalPiscinersCommand {
 
     await interaction.reply({ content: 'Fetching ongoing rush teams...', ephemeral: true });
     const projectSlug = 'c-piscine-rush-00';
-    const teams = await this.fetchOngoingRush(projectSlug);
 
-    if (teams.length === 0) {
-      await interaction.editReply(`This attempt will be assumed as testing since there is no ongoing \`\`${projectSlug}\`\` team that is waiting for correction.\n`);
-    } else {
-      await interaction.editReply(`Found ${teams.length} ongoing rush teams`);
-    }
+    await this.fetchOngoingRush(projectSlug).then(newTeams => {
+      if (newTeams.length) {
+        logger.log(`Found ${newTeams.length} ongoing ${projectSlug} teams`);
+        interaction.editReply(`Found ${newTeams.length} ongoing ${projectSlug} teams`);
+      } else {
+        logger.log(`All ongoing ${projectSlug} teams are already registered`);
+        interaction.editReply(`All ongoing ${projectSlug} teams are already registered}`);
+      }
+    }).catch(error => {
+      logger.warn(error.message);
+      interaction.editReply(error.message);
+    });
+
     return interaction.channel.send(
       {
         content: `Dear ${getRole(interaction.guild, "PISCINER")}s`,
@@ -74,10 +81,10 @@ export class RushEvalPiscinersCommand {
 
   private async fetchOngoingRush(projectSlugOrId: string | number) {
     const intraRushTeams = await ApiManager.getDefaultInstance().getProjectTeams(projectSlugOrId, {
-      'filter[status]': ProjectStatus.WaitingForCorrection,
+      'filter[status]': [ProjectStatus.InProgress, ProjectStatus.WaitingForCorrection],
     });
     if (intraRushTeams.length === 0) {
-      return intraRushTeams;
+      throw new Error(`This attempt will be assumed as testing since there is no ongoing \`\`${projectSlugOrId}\`\` team that is waiting for correction.`);
     }
     const allRushTeams = await Promise.all(intraRushTeams.map(team => ApiManager.intraTeamToTeam(team, this.studentModel)));
     const localTeams = await this.teamModel.find().exec();
@@ -133,8 +140,8 @@ export class RushEvalPiscinersButtonComponent {
     /* if recognise student, look for their team */
     const team: Team = await this.teamModel.findOne({
       $or: [
-        { teamLeader: student },
-        { teamMembers: { $in: [student] } }]
+        { "teamLeader.intraName": student.intraName },
+        { "teamMembers.intraName": { $in: [student.intraName] } }]
     }).exec()
       /* if team not found, fetch from intra */
       ?? await this.fetchIntraGroup(projectSlug, student.intraName).catch((error: AxiosError) => {
@@ -193,8 +200,6 @@ If you're certain you've signed up for this project, please contact BOCAL for it
     ]);
     const unavailableCount = await this.teamModel.aggregate([{ $unwind: '$timeslot' }, { $group: { _id: '$timeslot.timeslot', count: { $sum: 1 } } }, { $project: { _id: 0, timeslot: '$_id', count: 1 } }]);
 
-    console.log(availableCount);
-    console.log(unavailableCount);
     var timeslotOptions = [];
     timeslots.forEach(timeslot => {
       let currentAvailable = availableCount.find((timeslotCount) => timeslotCount.timeslot === timeslot.timeslot);
@@ -252,8 +257,8 @@ export class RushEvalPiscinersStringSelectComponent {
     const selectedTimeslot = await this.timeslotModel.findOne({ timeslot: selected[0] }).exec();
     const team = await this.teamModel.findOne({
       $or: [
-        { teamLeader: student },
-        { teamMembers: { $in: [student] } }]
+        { "teamLeader.intraName": student.intraName },
+        { "teamMembers.intraName": { $in: [student.intraName] } }]
     }).exec();
     // const team = await this.teamModel.findOne({ teamLeader: student }).exec();
 
@@ -261,7 +266,7 @@ export class RushEvalPiscinersStringSelectComponent {
     team.chosenTimeslotAt = new Date();
     team.chosenTimeslotBy = student;
     await team.save();
-    return interaction.update({ content: `You have selected ${selected}`, components: [] });
+    return interaction.reply({ content: `You have selected ${selected}`, components: [], ephemeral: true });
   }
 }
 
