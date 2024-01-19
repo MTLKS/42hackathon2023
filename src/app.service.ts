@@ -64,7 +64,6 @@ ${body}
 @Injectable()
 export class AppService {
   constructor(
-    private httpService: HttpService,
     @InjectModel(Student.name) private readonly studentModel: Model<Student>,
     @InjectModel(LoginCode.name) private readonly loginCodeModel: Model<LoginCode>,
   ) {
@@ -130,10 +129,10 @@ export class AppService {
       ?? new this.studentModel({
         intraId: intraId,
         intraName: intraUserData.login,
-        poolYear: intraUserData.pool_year,
-        poolMonth: intraUserData.pool_month,
       });
 
+    student.poolYear = intraUserData.poolYear;
+    student.poolMonth = intraUserData.pool_month;
     student.discordId = loginCode.discordId;
     student.discordName = loginCode.discordUsername;
     student.progressRole = role;
