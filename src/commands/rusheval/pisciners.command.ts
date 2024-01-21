@@ -167,7 +167,7 @@ If you're certain you've signed up for this project, please contact BOCAL for it
       reply += `**Unless your leader(${leader.intraName}) is unresponsive, please leave it to them to choose the timeslot.**\n`;
     }
     /* Return available session */
-    const timeslotOptions = await this.getTimeslotOptions();
+    const timeslotOptions = await this.getTimeslotOptions(team.name);
     if (timeslotOptions.length === 0) {
       /* Should notify the admin that there is no available session for pisciner */
       this.logger.error(`No available session`);
@@ -191,14 +191,19 @@ If you're certain you've signed up for this project, please contact BOCAL for it
     });
   }
 
-  private async getTimeslotOptions() {
+  private async getTimeslotOptions(teamName: string) {
     const timeslots = await this.timeslotModel.find().exec();
     const availableCount = await this.evaluatorModel.aggregate([
       { $unwind: '$timeslots' },
       { $group: { _id: '$timeslots.timeslot', count: { $sum: 1 } } },
       { $project: { _id: 0, timeslot: '$_id', count: 1 } }
     ]);
-    const unavailableCount = await this.teamModel.aggregate([{ $unwind: '$timeslot' }, { $group: { _id: '$timeslot.timeslot', count: { $sum: 1 } } }, { $project: { _id: 0, timeslot: '$_id', count: 1 } }]);
+    const unavailableCount = await this.teamModel.aggregate([
+      { $match: { name: { $ne: teamName } } },
+      { $unwind: '$timeslot' },
+      { $group: { _id: '$timeslot.timeslot', count: { $sum: 1 } } },
+      { $project: { _id: 0, timeslot: '$_id', count: 1 } }
+    ]);
 
     var timeslotOptions = [];
     timeslots.forEach(timeslot => {
