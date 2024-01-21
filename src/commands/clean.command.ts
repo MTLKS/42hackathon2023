@@ -1,5 +1,5 @@
 import { ButtonBuilder } from "@discordjs/builders";
-import { Injectable } from "@nestjs/common";
+import { ConsoleLogger, Injectable } from "@nestjs/common";
 import { InjectModel } from "@nestjs/mongoose";
 import { ActionRowBuilder, ButtonStyle, EmbedBuilder } from "discord.js";
 import { Model } from "mongoose";
@@ -17,6 +17,9 @@ export class CleanCommand {
     dmPermission: false,
   })
   public async onClean(@Context() [interaction]: SlashCommandContext) {
+    const logger = new ConsoleLogger("CleanCommand");
+
+    logger.warn(`Clean Command called by ${interaction.user.username}`);
     const newEmbed = new EmbedBuilder()
       .setColor('#00FFFF')
       .setTitle('This will clear every data in the database. Are you sure?')
@@ -44,6 +47,7 @@ export class CleanCommand {
 
 @Injectable()
 export class CleanDatabase {
+  private readonly logger = new ConsoleLogger("CleanDatabase");
   constructor(
     @InjectModel(Team.name) private readonly teamModel: Model<Team>,
     @InjectModel(Evaluator.name) private readonly evaluatorModel: Model<Evaluator>,
@@ -53,27 +57,18 @@ export class CleanDatabase {
 
   @Button('clean-database-confirmed')
   public async onComfirmation(@Context() [interaction]: ButtonContext) {
-    const promises = [
-      this.teamModel.deleteMany({}),
-      this.evaluatorModel.deleteMany({}),
-      // this.studentModel.deleteMany({})
-    ];
-    let specialSlots = await this.specialslotModel.find().exec();
-
-    specialSlots.forEach(s => {
-      s.evaluators = [];
-      s.save();
-    });
-    const cleared = await Promise.all(promises);
+    this.logger.warn(`${interaction.user.username} confirmed to clean databse`);
+    const teamPromise = this.teamModel.deleteMany({});
+    const evaluator = await this.evaluatorModel.updateMany({}, {$unset: {timeslots: 1, lastCreatedTimeslotsAt: 1}});
     const embed = new EmbedBuilder()
       .setTitle("Clear Report")
       .addFields({
         name: 'Collection Name',
-        value: ['team', 'evaluator', 'student'].join('\n'),
+        value: ['team', 'evaluator'].join('\n'),
         inline: true
       }, {
         name: 'Amount Cleared',
-        value: cleared.map(c => c.deletedCount).join('\n'),
+        value: [(await teamPromise).deletedCount ?? 0, evaluator.modifiedCount ?? 0].join("\n"),
         inline: true
       }
       );
