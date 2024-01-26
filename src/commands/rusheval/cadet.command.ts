@@ -30,7 +30,7 @@ export class RushEvalCadetCommand {
       .addComponents(slotsButton);
 
     const embed = new EmbedBuilder()
-      .setTitle("For those who are able to volunteer for tomorrow's rush-01 evaluations, please choose your slots. You will be getting eval points / blackholes ya!")
+      .setTitle("For those who are able to volunteer for next Monday's rush evaluations, please choose your slots. You will be getting eval points / blackholes ya!")
       .setColor('#00FFFF')
       ;
 
@@ -97,7 +97,7 @@ export class RushEvalCadetFetchSlotsComponent {
       ;
 
     return interaction.reply({
-      content: 'Please select your timeslot for the next rush-01 defense.',
+      content: 'Please select your timeslot for the next rush defense.',
       ephemeral: true,
       components: [row],
     });
