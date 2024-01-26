@@ -5,14 +5,14 @@ DOMAIN = "https://api.intra.42.fr"
 
 
 def get_access_token() -> str:
-    UID = os.environ['API_UID']
-    SECRET = os.environ['API_SECRET']
+    UID = os.environ['THILA_BOT_API_UID']
+    SECRET = os.environ['THILA_BOT_API_SECRET']
 
     # Not sure why os.environ[] doesn't throw
     if not UID:
-        raise EnvironmentError("API_UID environment variable not set")
+        raise EnvironmentError("THILA_BOT_API_UID environment variable not set")
     if not SECRET:
-        raise EnvironmentError("API_SECRET environment variable not set")
+        raise EnvironmentError("THILA_BOT_API_SECRET environment variable not set")
     REQUEST = f"{DOMAIN}/oauth/token?grant_type=client_credentials&client_id={UID}&client_secret={SECRET}"
     r = requests.post(REQUEST, headers={'Content-type':'application/json'})
     try:

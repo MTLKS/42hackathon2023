@@ -6,10 +6,13 @@ import { ApiManager } from './ApiManager';
 
 function checkEnv() {
   const requiredEnv = new Array<[string, string]>(
-    ['BOT_HOST(ex: http://localhost)', process.env.BOT_HOST],
-    ['API_UID', process.env.API_UID],
-    ['API_SECRET', process.env.API_SECRET],
-    ['DISCORD_TOKEN', process.env.DISCORD_TOKEN],
+    ['THILA_BOT_DISCORD_TOKEN', process.env.THILA_BOT_DISCORD_TOKEN],
+    ['THILA_BOT_API_UID', process.env.THILA_BOT_API_UID],
+    ['THILA_BOT_API_SECRET', process.env.THILA_BOT_API_SECRET],
+    ['THILA_BOT_HOST(ex: http://localhost)', process.env.THILA_BOT_HOST],
+    ['THILA_BOT_PORT', process.env.THILA_BOT_PORT],
+    ['THILA_BOT_CLIENT_REDIRECT', process.env.THILA_BOT_CLIENT_REDIRECT],
+    ['THILA_BOT_DATABASE_URL', process.env.THILA_BOT_DATABASE_URL],
   );
   const missingEnv = requiredEnv
     .filter(([_, value]) => value === undefined)
@@ -38,14 +41,14 @@ async function bootstrap() {
 Error message: ${error.response.data.error_description}
 
 Potential causes include:
-Incorrect API_UID or API_SECRET
-API_SECRET has been refreshed
+Incorrect THILA_BOT_API_UID or THILA_BOT_API_SECRET
+THILA_BOT_API_SECRET has been refreshed
 `);
     return;
   }
   const app = await NestFactory.create(AppModule);
   app.use(cookieParser());
-  await app.listen(process.env.BOT_PORT || 80);
+  await app.listen(process.env.THILA_BOT_PORT || 80);
 }
 
 bootstrap().catch(error => console.error('bootstrap:', error));

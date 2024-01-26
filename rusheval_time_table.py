@@ -1,12 +1,23 @@
 import sys
+import os
 import json
 from matplotlib import pyplot as plt
 from matplotlib import colors as pltcolor
 from matplotlib import table as plttable
 import pymongo as mongo
 
+def get_database():
+    URL = os.environ['THILA_BOT_DATABASE_URL']
+    uri = URL.split('/')
 
-database = mongo.MongoClient('mongodb://127.0.0.1:27017/nest').get_database('nest')
+    domain = uri[2]
+    uri = '/'.join(uri[3:])
+    if uri == '':
+        uri = None
+    return mongo.MongoClient(f'mongodb://{domain}').get_database(uri)
+
+
+database = get_database()
 
 CELL_WIDTH = .2
 CELL_HEIGHT = .14

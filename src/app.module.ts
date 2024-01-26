@@ -28,7 +28,7 @@ import { RushEval, RushEvalSchema } from './schema/rusheval.schema';
 @Module({
   imports: [
     NecordModule.forRoot({
-      token: process.env.DISCORD_TOKEN,
+      token: process.env.THILA_BOT_DISCORD_TOKEN,
       intents: [
         IntentsBitField.Flags.Guilds,
         IntentsBitField.Flags.GuildMembers
@@ -36,7 +36,7 @@ import { RushEval, RushEvalSchema } from './schema/rusheval.schema';
       development: [process.env.DISCORD_DEVELOPMENT_GUILD_ID]
     }),
     HttpModule,
-    MongooseModule.forRoot('mongodb://127.0.0.1:27017/nest'),
+    MongooseModule.forRoot(process.env.THILA_BOT_DATABASE_URL),
     MongooseModule.forFeature([
       { name: RushEval.name, schema: RushEvalSchema },
       { name: Student.name, schema: StudentSchema },

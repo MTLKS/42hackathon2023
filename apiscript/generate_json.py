@@ -19,8 +19,8 @@ def request(uri: str, *args):
 
 def init_access_token():
     global ACCESS_TOKEN
-    UID = os.environ['API_UID']
-    SECRET = os.environ['API_SECRET']
+    UID = os.environ['THILA_BOT_API_UID']
+    SECRET = os.environ['THILA_BOT_API_SECRET']
 
     headers = {'Content-type':'application/json'}
     r = requests.post(f"{DOMAIN}/oauth/token?grant_type=client_credentials&client_id={UID}&client_secret={SECRET}", headers=headers)

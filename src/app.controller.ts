@@ -16,10 +16,10 @@ export class AppController {
 
     response.cookie('code', code);
 
-    if (process.env.CLIENT_REDIRECT === undefined) {
+    if (process.env.THILA_BOT_CLIENT_REDIRECT === undefined) {
       response.status(HttpStatus.INTERNAL_SERVER_ERROR).send('No redirect url provided');
     } else {
-      response.redirect(HttpStatus.FOUND, process.env.CLIENT_REDIRECT);
+      response.redirect(HttpStatus.FOUND, process.env.THILA_BOT_CLIENT_REDIRECT);
     }
   }
 }

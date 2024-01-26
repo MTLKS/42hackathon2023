@@ -50,8 +50,8 @@ export class ApiManager {
   public static async getAccessToken(code?: string): Promise<string> {
     const params = {
       grant_type: 'client_credentials',
-      client_id: process.env.API_UID,
-      client_secret: process.env.API_SECRET,
+      client_id: process.env.THILA_BOT_API_UID,
+      client_secret: process.env.THILA_BOT_API_SECRET,
       code: code,
       redirect_uri: undefined
     }
@@ -59,9 +59,9 @@ export class ApiManager {
     if (code !== undefined) {
       params.grant_type = 'authorization_code';
 
-      let redirect_uri = process.env.BOT_HOST;
-      if (process.env.BOT_PORT !== undefined) {
-        redirect_uri += `:${process.env.BOT_PORT}`;
+      let redirect_uri = process.env.THILA_BOT_HOST;
+      if (process.env.THILA_BOT_PORT !== undefined) {
+        redirect_uri += `:${process.env.THILA_BOT_PORT}`;
       }
       params.redirect_uri = redirect_uri;
     }

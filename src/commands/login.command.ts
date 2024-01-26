@@ -58,7 +58,7 @@ export class LoginCommand {
       }
       return code;
     }
-    const port = (process.env.BOT_PORT !== undefined) ? `:${process.env.BOT_PORT}` : "";
+    const port = (process.env.THILA_BOT_PORT !== undefined) ? `:${process.env.THILA_BOT_PORT}` : "";
     const existingLoginCode = await loginCodeModel.findOne({ discordId: discordUser.id });
 
     if (existingLoginCode !== null) {
@@ -79,7 +79,7 @@ export class LoginCommand {
       loginCode.deleteOne().then(() => logger.log(`Deleted login code (${loginCode.code}) for ${discordUser.username}`));
     }, 5 * 60 * 1000);
     // }, 5 * 1000);
-    const url = `${process.env.BOT_HOST}${port}/login/${loginCode.code}`;
+    const url = `${process.env.THILA_BOT_HOST}${port}/login/${loginCode.code}`;
 
     const newEmbed = new EmbedBuilder()
       .setColor('#00FFFF')

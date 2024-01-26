@@ -1,4 +1,4 @@
-db = connect('mongodb://localhost:27017/nest')
+db = connect(process.env.THILA_BOT_DATABASE_URL)
 
 /* This script is meant to be loaded in mongosh ( load("queries.js") ), providing the function to aggregate data */
 
