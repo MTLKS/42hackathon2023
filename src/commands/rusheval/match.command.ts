@@ -117,7 +117,7 @@ export class RushEvalMatchCommand {
     if (await this.teamModel.count({ feedbackAt: { $ne: undefined } }).exec() !== 0) {
       this.logger.error(`${interaction.user.username} attempted to match after feedback has been given.`);
       return interaction.editReply('Error: Some feedback has been given to teams, doing so may result in loses in feedback.\n'
-        + "If you deem it's necessary, please notify qixeo to disable this failsafe.\n");
+        + "If you deem it's necessary, please notify the admin to disable this failsafe.\n");
     }
     interaction.editReply('Matching rush teams and evaluators...');
     this.logger.log('Matching rush teams and evaluators...');
