@@ -5,6 +5,7 @@ import { ActionRowBuilder, ButtonStyle, EmbedBuilder } from "discord.js";
 import { Model } from "mongoose";
 import { Button, ButtonContext, Context, SlashCommand, SlashCommandContext } from "necord";
 import { Evaluator } from "src/schema/evaluator.schema";
+import { RushEval } from "src/schema/rusheval.schema";
 import { Student } from "src/schema/student.schema";
 import { Team } from "src/schema/team.schema";
 
@@ -48,6 +49,7 @@ export class CleanCommand {
 export class CleanDatabase {
   private readonly logger = new ConsoleLogger("CleanDatabase");
   constructor(
+    @InjectModel(RushEval.name) private readonly rushEvalModel: Model<RushEval>,
     @InjectModel(Team.name) private readonly teamModel: Model<Team>,
     @InjectModel(Evaluator.name) private readonly evaluatorModel: Model<Evaluator>,
     @InjectModel(Student.name) private readonly studentModel: Model<Student>,
@@ -68,9 +70,9 @@ export class CleanDatabase {
         name: 'Amount Cleared',
         value: [(await teamPromise).deletedCount ?? 0, (await evaluatorPromise).deletedCount ?? 0].join("\n"),
         inline: true
-      }
-      );
+      });
 
+    this.rushEvalModel.deleteOne({});
     return interaction.update({
       content: 'Database Cleared',
       embeds: [embed],
