@@ -4,8 +4,6 @@ import { ActionRowBuilder, ButtonBuilder, ButtonStyle, EmbedBuilder } from 'disc
 import { Model } from 'mongoose';
 import { SlashCommand, SlashCommandContext, Context, Button } from 'necord';
 import { Evaluator } from 'src/schema/evaluator.schema';
-import { Specialslot } from 'src/schema/specialslot.schema';
-import { SpecRequest } from 'src/schema/specrequest.schema';
 import { Student } from 'src/schema/student.schema';
 import { Team } from 'src/schema/team.schema';
 import { Timeslot } from 'src/schema/timeslot.schema';
@@ -16,8 +14,6 @@ export class TestCommand {
     @InjectModel(Timeslot.name) private readonly timeslotModel: Model<Timeslot>,
     @InjectModel(Evaluator.name) private readonly evaluatorModel: Model<Evaluator>,
     @InjectModel(Student.name) private readonly studentModel: Model<Student>,
-    @InjectModel(Specialslot.name) private readonly specialslotModel: Model<Specialslot>,
-    @InjectModel(SpecRequest.name) private readonly specRequestModel: Model<SpecRequest>,
     @InjectModel(Team.name) private readonly teamModel: Model<Team>,
   ) { }
 
@@ -47,9 +43,7 @@ export class TestCommand {
   public async onClear(@Context() [interaction]: SlashCommandContext) {
     await this.studentModel.deleteMany({});
     await this.evaluatorModel.deleteMany({});
-    await this.specialslotModel.updateMany({}, { $unset: { evaluators: 1 } });
     await this.teamModel.deleteMany({});
-    await this.specRequestModel.deleteMany({});
 
     const plau = new this.studentModel({
       intraId: '111868',

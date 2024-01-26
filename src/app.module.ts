@@ -9,7 +9,6 @@ import { Student, StudentSchema } from './schema/student.schema';
 import { Timeslot, TimeslotSchema } from './schema/timeslot.schema';
 import { Evaluator, EvaluatorSchema } from './schema/evaluator.schema';
 import { Team, TeamSchema } from './schema/team.schema';
-import { Specialslot, SpecialslotSchema } from './schema/specialslot.schema';
 import { LoginCommand } from './commands/login.command';
 import { PingCommand } from './commands/ping.command';
 import { HelpCommand } from './commands/help.command';
@@ -20,11 +19,11 @@ import { RushEvalMatchCommand } from './commands/rusheval/match.command';
 import { RushEvalFeedbackCommand, RushEvalFeedbackForm, RushEvalFeedbackTeamSelectButton } from './commands/rusheval/feedback.command';
 import { UpdateRolesCommand } from './commands/updateroles.command';
 import { CleanCommand, CleanDatabase } from './commands/clean.command';
-import { SpecRequest, SpecRequestSchema } from './schema/specrequest.schema';
 import { TestCommand } from './commands/test.command';
 import { StudentService } from './StudentService';
 import { LoginCode, LoginCodeSchema } from './schema/logincode.schema';
 import { RushEvalExportFeedbackCommand } from './commands/rusheval/export.command';
+import { RushEval, RushEvalSchema } from './schema/rusheval.schema';
 
 @Module({
   imports: [
@@ -39,13 +38,12 @@ import { RushEvalExportFeedbackCommand } from './commands/rusheval/export.comman
     HttpModule,
     MongooseModule.forRoot('mongodb://127.0.0.1:27017/nest'),
     MongooseModule.forFeature([
+      { name: RushEval.name, schema: RushEvalSchema },
       { name: Student.name, schema: StudentSchema },
       { name: Timeslot.name, schema: TimeslotSchema },
       { name: Evaluator.name, schema: EvaluatorSchema },
       { name: Team.name, schema: TeamSchema },
-      { name: Specialslot.name, schema: SpecialslotSchema },
-      { name: SpecRequest.name, schema: SpecRequestSchema },
-      { name: LoginCode.name, schema: LoginCodeSchema }
+      { name: LoginCode.name, schema: LoginCodeSchema },
     ])
   ],
   controllers: [AppController],

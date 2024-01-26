@@ -9,8 +9,6 @@ import { ButtonBuilder, ActionRowBuilder, ButtonStyle, StringSelectMenuBuilder, 
 import { ConsoleLogger, Injectable } from '@nestjs/common';
 import { Team } from 'src/schema/team.schema';
 import { getRole } from '../updateroles.command';
-import { SpecRequest } from 'src/schema/specrequest.schema';
-import { Specialslot } from 'src/schema/specialslot.schema';
 import { ApiManager, ProjectStatus } from 'src/ApiManager';
 import { AxiosError } from 'axios';
 import { StudentService } from 'src/StudentService';
@@ -36,19 +34,8 @@ export class RushEvalPiscinersCommand {
       .setLabel('Get timeslots')
       .setStyle(ButtonStyle.Primary)
       ;
-
-    // const specialButton = new ButtonBuilder()
-    //   .setCustomId('piscinersSpecialButton')
-    //   .setLabel('Request for special timeslot')
-    //   .setStyle(ButtonStyle.Danger)
-    // ;
-
     const row = new ActionRowBuilder<ButtonBuilder>()
-      .addComponents(button,
-        // specialButton
-      )
-      ;
-
+      .addComponents(button);
     const embed = new EmbedBuilder()
       .setTitle("Please select your timeslot for the rush01 defense")
       .setColor('#00FFFF')

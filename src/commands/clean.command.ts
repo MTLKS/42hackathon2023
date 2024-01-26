@@ -5,7 +5,6 @@ import { ActionRowBuilder, ButtonStyle, EmbedBuilder } from "discord.js";
 import { Model } from "mongoose";
 import { Button, ButtonContext, Context, SlashCommand, SlashCommandContext } from "necord";
 import { Evaluator } from "src/schema/evaluator.schema";
-import { Specialslot } from "src/schema/specialslot.schema";
 import { Student } from "src/schema/student.schema";
 import { Team } from "src/schema/team.schema";
 
@@ -51,7 +50,6 @@ export class CleanDatabase {
   constructor(
     @InjectModel(Team.name) private readonly teamModel: Model<Team>,
     @InjectModel(Evaluator.name) private readonly evaluatorModel: Model<Evaluator>,
-    @InjectModel(Specialslot.name) private readonly specialslotModel: Model<Specialslot>,
     @InjectModel(Student.name) private readonly studentModel: Model<Student>,
   ) { }
 
@@ -59,7 +57,7 @@ export class CleanDatabase {
   public async onComfirmation(@Context() [interaction]: ButtonContext) {
     this.logger.warn(`${interaction.user.username} confirmed to clean databse`);
     const teamPromise = this.teamModel.deleteMany({});
-    const evaluator = await this.evaluatorModel.updateMany({}, {$unset: {timeslots: 1, lastCreatedTimeslotsAt: 1}});
+    const evaluatorPromise = this.evaluatorModel.deleteMany({});
     const embed = new EmbedBuilder()
       .setTitle("Clear Report")
       .addFields({
@@ -68,7 +66,7 @@ export class CleanDatabase {
         inline: true
       }, {
         name: 'Amount Cleared',
-        value: [(await teamPromise).deletedCount ?? 0, evaluator.modifiedCount ?? 0].join("\n"),
+        value: [(await teamPromise).deletedCount ?? 0, (await evaluatorPromise).deletedCount ?? 0].join("\n"),
         inline: true
       }
       );

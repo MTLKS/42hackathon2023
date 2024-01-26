@@ -7,7 +7,6 @@ import { Model } from 'mongoose';
 import { Student } from '../../schema/student.schema';
 import { Timeslot } from 'src/schema/timeslot.schema';
 import { Evaluator } from 'src/schema/evaluator.schema';
-import { Specialslot } from 'src/schema/specialslot.schema';
 import { getRole } from '../updateroles.command';
 import { LoginCommand } from '../login.command';
 import { LoginCode } from 'src/schema/logincode.schema';
@@ -27,17 +26,8 @@ export class RushEvalCadetCommand {
       .setStyle(ButtonStyle.Success)
       ;
 
-    // const specialButton = new ButtonBuilder()
-    //   .setCustomId('cadet-fetch-special')
-    //   .setLabel('Open special slots')
-    //   .setStyle(ButtonStyle.Primary)
-    //   ;
-
     const row = new ActionRowBuilder<ButtonBuilder>()
-      .addComponents([
-        slotsButton,
-      ])
-      ;
+      .addComponents(slotsButton);
 
     const embed = new EmbedBuilder()
       .setTitle("For those who are able to volunteer for tomorrow's rush-01 evaluations, please choose your slots. You will be getting eval points / blackholes ya!")
