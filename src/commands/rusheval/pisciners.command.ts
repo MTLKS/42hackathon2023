@@ -1,12 +1,12 @@
-import { Subcommand, Context, SlashCommandContext, Button, ButtonContext, StringSelect, StringSelectContext, SelectedStrings, Modal, ModalContext } from 'necord';
+import { Subcommand, Context, SlashCommandContext, Button, ButtonContext, StringSelect, StringSelectContext, SelectedStrings, Options } from 'necord';
 import { RushEvalCommandDecorator } from './rusheval.command';
 import { InjectModel } from '@nestjs/mongoose';
 import { Model } from 'mongoose';
 import { Student } from '../../schema/student.schema';
 import { Timeslot } from 'src/schema/timeslot.schema';
 import { Evaluator } from 'src/schema/evaluator.schema';
-import { ButtonBuilder, ActionRowBuilder, ButtonStyle, StringSelectMenuBuilder, ModalBuilder, TextInputBuilder, TextInputStyle, EmbedBuilder } from 'discord.js';
-import { ConsoleLogger, Injectable } from '@nestjs/common';
+import { ButtonBuilder, ActionRowBuilder, ButtonStyle, StringSelectMenuBuilder, EmbedBuilder } from 'discord.js';
+import { ConsoleLogger, Injectable, UseInterceptors } from '@nestjs/common';
 import { Team } from 'src/schema/team.schema';
 import { getRole } from '../updateroles.command';
 import { ApiManager, ProjectStatus } from 'src/ApiManager';
@@ -14,20 +14,24 @@ import { AxiosError } from 'axios';
 import { StudentService } from 'src/StudentService';
 import { LoginCommand } from '../login.command';
 import { LoginCode } from 'src/schema/logincode.schema';
+import { RushEval, RushProjectSlugDto, RushProjectSlug, RushProjectSlugAutocompleteInterceptor, getRushName } from 'src/schema/rusheval.schema';
 
 @RushEvalCommandDecorator()
 export class RushEvalPiscinersCommand {
   constructor(
+    @InjectModel(RushEval.name) private readonly rushEvalModel: Model<RushEval>,
     @InjectModel(Student.name) private readonly studentModel: Model<Student>,
     @InjectModel(Team.name) private readonly teamModel: Model<Team>,
   ) { }
 
+  @UseInterceptors(RushProjectSlugAutocompleteInterceptor)
   @Subcommand({
     name: 'pisciners',
     description: 'Get pisciners to choose timeslots',
   })
-  public async onCommandCall(@Context() [interaction]: SlashCommandContext) {
+  public async onCommandCall(@Context() [interaction]: SlashCommandContext, @Options() { project }: RushProjectSlugDto) {
     const logger = new ConsoleLogger('RushEvalPiscinersCommand');
+
     logger.log(`Pisciners command called by ${interaction.user.username}`);
     const button = new ButtonBuilder()
       .setCustomId('pisciner-session-fetch')
@@ -36,50 +40,67 @@ export class RushEvalPiscinersCommand {
       ;
     const row = new ActionRowBuilder<ButtonBuilder>()
       .addComponents(button);
+    const rushName = getRushName(project);
+
+    if (rushName === project) {
+      return interaction.reply({ content: `Unknown rush project slug ${project}`, ephemeral: true });
+    }
     const embed = new EmbedBuilder()
-      .setTitle("Please select your timeslot for the rush01 defense")
+      .setTitle(`Please select a session for your ${rushName} defense`)
       .setColor('#00FFFF')
       ;
+    const rushEval = await this.rushEvalModel.findOne().exec()
+      ?? new this.rushEvalModel();
+    const now = new Date();
 
-    const projectSlug = 'c-piscine-rush-01';
-    await interaction.reply({ content: `Fetching ongoing ${projectSlug} teams...`, ephemeral: true });
+    rushEval.project = project;
+    rushEval.poolYear = String(now.getFullYear());
+    rushEval.poolMonth = now.toLocaleDateString(undefined, { month: 'long' });
+    const batch = `batch ${rushEval.poolMonth} ${rushEval.poolYear}`;
 
-    await this.fetchOngoingRush(projectSlug).then(newTeams => {
-      if (newTeams.length) {
-        logger.log(`Found ${newTeams.length} ongoing ${projectSlug} teams`);
-        interaction.editReply(`Found ${newTeams.length} ongoing ${projectSlug} teams`);
-      } else {
-        logger.log(`All ongoing ${projectSlug} teams are already registered`);
-        interaction.editReply(`All ongoing ${projectSlug} teams are already registered`);
-      }
+    await interaction.reply({ content: `Fetching ongoing ${project} teams in ${batch}...`, ephemeral: true });
+    const prevTeamCount = await this.teamModel.countDocuments().exec();
+    return await this.fetchOngoingRush(project).then((nowTeamCount) => {
+      const reply = (() => {
+        if (nowTeamCount === 0) {
+          return `This attempt will be assumed as testing since there is no ongoing \`\`${project}\`\` team that is waiting for correction.`;
+        } else if (prevTeamCount === nowTeamCount) {
+          return `All ongoing ${project} teams are already registered in ${batch}`;
+        } else {
+          return `Found ${nowTeamCount - prevTeamCount} new ${project} team`;
+        }
+      })();
+
+      logger.log(reply);
+      interaction.editReply(reply);
+      rushEval.save();
+      return interaction.channel.send({
+        content: `Dear ${getRole(interaction.guild, "PISCINER")}s`,
+        embeds: [embed],
+        components: [row],
+      });
     }).catch(error => {
       logger.warn(error.message);
       interaction.editReply(error.message);
     });
-
-    return interaction.channel.send(
-      {
-        content: `Dear ${getRole(interaction.guild, "PISCINER")}s`,
-        embeds: [embed],
-        components: [row],
-      }
-    );
   }
 
-  private async fetchOngoingRush(projectSlugOrId: string | number) {
-    const intraRushTeams = await ApiManager.getDefaultInstance().getProjectTeams(projectSlugOrId, {
+  private async fetchOngoingRush(project: RushProjectSlug) {
+    const intraRushTeams = await ApiManager.getDefaultInstance().getProjectTeams(project, {
       'filter[status]': ProjectStatus.InProgress,
     });
+
     if (intraRushTeams.length === 0) {
-      throw new Error(`This attempt will be assumed as testing since there is no ongoing \`\`${projectSlugOrId}\`\` team that is waiting for correction.`);
+      return 0;
     }
     const allRushTeams = await Promise.all(intraRushTeams.map(team => ApiManager.intraTeamToTeam(team, this.studentModel)));
     const localTeams = await this.teamModel.find().exec();
 
-    return await Promise.all(allRushTeams
+    await Promise.all(allRushTeams
       .filter(intra => !localTeams.find(local => local.intraId === intra.intraId))
       .map(intra => this.teamModel.create(intra))
     );
+    return allRushTeams.length;
   }
 }
 
@@ -87,6 +108,7 @@ export class RushEvalPiscinersCommand {
 export class RushEvalPiscinersButtonComponent {
   private readonly logger = new ConsoleLogger("pisciner-session-fetch");
   constructor(
+    @InjectModel(RushEval.name) private readonly rushEvalModel: Model<RushEval>,
     @InjectModel(Student.name) private readonly studentModel: Model<Student>,
     @InjectModel(Timeslot.name) private readonly timeslotModel: Model<Timeslot>,
     @InjectModel(Evaluator.name) private readonly evaluatorModel: Model<Evaluator>,
@@ -94,9 +116,9 @@ export class RushEvalPiscinersButtonComponent {
     @InjectModel(LoginCode.name) private readonly loginCodeModel: Model<LoginCode>,
   ) { }
 
-  private async fetchIntraGroup(projectSlugOrId: string | number, intraIdOrLogin: string | number) {
-    this.logger.warn(`Fetching intra group ${intraIdOrLogin} for ${projectSlugOrId}`);
-    const intraTeam = await ApiManager.getDefaultInstance().getUserTeam(intraIdOrLogin, projectSlugOrId);
+  private async fetchIntraGroup(project: RushProjectSlug, intraIdOrLogin: string | number) {
+    this.logger.warn(`Fetching intra group ${intraIdOrLogin} for ${project}`);
+    const intraTeam = await ApiManager.getDefaultInstance().getUserTeam(intraIdOrLogin, project);
 
     if (intraTeam === null) {
       return null;
@@ -107,6 +129,10 @@ export class RushEvalPiscinersButtonComponent {
 
   @Button('pisciner-session-fetch')
   public async onFetchSession(@Context() [interaction]: ButtonContext) {
+    const project = (await this.rushEvalModel.findOne().exec())?.project;
+    if (project === undefined) {
+      return interaction.reply({ content: `There's no ongoing rush at the moment`, ephemeral: true });
+    }
     const student = await this.studentModel.findOne({ discordId: interaction.user.id }).exec();
 
     /* if student not found, prompt student intra login */
@@ -121,7 +147,6 @@ export class RushEvalPiscinersButtonComponent {
         .then(() => student.save());
     }
     this.logger.log(`${student.intraName} is fetching for timeslot`);
-    const projectSlug = 'c-piscine-rush-01';
     await interaction.deferReply({ ephemeral: true });
     interaction.editReply(`Looking for ${student.intraName} team...`);
     /* if recognise student, look for their team */
@@ -131,7 +156,7 @@ export class RushEvalPiscinersButtonComponent {
         { "teamMembers.intraName": { $in: [student.intraName] } }]
     }).exec()
       /* if team not found, fetch from intra */
-      ?? await this.fetchIntraGroup(projectSlug, student.intraName).catch((error: AxiosError) => {
+      ?? await this.fetchIntraGroup(project, student.intraName).catch((error: AxiosError) => {
         if (error.response?.status !== 404) {
           this.logger.error(error.message);
         }
@@ -140,21 +165,23 @@ export class RushEvalPiscinersButtonComponent {
 
     /* if team not found in intra, reply error */
     if (team === null) {
-      const content = `Did not find your record of \`\`${projectSlug}\`\`.
+      const content = `Did not find your record of \`\`${project}\`\`.
 If you're certain you've signed up for this project, please contact BOCAL for it.
 `;
 
-      this.logger.log(`Did not find ${student.intraName} record of ${projectSlug}`);
+      this.logger.log(`Did not find ${student.intraName} record of ${project}`);
       return interaction.editReply(content);
     }
     interaction.editReply('Looking for available timeslot...');
     let reply = '';
     const leader = team.teamLeader;
+
     if (student.intraName !== leader.intraName) {
       reply += `**Unless your leader(${leader.intraName}) is unresponsive, please leave it to them to choose the timeslot.**\n`;
     }
     /* Return available session */
     const timeslotOptions = await this.getTimeslotOptions(team.name);
+
     if (timeslotOptions.length === 0) {
       /* Should notify the admin that there is no available session for pisciner */
       this.logger.error(`No available session`);
@@ -167,15 +194,12 @@ If you're certain you've signed up for this project, please contact BOCAL for it
       .setMinValues(1)
       .setMaxValues(1)
       .setOptions(timeslotOptions);
-
     const row = new ActionRowBuilder<StringSelectMenuBuilder>()
       .addComponents(stringSelect);
+
     this.logger.log(`${student.intraName} (leader: ${student.intraName === leader.intraName}) got ${timeslotOptions.map(t => t.value)} as options`);
-    reply += 'Please select your timeslot for the next rush-01 defense';
-    return interaction.editReply({
-      content: reply,
-      components: [row]
-    });
+    reply += `Please select a session for ${getRushName(project)} defense`;
+    return interaction.editReply({ content: reply, components: [row] });
   }
 
   private async getTimeslotOptions(teamName: string) {
