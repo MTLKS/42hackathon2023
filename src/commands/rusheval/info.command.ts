@@ -2,7 +2,7 @@ import { Subcommand, Context, SlashCommandContext, Options } from 'necord';
 import { RushEvalCommandDecorator } from './rusheval.command';
 import { InjectModel } from '@nestjs/mongoose';
 import { Model } from 'mongoose';
-import { Timeslot, TimeslotAutoCompleteInterceptor, TimeslotDto } from 'src/schema/timeslot.schema';
+import { Timeslot, TimeslotAutocompleteInterceptor, TimeslotDto } from 'src/schema/timeslot.schema';
 import { Evaluator } from 'src/schema/evaluator.schema';
 import { Team } from 'src/schema/team.schema';
 import { EmbedBuilder } from 'discord.js';
@@ -17,7 +17,7 @@ export class RushEvalInfoCommand {
     @InjectModel(Team.name) private readonly teamModel: Model<Team>,
   ) { }
 
-  @UseInterceptors(TimeslotAutoCompleteInterceptor)
+  @UseInterceptors(TimeslotAutocompleteInterceptor)
   @Subcommand({
     name: 'info',
     description: 'Get current info about rush eval',

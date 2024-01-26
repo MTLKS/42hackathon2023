@@ -14,7 +14,7 @@ export class Timeslot {
 }
 
 @Injectable()
-export class TimeslotAutoCompleteInterceptor extends AutocompleteInterceptor {
+export class TimeslotAutocompleteInterceptor extends AutocompleteInterceptor {
   constructor(
     @InjectModel(Timeslot.name) private readonly timeslotModel: Model<Timeslot>,
   ) {
