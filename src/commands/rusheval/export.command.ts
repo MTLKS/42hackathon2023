@@ -50,7 +50,7 @@ export class RushEvalExportFeedbackCommand {
     name: "export",
     description: "Export feedbacks",
   })
-  public async onExecute(@Context() [interaction]: SlashCommandContext, @Options() { force }: ForceDto) {
+  public async onCommandCall(@Context() [interaction]: SlashCommandContext, @Options() { force }: ForceDto) {
     await interaction.deferReply({ephemeral: true});
     this.logger.log(`Export command called by ${interaction.user.username}${force ? " with force" : ""}`);
     if (force !== true) {

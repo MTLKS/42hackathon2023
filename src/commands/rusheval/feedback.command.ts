@@ -20,7 +20,7 @@ export class RushEvalFeedbackCommand {
     name: 'feedback',
     description: 'Get feedback from rush evaluators',
   })
-  public async onPing(@Context() [interaction]: SlashCommandContext) {
+  public async onCommandCall(@Context() [interaction]: SlashCommandContext) {
     const logger = new ConsoleLogger('RushEvalFeedbackCommand');
     logger.log(`Feedback command called by ${interaction.user.username}`);
     const button = new ButtonBuilder()
@@ -57,7 +57,7 @@ export class RushEvalFeedbackTeamSelectButton {
   ) { }
 
   @Button('feedback-fetch-team')
-  public async onPress(@Context() [interaction]: ButtonContext) {
+  public async onFetchTeam(@Context() [interaction]: ButtonContext) {
     const logger = new ConsoleLogger('feedback-fetch-team');
     const student = await this.studentModel.findOne({ discordId: interaction.user.id }).exec();
     const teams = await this.teamModel.find({ evaluator: student }).exec();
@@ -106,7 +106,7 @@ export class RushEvalFeedbackForm {
   ) { }
 
   @Button('feedback-team-select-button/:teamName')
-  public async onSelection(@Context() [interaction]: ButtonContext, @ComponentParam('teamName') teamName: string) {
+  public async onSelectTeam(@Context() [interaction]: ButtonContext, @ComponentParam('teamName') teamName: string) {
     const cadet = await this.studentModel.findOne({ discordId: interaction.user.id }).exec();
 
     if (cadet === null) {

@@ -26,11 +26,11 @@ export class RushEvalPiscinersCommand {
     name: 'pisciners',
     description: 'Get pisciners to choose timeslots',
   })
-  public async onExecute(@Context() [interaction]: SlashCommandContext) {
+  public async onCommandCall(@Context() [interaction]: SlashCommandContext) {
     const logger = new ConsoleLogger('RushEvalPiscinersCommand');
     logger.log(`Pisciners command called by ${interaction.user.username}`);
     const button = new ButtonBuilder()
-      .setCustomId('piscinersButton')
+      .setCustomId('pisciner-session-fetch')
       .setLabel('Get timeslots')
       .setStyle(ButtonStyle.Primary)
       ;
@@ -85,7 +85,7 @@ export class RushEvalPiscinersCommand {
 
 @Injectable()
 export class RushEvalPiscinersButtonComponent {
-  private readonly logger = new ConsoleLogger("piscinerButton");
+  private readonly logger = new ConsoleLogger("pisciner-session-fetch");
   constructor(
     @InjectModel(Student.name) private readonly studentModel: Model<Student>,
     @InjectModel(Timeslot.name) private readonly timeslotModel: Model<Timeslot>,
@@ -105,8 +105,8 @@ export class RushEvalPiscinersButtonComponent {
     return await this.teamModel.create(team);
   }
 
-  @Button('piscinersButton')
-  public async onButton(@Context() [interaction]: ButtonContext) {
+  @Button('pisciner-session-fetch')
+  public async onFetchSession(@Context() [interaction]: ButtonContext) {
     const student = await this.studentModel.findOne({ discordId: interaction.user.id }).exec();
 
     /* if student not found, prompt student intra login */
@@ -162,7 +162,7 @@ If you're certain you've signed up for this project, please contact BOCAL for it
       return interaction.editReply(reply);
     }
     const stringSelect = new StringSelectMenuBuilder()
-      .setCustomId('piscinersStringSelect')
+      .setCustomId('pisciner-session-choose')
       .setPlaceholder(`Selected: ${team.timeslot?.timeslot ?? 'None'}`)
       .setMinValues(1)
       .setMaxValues(1)
@@ -214,7 +214,7 @@ If you're certain you've signed up for this project, please contact BOCAL for it
 
 @Injectable()
 export class RushEvalPiscinersStringSelectComponent {
-  private readonly logger = new ConsoleLogger("piscinerStringSelect");
+  private readonly logger = new ConsoleLogger("pisciner-session-choose");
   constructor(
     @InjectModel(Student.name) private readonly studentModel: Model<Student>,
     @InjectModel(Timeslot.name) private readonly timeslotModel: Model<Timeslot>,
@@ -222,8 +222,8 @@ export class RushEvalPiscinersStringSelectComponent {
     @InjectModel(Team.name) private readonly teamModel: Model<Team>,
   ) { }
 
-  @StringSelect('piscinersStringSelect')
-  public async onStringSelect(@Context() [interaction]: StringSelectContext, @SelectedStrings() selected: string[]) {
+  @StringSelect('pisciner-session-choose')
+  public async onChooseSession(@Context() [interaction]: StringSelectContext, @SelectedStrings() selected: string[]) {
     const student = await this.studentModel.findOne({ discordId: interaction.user.id }).exec();
     if (student === null) {
       return interaction.reply({ content: 'Please try fetching slots and register yourself as new student again.', ephemeral: true });

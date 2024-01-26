@@ -1,41 +1,12 @@
-import { Subcommand, Context, SlashCommandContext, StringOption, Options, AutocompleteInterceptor } from 'necord';
+import { Subcommand, Context, SlashCommandContext, Options } from 'necord';
 import { RushEvalCommandDecorator } from './rusheval.command';
 import { InjectModel } from '@nestjs/mongoose';
 import { Model } from 'mongoose';
-import { Timeslot } from 'src/schema/timeslot.schema';
+import { Timeslot, TimeslotAutoCompleteInterceptor, TimeslotDto } from 'src/schema/timeslot.schema';
 import { Evaluator } from 'src/schema/evaluator.schema';
 import { Team } from 'src/schema/team.schema';
-import { AutocompleteInteraction, EmbedBuilder } from 'discord.js';
-import { ConsoleLogger, Injectable, UseInterceptors } from '@nestjs/common';
-
-@Injectable()
-export class TimeslotAutoCompleteInterceptor extends AutocompleteInterceptor {
-  constructor(
-    @InjectModel(Timeslot.name) private readonly timeslotModel: Model<Timeslot>,
-  ) {
-    super();
-  }
-
-  public async transformOptions(interaction: AutocompleteInteraction) {
-    const focused = interaction.options.getFocused(true);
-    const choices = (await this.timeslotModel.find().exec()).map(({timeslot}) => timeslot);
-
-    return interaction.respond(choices
-      .filter(choice => choice.startsWith(focused.value.toString()))
-      .map(choice => ({ name: choice, value: choice }))
-    );
-  }
-}
-
-export class TimeslotDto {
-  @StringOption({
-    name: 'timeslot',
-    description: 'Query for a specific timeslot evaluators and teams',
-    autocomplete: true,
-    required: false
-  })
-  timeslot: string;
-}
+import { EmbedBuilder } from 'discord.js';
+import { ConsoleLogger, UseInterceptors } from '@nestjs/common';
 
 @RushEvalCommandDecorator()
 export class RushEvalInfoCommand {
@@ -51,7 +22,7 @@ export class RushEvalInfoCommand {
     name: 'info',
     description: 'Get current info about rush eval',
   })
-  public async onExecute(@Context() [interaction]: SlashCommandContext, @Options() { timeslot }: TimeslotDto) {
+  public async onCommandCall(@Context() [interaction]: SlashCommandContext, @Options() { timeslot }: TimeslotDto) {
     this.logger.log(`Info command called by ${interaction.user.username} arg(${timeslot})`);
     try {
       const embed = timeslot

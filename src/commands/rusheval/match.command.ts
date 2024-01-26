@@ -109,7 +109,7 @@ export class RushEvalMatchCommand {
     name: 'match',
     description: 'Lock in cadet and pisciner timeslots',
   })
-  public async onMatch(@Context() [interaction]: SlashCommandContext) {
+  public async onCommandCall(@Context() [interaction]: SlashCommandContext) {
     const projectSlug = 'c-piscine-rush-01';
 
     this.logger.log(`${interaction.user.username} attempted to match teams and evaluators`);

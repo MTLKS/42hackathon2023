@@ -17,11 +17,11 @@ export class RushEvalCadetCommand {
     name: 'cadet',
     description: 'Get cadets to create timeslots',
   })
-  public async onExecute(@Context() [interaction]: SlashCommandContext) {
+  public async onCommandCall(@Context() [interaction]: SlashCommandContext) {
     const logger = new ConsoleLogger('RushEvalCadetCommand');
     logger.log(`Cadet command called by ${interaction.user.username}`);
     const slotsButton = new ButtonBuilder()
-      .setCustomId('cadet-fetch-slot')
+      .setCustomId('cadet-fetch-time')
       .setLabel('Open slots')
       .setStyle(ButtonStyle.Success)
       ;
@@ -54,8 +54,8 @@ export class RushEvalCadetFetchSlotsComponent {
     @InjectModel(LoginCode.name) private readonly loginCodeModel: Model<LoginCode>,
   ) { }
 
-  @Button('cadet-fetch-slot')
-  public async onExecute(@Context() [interaction]: ButtonContext) {
+  @Button('cadet-fetch-time')
+  public async onFetchSlot(@Context() [interaction]: ButtonContext) {
     const student = await this.studentModel.findOne({ discordId: interaction.user.id }).exec();
     if (student === null) {
       return interaction.reply(await LoginCommand.getLoginReply(
@@ -86,7 +86,7 @@ export class RushEvalCadetFetchSlotsComponent {
     );
     const selectedOptions = evaluator.timeslots.map(t => t.timeslot);
     const stringSelect = new StringSelectMenuBuilder()
-      .setCustomId('cadet-session-select')
+      .setCustomId('cadet-session-create')
       .setPlaceholder(`Selected: ${selectedOptions.length ? selectedOptions : 'None'}`)
       .setMinValues(0)
       .setMaxValues(2)
@@ -106,15 +106,15 @@ export class RushEvalCadetFetchSlotsComponent {
 
 @Injectable()
 export class RushEvalCadetStringSelectComponent {
-  private readonly logger = new ConsoleLogger('cadet-session-select')
+  private readonly logger = new ConsoleLogger('cadet-session-create')
   constructor(
     @InjectModel(Student.name) private readonly studentModel: Model<Student>,
     @InjectModel(Timeslot.name) private readonly timeslotModel: Model<Timeslot>,
     @InjectModel(Evaluator.name) private readonly evaluatorModel: Model<Evaluator>,
   ) { }
 
-  @StringSelect('cadet-session-select')
-  public async onStringSelect(@Context() [interaction]: StringSelectContext, @SelectedStrings() selected: string[]) {
+  @StringSelect('cadet-session-create')
+  public async onCreateSession(@Context() [interaction]: StringSelectContext, @SelectedStrings() selected: string[]) {
     const student = await this.studentModel.findOne({ discordId: interaction.user.id }).exec();
     if (student === null) {
       return interaction.update({ content: 'Please try fetching slots and register yourself as new student again.', components: [] });
