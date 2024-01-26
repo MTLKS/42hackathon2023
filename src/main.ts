@@ -34,7 +34,13 @@ async function bootstrap() {
     await ApiManager.initDefaultInstance();
   } catch (error) {
     const logger = new ConsoleLogger("main");
-    logger.fatal(`Failed to get access token from 42 API: ${error.response.data.error_description}`);
+    logger.fatal(`Failed to get access token from 42 API:
+Error message: ${error.response.data.error_description}
+
+Potential causes include:
+Incorrect API_UID or API_SECRET
+API_SECRET has been refreshed
+`);
     return;
   }
   const app = await NestFactory.create(AppModule);
