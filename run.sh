@@ -36,7 +36,8 @@ then
 fi
 
 source venv/bin/activate 2> /dev/null ||
-source venv/Scripts/activate 2> /dev/null ||
+source venv/Scripts/activate 2> /dev/null &&
+echo "Initiated venv" ||
 echo "venv not found" >&2
 export $(cat .env | xargs) &&
 npm run start:dev
