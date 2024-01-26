@@ -68,7 +68,7 @@ export class RushEvalPiscinersCommand {
 
   private async fetchOngoingRush(projectSlugOrId: string | number) {
     const intraRushTeams = await ApiManager.getDefaultInstance().getProjectTeams(projectSlugOrId, {
-      'filter[status]': [ProjectStatus.InProgress, ProjectStatus.WaitingForCorrection],
+      'filter[status]': ProjectStatus.InProgress,
     });
     if (intraRushTeams.length === 0) {
       throw new Error(`This attempt will be assumed as testing since there is no ongoing \`\`${projectSlugOrId}\`\` team that is waiting for correction.`);
