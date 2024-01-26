@@ -13,8 +13,8 @@ import { Specialslot, SpecialslotSchema } from './schema/specialslot.schema';
 import { LoginCommand } from './commands/login.command';
 import { PingCommand } from './commands/ping.command';
 import { HelpCommand } from './commands/help.command';
-import { RushEvalCadetCommand, RushEvalCadetFetchSlotsComponent, RushEvalCadetStringSelectComponent, RushEvalCadetFetchSpecialSlotsComponent, RushEvalCadetSpecialStringSelectComponent } from './commands/rusheval/cadet.command';
-import { RushEvalPiscinersCommand, RushEvalPiscinersButtonComponent, RushEvalPiscinersStringSelectComponent, RushEvalPiscinersSpecialButtonComponent, RushEvalPiscinersSpecialModalComponent, RushEvalPiscinersSpecialApproveButtonComponent, RushEvalPiscinersSpecialStringSelectComponent } from './commands/rusheval/pisciners.command';
+import { RushEvalCadetCommand, RushEvalCadetFetchSlotsComponent, RushEvalCadetStringSelectComponent } from './commands/rusheval/cadet.command';
+import { RushEvalPiscinersCommand, RushEvalPiscinersButtonComponent, RushEvalPiscinersStringSelectComponent } from './commands/rusheval/pisciners.command';
 import { RushEvalInfoCommand } from './commands/rusheval/info.command';
 import { RushEvalMatchCommand } from './commands/rusheval/match.command';
 import { RushEvalFeedbackCommand, RushEvalFeedbackForm, RushEvalFeedbackTeamSelectButton } from './commands/rusheval/feedback.command';
@@ -58,15 +58,9 @@ import { RushEvalExportFeedbackCommand } from './commands/rusheval/export.comman
     RushEvalCadetCommand,
     RushEvalCadetFetchSlotsComponent,
     RushEvalCadetStringSelectComponent,
-    RushEvalCadetFetchSpecialSlotsComponent,
-    RushEvalCadetSpecialStringSelectComponent,
     RushEvalPiscinersCommand,
     RushEvalPiscinersButtonComponent,
     RushEvalPiscinersStringSelectComponent,
-    RushEvalPiscinersSpecialButtonComponent,
-    RushEvalPiscinersSpecialModalComponent,
-    RushEvalPiscinersSpecialApproveButtonComponent,
-    RushEvalPiscinersSpecialStringSelectComponent,
     RushEvalInfoCommand,
     RushEvalMatchCommand,
     RushEvalFeedbackCommand,
