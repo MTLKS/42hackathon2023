@@ -61,7 +61,7 @@ export class RushEvalInfoCommand {
 
       return {
         name: `__${timeslot}__ (${available > 0 ? `+${available}` : available})`,
-        value: `**${taken}** taken / **${opened}** opened`,
+        value: `${taken ? `**${taken}** taken` : "None"} / ${opened ? `**${opened}** opened` : "None"}`,
       };
     });
     const embed = new EmbedBuilder()
