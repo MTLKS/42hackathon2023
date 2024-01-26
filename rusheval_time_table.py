@@ -11,7 +11,6 @@ database = mongo.MongoClient('mongodb://127.0.0.1:27017/nest').get_database('nes
 CELL_WIDTH = .2
 CELL_HEIGHT = .14
 MAX_SLOTS = 4
-TIMESLOTS_AMOUNT = 6
 
 def create_figure():
     plt.figure(
@@ -19,12 +18,11 @@ def create_figure():
         edgecolor=(.39, .39, .39),
         tight_layout={'pad':1},
         dpi=200,
-        figsize=(8, 4)
     )
     plt.gca().get_xaxis().set_visible(False)
     plt.gca().get_yaxis().set_visible(False)
     plt.box(on=None)
-    title_text = plt.suptitle("Evaluation Time Table")
+    title_text = plt.suptitle("Rush Evaluation Time Table")
     title_text.set_fontsize(20)
     title_text.set_fontweight('bold')
     title_text.set_y(0.9)
