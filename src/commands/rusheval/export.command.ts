@@ -77,8 +77,8 @@ export class RushEvalExportFeedbackCommand {
       }
     }
     const teams = await this.teamModel.find().exec();
-    const monthNum = monthNameToNumber(rushEval.poolMonth);
-    const outfile = `${rushEval.poolYear}-${monthNum} ${getRushName(rushEval.project)}.pdf`;
+    const month = monthNameToNumber(rushEval.poolMonth).toString().padStart(2, "0");
+    const outfile = `${rushEval.poolYear}-${month} ${getRushName(rushEval.project)}.pdf`;
     
     const reply = (force !== true)
       ? `Exported ${teams.length} teams`
