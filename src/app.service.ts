@@ -36,6 +36,7 @@ function thilaBotResponse(body: string): string {
 <style>
   body {
     background-color: #222222;
+    color: #FFFFFF;
     display: flex;
     flex-wrap: wrap;
     justify-content: center;
@@ -49,8 +50,9 @@ function thilaBotResponse(body: string): string {
     height: 0;
   }
 
-  h1 {
-    color: #FFFFFF;
+  img {
+    margin: 1vw;
+    border-radius: 10px;
   }
 </style>
 </head>
@@ -85,22 +87,37 @@ export class AppService {
   }
 
   async getCode(@Req() request: Request): Promise<string> {
-    const code = request.cookies['code'];
+    const hiBestieGif = "https://i.pinimg.com/originals/49/b7/93/49b793ae912e181461e1fe87530f1818.gif";
+    const chairFallGif = "https://media1.tenor.com/m/L4OqCI0rthEAAAAd/hatsune-miku-chair.gif";
+    const swingGif = "https://media1.tenor.com/m/QONGo5d2GdIAAAAd/hatsune-miku-miku-hatsune.gif";
 
+    if (request.query?.error) {
+      return thilaBotResponse(`<h1>Access Denied</h1>
+      <div class="break"></div>
+      <img src="${chairFallGif}" height="200px">
+      `);
+    }
+    const code = request.cookies['code'];
     if (!code) {
-      return thilaBotResponse(`<img src="https://i.pinimg.com/originals/49/b7/93/49b793ae912e181461e1fe87530f1818.gif" height="200px">`);
+      return thilaBotResponse(`<img src="${hiBestieGif}" height="200px">`);
     }
     const loginCode = await this.loginCodeModel.findOne({ code: code });
 
     if (loginCode === null) {
       return thilaBotResponse(`<h1>The link has either expired or is invalid</h1>
       <div class="break"></div>
-      <img src="https://media1.tenor.com/m/L4OqCI0rthEAAAAd/hatsune-miku-chair.gif" height="200px">
+      <img src="${chairFallGif}" height="200px">
       `);
     }
     this.logger.log(`${loginCode.discordUsername} attempted to login`);
     if (loginCode.intraCode !== undefined) {
-      return thilaBotResponse(`<img src="https://i.pinimg.com/originals/49/b7/93/49b793ae912e181461e1fe87530f1818.gif" height="200px">`);
+      const student = await this.studentModel.findOne({ discordId: loginCode.discordId });
+      return thilaBotResponse(`
+      <h1>Hi ${student.discordName} | ${student.intraName}</h1>
+      <div class="break"></div>
+      <img src="${hiBestieGif}" height="200px">
+      <img src="${loginCode.discordAvatarUrl}" height="200px">
+      `);
     }
     loginCode.intraCode = request.query.code as string;
     await loginCode.save();
@@ -112,7 +129,7 @@ export class AppService {
       this.logger.debug(`${loginCode.discordUsername}'s code expired, presumably before the loginCode timeout (5min)`);
       return thilaBotResponse(`<h1>Code expired. Please try creating a new link.</h1>
       <div class="break"></div>
-      <img src="https://media1.tenor.com/m/QONGo5d2GdIAAAAd/hatsune-miku-miku-hatsune.gif" height="200px">
+      <img src="${swingGif}" height="200px">
     `);
     }
     const api = new ApiManager(access_token);
