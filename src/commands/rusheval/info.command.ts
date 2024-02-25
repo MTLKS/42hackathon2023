@@ -79,13 +79,12 @@ export class RushEvalInfoCommand {
     }
     const evaluators = await this.evaluatorModel.find({ 'timeslots.timeslot': timeslot }).exec();
     const teams = await this.teamModel.find({ 'timeslot.timeslot': timeslot }).exec();
-
-    let evaluatorsValue = evaluators.map((evaluator) => `${evaluator.student.intraName} (**x${evaluator.timeslots.length}**)`).join('\n');
-    evaluatorsValue = evaluatorsValue == '' ? 'None' : evaluatorsValue;
-
-    let teamsValue = teams.map((team) => team.teamLeader.intraName).join('\n');
-    teamsValue = teamsValue == '' ? 'None' : teamsValue;
-
+    const evaluatorTimeslots = (e: Evaluator) =>  e.timeslots
+      .filter((t) => t.timeslot !== timeslot)
+      .map((t) => t.timeslot)
+      ;
+    const evaluatorsValue = evaluators.map((e) => `${e.student.intraName} (**+${evaluatorTimeslots(e)}**)`).join('\n') || 'None';
+    const teamsValue = teams.map((team) => team.teamLeader.intraName).join('\n') || 'None';
     const embed = new EmbedBuilder()
       .setTitle(`Rush Eval ${timeslot} Details`)
       .addFields(
