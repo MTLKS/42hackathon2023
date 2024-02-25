@@ -8,16 +8,7 @@ import { EmbedBuilder } from "discord.js";
 import { unlink, writeFile } from "fs";
 import { ConsoleLogger } from "@nestjs/common";
 import { RushEval, getRushName } from "src/schema/rusheval.schema";
-import { monthNameToNumber } from "src/utils";
-
-class ForceDto {
-  @BooleanOption({
-    name: 'force',
-    description: "Export feedback regardless there's teams without feedbacks",
-    required: false
-  })
-  force: boolean;
-}
+import { ForceDto, monthNameToNumber } from "src/utils";
 
 interface EvaluatorTeamsAggregation {
   evaluator: string,

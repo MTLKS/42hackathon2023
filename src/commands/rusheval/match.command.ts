@@ -1,4 +1,4 @@
-import { Subcommand, Context, SlashCommandContext } from 'necord';
+import { Subcommand, Context, SlashCommandContext, Options } from 'necord';
 import { RushEvalCommandDecorator } from './rusheval.command';
 import { InjectModel } from '@nestjs/mongoose';
 import { Team } from 'src/schema/team.schema';
@@ -11,6 +11,7 @@ import { getRole } from '../updateroles.command';
 import { Student } from 'src/schema/student.schema';
 import { randomInt } from 'crypto';
 import { ConsoleLogger } from '@nestjs/common';
+import { ForceDto } from 'src/utils';
 
 function getMissingEvaluatorEmbeds(teamsWithoutEvaluator: Team[]) {
   const teamsNoRegister = teamsWithoutEvaluator.filter(team => team.timeslot === undefined);
@@ -109,10 +110,10 @@ export class RushEvalMatchCommand {
     name: 'match',
     description: 'Lock in cadet and pisciner timeslots',
   })
-  public async onCommandCall(@Context() [interaction]: SlashCommandContext) {
+  public async onCommandCall(@Context() [interaction]: SlashCommandContext, @Options() { force }: ForceDto) {
     const projectSlug = 'c-piscine-rush-01';
 
-    this.logger.log(`${interaction.user.username} attempted to match teams and evaluators`);
+    this.logger.log(`${interaction.user.username} attempted to match teams and evaluators with force: ${force}`);
     await interaction.deferReply({ ephemeral: true });
     if (await this.teamModel.count({ feedbackAt: { $ne: undefined } }).exec() !== 0) {
       this.logger.error(`${interaction.user.username} attempted to match after feedback has been given.`);
@@ -129,22 +130,24 @@ export class RushEvalMatchCommand {
       console.error(error);
       return interaction.editReply('Error occured while matching teams and evaluators\n');
     }
-    interaction.editReply('Looking for teams without evaluator...');
-    this.logger.log('Looking for teams without evaluator...');
-    try {
-      const teamsWithoutEvaluator = await this.teamModel.find({ evaluator: undefined }).exec();
+    if (force !== true) {
+      interaction.editReply('Looking for teams without evaluator...');
+      this.logger.log('Looking for teams without evaluator...');
+      try {
+        const teamsWithoutEvaluator = await this.teamModel.find({ evaluator: undefined }).exec();
 
-      if (teamsWithoutEvaluator.length) {
-        const embed = getMissingEvaluatorEmbeds(teamsWithoutEvaluator);
+        if (teamsWithoutEvaluator.length) {
+          const embed = getMissingEvaluatorEmbeds(teamsWithoutEvaluator);
 
-        this.clearMatch();
-        this.logger.log(`Below teams are missing evaluator: ${teamsWithoutEvaluator.map(team => team.name)}`);
-        return interaction.editReply({ content: 'Below teams are missing evaluator: \n', embeds: embed });
+          this.clearMatch();
+          this.logger.log(`Below teams are missing evaluator: ${teamsWithoutEvaluator.map(team => team.name)}`);
+          return interaction.editReply({ content: 'Below teams are missing evaluator: \n', embeds: embed });
+        }
+      } catch (error) {
+        this.logger.error('Error occured while checking teams without evaluator');
+        console.error(error);
+        return interaction.editReply('Error occured while checking teams without evaluator\n');
       }
-    } catch (error) {
-      this.logger.error('Error occured while checking teams without evaluator');
-      console.error(error);
-      return interaction.editReply('Error occured while checking teams without evaluator\n');
     }
     interaction.editReply('Generating time table...');
     this.logger.log('Generating time table...');

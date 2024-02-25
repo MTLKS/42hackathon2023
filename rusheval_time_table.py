@@ -100,7 +100,7 @@ def draw_session(sessions: list):
             cell.get_text().set_fontweight('bold')
 
 
-def get_session(teams: list):
+def get_session(teams: list[dict]):
     get_login = lambda user: user['intraName']
     def get_eval_data(team):
         return {
@@ -121,7 +121,7 @@ def main():
         print(f"Usage: {sys.argv[0]} <dst image>", file=sys.stderr)
         return 1
     try:
-        teams = list(database.get_collection('teams').find())
+        teams = list(database.get_collection('teams').find({'evaluator': {'$ne': None}}))
         outfile = sys.argv[1]
         # draw_session(get_session_file("testmatch.json"))
         draw_session(get_session(teams))
