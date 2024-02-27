@@ -253,8 +253,21 @@ export class RushEvalPiscinersStringSelectComponent {
       return interaction.reply({ content: 'Please try fetching slots and register yourself as new student again.', ephemeral: true });
     }
     this.logger.log(`${student.intraName} selected timeslot: ${selected}`);
-    const availableCount = await this.evaluatorModel.aggregate([{ $unwind: '$timeslots' }, { $group: { _id: '$timeslots.timeslot', count: { $sum: 1 } } }, { $project: { _id: 0, timeslot: '$_id', count: 1 } }]);
-    const unavailableCount = await this.teamModel.aggregate([{ $unwind: '$timeslot' }, { $group: { _id: '$timeslot.timeslot', count: { $sum: 1 } } }, { $project: { _id: 0, timeslot: '$_id', count: 1 } }]);
+    const team = await this.teamModel.findOne({
+      $or: [
+        { "teamLeader.intraName": student.intraName },
+        { "teamMembers.intraName": { $in: [student.intraName] } }]
+    }).exec();
+    const availableCount = await this.evaluatorModel.aggregate([
+      { $unwind: '$timeslots' },
+      { $group: { _id: '$timeslots.timeslot', count: { $sum: 1 } } },
+      { $project: { _id: 0, timeslot: '$_id', count: 1 } }
+    ]);
+    const unavailableCount = await this.teamModel.aggregate([
+      { $unwind: '$timeslot' },
+      { $group: { _id: '$timeslot.timeslot', count: { $sum: 1 } } },
+      { $project: { _id: 0, timeslot: '$_id', count: 1 } }
+    ]);
     let currentAvailable = availableCount.find((timeslot) => timeslot.timeslot === selected[0]);
     let currentUnavailable = unavailableCount.find((timeslot) => timeslot.timeslot === selected[0]);
 
@@ -264,18 +277,15 @@ export class RushEvalPiscinersStringSelectComponent {
     } else if (currentAvailable && !currentUnavailable) {
       finalCount = currentAvailable.count;
     }
-
+    if (team.timeslot?.timeslot === selected[0]) {
+      finalCount++;
+    }
     if (finalCount == 0) {
       this.logger.log(`${student.intraName} Selected timeslots: ${selected} is full`);
       return interaction.update({ content: `Sorry, timeslot ${selected[0]} is full, please try again.`, components: [] });
     }
 
     const selectedTimeslot = await this.timeslotModel.findOne({ timeslot: selected[0] }).exec();
-    const team = await this.teamModel.findOne({
-      $or: [
-        { "teamLeader.intraName": student.intraName },
-        { "teamMembers.intraName": { $in: [student.intraName] } }]
-    }).exec();
     // const team = await this.teamModel.findOne({ teamLeader: student }).exec();
 
     team.timeslot = selectedTimeslot;
