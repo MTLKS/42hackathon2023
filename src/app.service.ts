@@ -148,7 +148,7 @@ export class AppService {
         intraName: intraUserData.login,
       });
 
-    student.poolYear = intraUserData.poolYear;
+    student.poolYear = intraUserData.pool_year;
     student.poolMonth = intraUserData.pool_month;
     student.discordId = loginCode.discordId;
     student.discordName = loginCode.discordUsername;
