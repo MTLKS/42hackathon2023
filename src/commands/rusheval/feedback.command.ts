@@ -60,7 +60,7 @@ export class RushEvalFeedbackTeamSelectButton {
   public async onFetchTeam(@Context() [interaction]: ButtonContext) {
     const logger = new ConsoleLogger('feedback-fetch-team');
     const student = await this.studentModel.findOne({ discordId: interaction.user.id }).exec();
-    const teams = await this.teamModel.find({ evaluator: student }).exec();
+    const teams = await this.teamModel.find({ 'evaluator._id': student._id }).exec();
 
     if (student === null) {
       logger.log(`${interaction.user.username} is not registered`);
