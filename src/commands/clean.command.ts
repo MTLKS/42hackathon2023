@@ -84,6 +84,7 @@ export class CleanDatabase {
   public async onRejection(@Context() [interaction]: ButtonContext) {
     return interaction.update({
       content: "Cleaning Aborted",
+      embeds: [],
       components: []
     });
   }
