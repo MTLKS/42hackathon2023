@@ -9,6 +9,7 @@ import { unlink, writeFile } from "fs";
 import { ConsoleLogger } from "@nestjs/common";
 import { RushEval, getRushName } from "src/schema/rusheval.schema";
 import { ForceDto, monthNameToNumber } from "src/utils";
+import { Timeslot } from "src/schema/timeslot.schema";
 
 interface EvaluatorTeamsAggregation {
   evaluator: string,
@@ -37,6 +38,7 @@ export class RushEvalExportFeedbackCommand {
   private readonly logger = new ConsoleLogger("RushEvalExportFeedbackCommand", {timestamp: true});
   constructor(
     @InjectModel(RushEval.name) private readonly rushEvalModel: Model<RushEval>,
+    @InjectModel(Timeslot.name) private readonly timeslotModel: Model<Timeslot>,
     @InjectModel(Team.name) private readonly teamModel: Model<Team>,
   ) { }
 
@@ -67,10 +69,9 @@ export class RushEvalExportFeedbackCommand {
         });
       }
     }
-    const teams = await this.teamModel.find().exec();
+    const teams = await this.getSortedTeams();
     const month = monthNameToNumber(rushEval.poolMonth).toString().padStart(2, "0");
     const outfile = `${rushEval.poolYear}-${month} ${getRushName(rushEval.project)}.pdf`;
-    
     const reply = (force !== true)
       ? `Exported ${teams.length} teams`
       : `Exported ${teams.filter(t => t.feedback).length}/${teams.length} teams with feedbacks`;
@@ -85,14 +86,27 @@ export class RushEvalExportFeedbackCommand {
     }).finally(() => unlink(outfile, () => {}));
   }
 
+  private async getSortedTeams() {
+    const teams = await this.teamModel.find().exec();
+    const timeslots = await this.timeslotModel.find().exec();
+    const mapped = timeslots.map(({timeslot}) => teams.filter(t => t.timeslot?.timeslot === timeslot));
+    const sorted = mapped.flat().concat(teams.filter(t => t.timeslot === undefined));
+
+    return sorted;
+  }
+
   private async createNavHTML() {
     const navTeams = await this.teamModel.aggregate([
       {$group: {_id: "$timeslot.timeslot", teams: {$push: {name: "$name", evaluator: "$evaluator.intraName"} }}},
       {$project: {time: "$_id", teams: "$teams", _id: 0}},
-      {$sort: {time: 1}}, // bug prone, sorted lexicographically
     ]).exec();
+    const timeslotOrder = await this.timeslotModel.find().exec();
+    const navTeamsSorted = timeslotOrder.map(({timeslot}) =>
+      navTeams.find(({time}) => time === timeslot)
+      ?? {time: timeslot, teams: []}
+    );
 
-    return navTeams.map(({time, teams}) => `
+    return navTeamsSorted.map(({time, teams}) => `
     <h4>${time}</h4>
 ${teams.map(team => `    <a class="nav" href="#${team.name}">${team.name}: <small>${team.evaluator}</small></a>`).join("<br>\n")}
 `).join("\n<br>\n<br>\n");
@@ -108,7 +122,6 @@ ${teams.map(team => `    <a class="nav" href="#${team.name}">${team.name}: <smal
     const page = await browser.newPage();
 
     this.logger.log(`Setting content`);
-    teams.sort((a, b) => a.timeslot?.timeslot.localeCompare(b.timeslot?.timeslot));
     const title = `Rush${rushEval.project.substr(-2)} Evaluations - ${rushEval.poolMonth} Piscine ${rushEval.poolYear}`;
 
     await page.setContent(`
