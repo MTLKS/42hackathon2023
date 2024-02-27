@@ -1,5 +1,5 @@
 import { Prop, Schema, SchemaFactory } from '@nestjs/mongoose';
-import { APIApplicationCommandOptionChoice, AutocompleteInteraction, CacheType } from 'discord.js';
+import { AutocompleteInteraction } from 'discord.js';
 import { HydratedDocument } from 'mongoose';
 import { AutocompleteInterceptor, StringOption } from 'necord';
 
@@ -7,6 +7,20 @@ export type RushEvalDocument = HydratedDocument<RushEval>;
 
 export const rushProjectSlugs = ["c-piscine-rush-00", "c-piscine-rush-01", "c-piscine-rush-02"];
 export type RushProjectSlug = typeof rushProjectSlugs[number];
+
+@Schema()
+export class RushEval {
+  @Prop()
+  poolYear: string;
+
+  @Prop()
+  poolMonth: string;
+
+  @Prop()
+  project: RushProjectSlug;
+}
+
+export const RushEvalSchema = SchemaFactory.createForClass(RushEval);
 
 export class RushProjectSlugDto {
   @StringOption({
@@ -24,7 +38,7 @@ export class RushProjectSlugAutocompleteInterceptor extends AutocompleteIntercep
     super();
   }
 
-  public transformOptions(interaction: AutocompleteInteraction<CacheType>) {
+  public transformOptions(interaction: AutocompleteInteraction) {
     const focused = interaction.options.getFocused(true);
 
     return interaction.respond(rushProjectSlugs
@@ -42,17 +56,3 @@ export function getRushName(project: RushProjectSlug) {
     default: return project;
   }
 }
-
-@Schema()
-export class RushEval {
-  @Prop()
-  poolYear: string;
-
-  @Prop()
-  poolMonth: string;
-
-  @Prop()
-  project: RushProjectSlug;
-}
-
-export const RushEvalSchema = SchemaFactory.createForClass(RushEval);

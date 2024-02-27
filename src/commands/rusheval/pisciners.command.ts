@@ -63,7 +63,7 @@ export class RushEvalPiscinersCommand {
     return await this.fetchOngoingRush(project).then((nowTeamCount) => {
       const reply = (() => {
         if (nowTeamCount === 0) {
-          return `This attempt will be assumed as testing since there is no ongoing \`\`${project}\`\` team that is waiting for correction.`;
+          return `This attempt will be assumed as testing since there is no ongoing \`\`${project}\`\` team.`;
         } else if (prevTeamCount === nowTeamCount) {
           return `All ongoing ${project} teams are already registered in ${batch}`;
         } else {
