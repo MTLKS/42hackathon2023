@@ -137,7 +137,7 @@ export class AppService {
     const intraId = intraUserData.id;
     const role = getCursusRole(intraUserData.cursus_users)
 
-    let coalition = '';
+    let coalition = undefined;
     if (role === 'SPECIALIZATION' || role === 'CADET') {
       const coalitionResponse = await api.get(`users/${intraId}/coalitions`);
       coalition = coalitionResponse[0].name;
@@ -150,6 +150,12 @@ export class AppService {
 
     student.poolYear = intraUserData.pool_year;
     student.poolMonth = intraUserData.pool_month;
+    if (student.poolYear === undefined) {
+      this.logger.error(`No pool year for ${student.intraName}`);
+    }
+    if (student.poolMonth === undefined) {
+      this.logger.error(`No pool month for ${student.intraName}`);
+    }
     student.discordId = loginCode.discordId;
     student.discordName = loginCode.discordUsername;
     student.progressRole = role;
