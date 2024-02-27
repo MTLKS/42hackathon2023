@@ -186,12 +186,12 @@ db = connect("mongodb://localhost:27017/nest");
 function cadsubst(teamLeaderIntraName, evaluatorIntraName) {
     evaluator = db.students.findOne({intraName: evaluatorIntraName});
     if (evaluator === null) {
-      console.log(`Error: ${evaluatorIntraName} not found`);
-      return ;
+        console.log(`Error: ${evaluatorIntraName} not found`);
+        return ;
     }
     stats = db.teams.updateOne(
-      {'teamLeader.intraName': teamLeaderIntraName},
-      {$set: {evaluator: evaluator}}
+        {'teamLeader.intraName': teamLeaderIntraName},
+        {$set: {evaluator: evaluator}}
     );
     console.log(`Updated team ${teamLeaderIntraName} with evaluator: ${evaluator.intraName}`);
     console.log(stats);
@@ -203,7 +203,7 @@ With this, if you're in the mongosh, you could ``load("cadsubst.js")`` to load a
 load("cadsubst.js")
 cadsubst("teamLeaderIntraName", "evaluatorIntraName")
 
-db.teams.find({"leader.intraName": "teamLeaderIntraName"})
+db.teams.find({"teamLeader.intraName": "teamLeaderIntraName"})
 ```
 
 Alternatively, if you're actively making changes to the script, or preparing for a large changes, it may be more convenient to either inline the function call or create a new script, and invoke the script with ``mongosh scriptname.js``.
@@ -213,7 +213,7 @@ Here's an example of creating a new script.
 load(__dirname + "/cadsubst.js");
 
 cadsubst(teamLeaderIntraName, evaluatorIntraName);
-console.log(db.teams.findOne({"leader.intraName": teamLeaderIntraName}));
+console.log(db.teams.findOne({"teamLeader.intraName": teamLeaderIntraName}));
 ```
 
 For more info about mongodb:
