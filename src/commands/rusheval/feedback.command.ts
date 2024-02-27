@@ -80,7 +80,7 @@ export class RushEvalFeedbackTeamSelectButton {
       const button = new ButtonBuilder()
         .setCustomId(`feedback-team-select-button/${team.name}`)
         .setLabel(team.name)
-        .setStyle(team.feedbackAt ? ButtonStyle.Success : ButtonStyle.Secondary)
+        .setStyle(team.feedback ? ButtonStyle.Success : ButtonStyle.Secondary)
         ;
 
       return button;
@@ -129,7 +129,7 @@ export class RushEvalFeedbackForm {
       ;
 
     const team = await this.teamModel.findOne({ name: teamName }).exec();
-    if (team.feedbackAt) {
+    if (team.feedback) {
       teamMembersInput.setValue(team.feedback.get(teamName));
       notesInput.setValue(team.feedback.get('notes'));
     } else {

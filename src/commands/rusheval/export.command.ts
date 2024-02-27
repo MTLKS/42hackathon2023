@@ -15,8 +15,7 @@ interface EvaluatorTeamsAggregation {
   evaluator: string,
   teams: {
     name: string,
-    timeslot: string,
-    feedbackAt: Date,
+    timeslot: string
   }[]
 }
 
@@ -57,7 +56,7 @@ export class RushEvalExportFeedbackCommand {
     if (force !== true) {
       const teamNoFeedback: EvaluatorTeamsAggregation[] = await this.teamModel.aggregate([
         { $match: { feedback: undefined } },
-        { $group: { _id: "$evaluator.intraName", teams: { $push: { name: "$name", timeslot: "$timeslot.timeslot", feedbackAt: "$feedbackAt" } } } },
+        { $group: { _id: "$evaluator.intraName", teams: { $push: { name: "$name", timeslot: "$timeslot.timeslot" } } } },
         { $project: { evaluator: "$_id", teams: "$teams", _id: 0 } },
       ]);
 
