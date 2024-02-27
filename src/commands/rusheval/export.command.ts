@@ -32,6 +32,12 @@ function createTeamNoFeedbackEmbed(teamNoFeedback: EvaluatorTeamsAggregation[]) 
   return embed;
 }
 
+function encodeHTML(s: string) {
+  return s.replace(/[\u00A0-\u9999<>\&]/g, function(i) {
+    return '&#'+i.charCodeAt(0)+';';
+  });
+}
+
 @RushEvalCommandDecorator()
 export class RushEvalExportFeedbackCommand {
   private readonly logger = new ConsoleLogger("RushEvalExportFeedbackCommand", {timestamp: true});
@@ -190,10 +196,10 @@ ${teams.map(team => `
   <h3 class="evaluator">${team.evaluator?.intraName ?? ''}: ${team.timeslot?.timeslot ?? ''}</h3>
   <h3>Members Overview</h3>
   <hr>
-  <p class="essay">${team.feedback?.get(team.name).replaceAll("\n", "<br>\n") ?? ''}</p>
+  <p class="essay">${encodeHTML(team.feedback?.get(team.name)).replaceAll("\n", "<br>\n") ?? ''}</p>
   <h3>Notes</h3>
   <hr>
-  <p class="essay">${team.feedback?.get("notes").replaceAll("\n", "<br>\n") ?? ''}</p>
+  <p class="essay">${encodeHTML(team.feedback?.get("notes")).replaceAll("\n", "<br>\n") ?? ''}</p>
 `).join("")}
 </body>
 </html>
