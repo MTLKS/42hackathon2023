@@ -11,7 +11,8 @@ import { getRole } from '../updateroles.command';
 import { Student } from 'src/schema/student.schema';
 import { randomInt } from 'crypto';
 import { ConsoleLogger } from '@nestjs/common';
-import { ForceDto } from 'src/utils';
+import { ForceDto, monthNameToNumber } from 'src/utils';
+import { RushEval } from 'src/schema/rusheval.schema';
 
 function getMissingEvaluatorEmbeds(teamsWithoutEvaluator: Team[]) {
   const teamsNoRegister = teamsWithoutEvaluator.filter(team => team.timeslot === undefined);
@@ -42,12 +43,30 @@ function getMissingEvaluatorEmbeds(teamsWithoutEvaluator: Team[]) {
   });
 }
 
+function getComparator(rushProjectSlug: string) {
+  /**
+   * @returns The difference in month
+   */
+  const studentPoolYearMonthComparator = (a: Student, b: Student) => {
+    return ((+a.poolYear - +b.poolYear) * 12)
+      + (monthNameToNumber(a.poolMonth) - monthNameToNumber(b.poolMonth));
+  };
+
+  if (rushProjectSlug === 'c-piscine-rush-00') {
+    return (a: Evaluator, b: Evaluator) => studentPoolYearMonthComparator(b.student, a.student);
+  } else if (['c-piscine-rush-01', 'c-piscine-rush-02'].includes(rushProjectSlug)) {
+    return (a: Evaluator, b: Evaluator) => studentPoolYearMonthComparator(a.student, b.student);
+  } else {
+    throw new Error(`Unknown rush project slug: ${rushProjectSlug}`);
+  }
+}
+
 @RushEvalCommandDecorator()
 export class RushEvalMatchCommand {
   private readonly logger = new ConsoleLogger('RushEvalMatchCommand');
 
   constructor(
-    @InjectModel(Student.name) private readonly studentModel: Model<Student>,
+    @InjectModel(RushEval.name) private readonly rushEvalModel: Model<RushEval>,
     @InjectModel(Team.name) private readonly teamModel: Model<Team>,
     @InjectModel(Evaluator.name) private readonly evaluatorModel: Model<Evaluator>,
   ) { }
@@ -63,23 +82,14 @@ export class RushEvalMatchCommand {
     }));
   }
 
-  private async matching(rushProjectSlug: string) {
+  private async matching(comparator: (a: Evaluator, b: Evaluator) => number) {
     let teams = await this.teamModel.find({ timeslot: { $ne: undefined } }).exec();
-    let evaluators = await this.evaluatorModel.find().exec();
+    let evaluators = await this.evaluatorModel.find({timeslots: {$ne: []}}).exec();
 
-    /* wanna sort the evaluator by their pool year */
-    if (rushProjectSlug === 'c-piscine-rush-00') {
-      evaluators.sort((a, b) => +b.student.poolYear - +a.student.poolYear);
-    } else if (rushProjectSlug === 'c-piscine-rush-01') {
-      evaluators.sort((a, b) => +a.student.poolYear - +b.student.poolYear);
-    } else if (rushProjectSlug === 'c-piscine-rush-02') {
-      throw new Error(`Not implemented yet: ${rushProjectSlug}`);
-    } else {
-      throw new Error(`Unknown rush project slug: ${rushProjectSlug}`);
-    }
-
+    evaluators.sort(comparator);
     // const logEvaluator = (evaluator: Evaluator) => {
     //   const student = evaluator.student;
+
     //   return {
     //     name: student.intraName,
     //     poolYear: student.poolYear,
@@ -111,20 +121,24 @@ export class RushEvalMatchCommand {
     description: 'Lock in cadet and pisciner timeslots',
   })
   public async onCommandCall(@Context() [interaction]: SlashCommandContext, @Options() { force }: ForceDto) {
-    const projectSlug = 'c-piscine-rush-01';
+    const projectSlug = (await this.rushEvalModel.findOne().exec())?.project;
 
+    if (projectSlug === undefined) {
+      this.logger.error('Error: No Ongoing Rush Project');
+      return interaction.reply('Error: No Ongoing Rush Project\n');
+    }
     this.logger.log(`${interaction.user.username} attempted to match teams and evaluators with force: ${force}`);
     await interaction.deferReply({ ephemeral: true });
-    if (await this.teamModel.count({ feedbackAt: { $ne: undefined } }).exec() !== 0) {
+    if (force !== true && await this.teamModel.count({ feedback: { $ne: undefined } }).exec() !== 0) {
       this.logger.error(`${interaction.user.username} attempted to match after feedback has been given.`);
-      return interaction.editReply('Error: Some feedback has been given to teams, doing so may result in loses in feedback.\n'
-        + "If you deem it's necessary, please notify the admin to disable this failsafe.\n");
+      return interaction.editReply('Error: Some feedback has been given to teams, doing so will result in clearing existing feedback.\n'
+        + "If you deem it's necessary, please invoke the command again with force: True.\n");
     }
     interaction.editReply('Matching rush teams and evaluators...');
     this.logger.log('Matching rush teams and evaluators...');
     await this.clearMatch();
     try {
-      await this.matching(projectSlug);
+      await this.matching(getComparator(projectSlug));
     } catch (error) {
       this.logger.error('Error occured while matching teams and evaluators');
       console.error(error);
