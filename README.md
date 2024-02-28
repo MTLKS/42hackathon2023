@@ -247,5 +247,11 @@ This is how the match result will look like.
 This order also affects the order of the timeslots cadet fetched, pisciner received, info display, and the export link, assuming I didn't miss any.
 
 
+### Match Algorithm
+As of now, it's still missing the absolute prioritization for junior cadet.
+
+Meaning that in the case where there's still junior cadet available for ``c-piscine-rush-00``, it should not take any chances to have a senior cadet taking that place instead regardless of the sample sizes and proportion.
+
+
 ## Contact and Feedback
 For any support, issue, and feedback, DM me on discord. My discord username is ``qixeo``.
