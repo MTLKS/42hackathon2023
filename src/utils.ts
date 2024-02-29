@@ -27,3 +27,22 @@ export class ForceDto {
   })
   force: boolean;
 }
+
+function getTimeslotPeriod(period: string) {
+  if (period === "AM") {
+    return 0;
+  } else if (period === "PM") {
+    return 12;
+  } else {
+    console.error(period, "is neither AM nor PM");
+    return NaN;
+  }
+}
+
+export function convertTimeslotStringToNumber(timeslot: string): number {
+  const offset = getTimeslotPeriod(timeslot.slice(-2));
+  const str = timeslot.substring(0, timeslot.length - 2);
+  const [hour, minute] = str.split(':').map(Number);
+
+  return offset + hour + (minute ? minute / 60 : 0);
+}
