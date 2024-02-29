@@ -196,10 +196,10 @@ ${teams.map(team => `
   <h3 class="evaluator">${team.evaluator?.intraName ?? ''}: ${team.timeslot?.timeslot ?? ''}</h3>
   <h3>Members Overview</h3>
   <hr>
-  <p class="essay">${encodeHTML(team.feedback?.get(team.name)).replaceAll("\n", "<br>\n") ?? ''}</p>
+  <p class="essay">${encodeHTML(team.feedback?.get(team.name) ?? '').replaceAll("\n", "<br>\n")}</p>
   <h3>Notes</h3>
   <hr>
-  <p class="essay">${encodeHTML(team.feedback?.get("notes")).replaceAll("\n", "<br>\n") ?? ''}</p>
+  <p class="essay">${encodeHTML(team.feedback?.get("notes") ?? '').replaceAll("\n", "<br>\n")}</p>
 `).join("")}
 </body>
 </html>
