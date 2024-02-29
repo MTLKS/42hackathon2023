@@ -115,6 +115,10 @@ The bot will always follow the latest generated result.
 Here's a successful example for 2024 January rush-00.
 ![Match Result](<doc-assets/match-result.png>)
 
+The order of which cadet will be prioritize during matching depends on the rush project that was given in pisciner command.
+- If the project is ``c-piscine-rush-00``, junior cadet will be prioritized.
+- If the project is ``c-piscine-rush-01`` or ``c-piscine-rush-02``, senior cadet will be prioritized.
+
 
 ### rusheval feedback
 **``ANNOUNCE``** ``< 1s``
@@ -253,5 +257,5 @@ As of now, it's still missing the absolute prioritization for junior cadet.
 Meaning that in the case where there's still junior cadet available for ``c-piscine-rush-00``, it should not take any chances to have a senior cadet taking that place instead regardless of the sample sizes and proportion.
 
 
-## Contact and Feedback
+## Contact
 For any support, issue, and feedback, DM me on discord. My discord username is ``qixeo``.
