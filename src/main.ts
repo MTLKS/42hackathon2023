@@ -9,9 +9,7 @@ function checkEnv() {
     ['THILA_BOT_DISCORD_TOKEN', process.env.THILA_BOT_DISCORD_TOKEN],
     ['THILA_BOT_API_UID', process.env.THILA_BOT_API_UID],
     ['THILA_BOT_API_SECRET', process.env.THILA_BOT_API_SECRET],
-    ['THILA_BOT_HOST(ex: http://localhost)', process.env.THILA_BOT_HOST],
-    ['THILA_BOT_PORT', process.env.THILA_BOT_PORT],
-    ['THILA_BOT_CLIENT_REDIRECT', process.env.THILA_BOT_CLIENT_REDIRECT],
+    ['THILA_BOT_URL(ex: http://localhost:8080)', process.env.THILA_BOT_URL],
     ['THILA_BOT_DATABASE_URL', process.env.THILA_BOT_DATABASE_URL],
   );
   const missingEnv = requiredEnv
@@ -48,7 +46,7 @@ THILA_BOT_API_SECRET has been refreshed
   }
   const app = await NestFactory.create(AppModule);
   app.use(cookieParser());
-  await app.listen(process.env.THILA_BOT_PORT || 80);
+  await app.listen(new URL(process.env.THILA_BOT_URL).port || 80);
 }
 
 bootstrap().catch(error => console.error('bootstrap:', error));

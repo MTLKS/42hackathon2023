@@ -58,12 +58,7 @@ export class ApiManager {
 
     if (code !== undefined) {
       params.grant_type = 'authorization_code';
-
-      let redirect_uri = process.env.THILA_BOT_HOST;
-      if (process.env.THILA_BOT_PORT !== undefined) {
-        redirect_uri += `:${process.env.THILA_BOT_PORT}`;
-      }
-      params.redirect_uri = redirect_uri;
+      params.redirect_uri = process.env.THILA_BOT_URL;
     }
 
     try {

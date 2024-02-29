@@ -13,13 +13,9 @@ export class AppController {
 
   @Get('login/:code')
   async getId(@Param('code') code: string, @Res() response: Response): Promise<void> {
+    const url = `https://api.intra.42.fr/oauth/authorize?client_id=${process.env.THILA_BOT_API_UID}&redirect_uri=${process.env.THILA_BOT_URL}&response_type=code`;
 
     response.cookie('code', code);
-
-    if (process.env.THILA_BOT_CLIENT_REDIRECT === undefined) {
-      response.status(HttpStatus.INTERNAL_SERVER_ERROR).send('No redirect url provided');
-    } else {
-      response.redirect(HttpStatus.FOUND, process.env.THILA_BOT_CLIENT_REDIRECT);
-    }
+    response.redirect(HttpStatus.FOUND, url);
   }
 }
