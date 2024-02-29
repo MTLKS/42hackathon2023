@@ -30,7 +30,7 @@ then
   if [ ! "$(pgrep mongod)" ]
   then
     echo "Starting MongoDB" &&
-    mongod --dbpath "$database_path" >> mongolog.json &
+    mongod --dbpath "$database_path" > /dev/null &
   fi
   echo "Setup completed" >&2
 fi
