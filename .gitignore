@@ -28,7 +28,7 @@ lerna-debug.log*
 *.sublime-workspace
 
 # IDE - VSCode
-.vscode/*
+/.vscode
 !.vscode/settings.json
 !.vscode/tasks.json
 !.vscode/launch.json
@@ -42,3 +42,4 @@ myenv/
 database
 mongolog.json
 *.pem
+set2024JanRush01Data.js

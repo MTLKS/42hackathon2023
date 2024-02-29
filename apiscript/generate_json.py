@@ -60,7 +60,7 @@ def main():
             exit(1)
         except Exception as e:
             print(f"{e.__class__.__name__}:", e, file=sys.stderr)
-        exit(1)
+    exit(1)
 
 if __name__ == "__main__":
     main()

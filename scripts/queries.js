@@ -33,3 +33,17 @@ function showNonLeaderTimeslot() {
 
   return feedback.toArray();
 }
+
+function cadsubst(teamLeaderIntraName, evaluatorIntraName) {
+  evaluator = db.students.findOne({intraName: evaluatorIntraName});
+  if (evaluator === null) {
+    console.log(`Error: ${evaluatorIntraName} not found`);
+    return ;
+  }
+  stats = db.teams.updateOne(
+    {'teamLeader.intraName': teamLeaderIntraName},
+    {$set: {evaluator: evaluator}}
+  );
+  console.log(`Updated team ${teamLeaderIntraName} with evaluator: ${evaluator.intraName}`);
+  console.log(stats);
+}
