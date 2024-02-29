@@ -258,4 +258,4 @@ Meaning that in the case where there's still junior cadet available for ``c-pisc
 
 
 ## Contact
-For any support, issue, and feedback, DM me on discord. My discord username is ``qixeo``.
+For any support, issue, and feedback, DM me [(Qixeo)](https://discord.com/users/387502639350284288) on discord.
