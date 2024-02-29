@@ -166,7 +166,7 @@ export class RushEvalMatchCommand {
     interaction.editReply('Generating time table...');
     this.logger.log('Generating time table...');
     const outfile = `rush${projectSlug.substr(-2)}_evaluation_time_table.jpg`;
-    const child = exec(`python rusheval_time_table.py ${outfile}`, (error, stdout, stderr) => {
+    const child = exec(`python scripts/rusheval_time_table.py ${outfile}`, (error, stdout, stderr) => {
       if (stdout) {
         console.log(stdout);
       }
