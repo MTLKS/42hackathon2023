@@ -35,9 +35,20 @@ then
   echo "Setup completed" >&2
 fi
 
+dir="$(dirname $0)"
+
 source venv/bin/activate 2> /dev/null ||
 source venv/Scripts/activate 2> /dev/null &&
 echo "Initiated venv" ||
 echo "venv not found" >&2
-export $(cat .env | xargs) &&
+
+envfile="$dir/../.env"
+
+if [ ! -f "$envfile" ]
+then
+  echo "No $envfile file found" >&2
+  return 1
+fi
+
+export $(cat "$envfile" | xargs) &&
 npm run start:dev
