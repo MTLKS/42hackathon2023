@@ -20,6 +20,55 @@ With **THILA Bot**, most of it's tedious works are automated.
 Now, instead of creating google docs and form for matching the pisciner and cadet, they could now just run a few **commands** to get the job done.
 
 
+## Setup
+For more info about bot creation, please refer to [Bot Creation](BotCreation.md). (WIP)
+For more info about intra application creation, please refer to [Intra Application Creation](IntraApplicationCreation.md). (WIP)
+
+
+## Prerequisites
+The application uses npm and python3, along with mongodb as it's database.
+These are the version info.
+
+npm: 10.2.0
+python3: 3.10.13
+mongod: 7.0.2
+
+
+## Installation
+To install the project dependencies, simply run ``./scripts/setup``.
+
+
+## Environmental Variable
+These environmental variables are required for the bot.
+
+- THILA_BOT_DISCORD_TOKEN
+	The discord bot's token.
+	<!-- Discord bot token image with pointer -->
+
+- THILA_BOT_API_UID
+	The intra application uid.
+	<!-- Intra application page with pointer -->
+
+- THILA_BOT_API_SECRET
+	The intra application secret.
+	<!-- Intra application page with pointer -->
+
+- THILA_BOT_URL
+	The url which the bot will receive the login request.
+	This url **NEEDS** to be the **SAME** as the **Redirect URI** filled in the intra application.
+	<!-- Intra application setting page with pointer -->
+	Ex: ``http://localhost:8080``
+
+- THILA_BOT_DATABASE_URL
+	The url to the database.
+	Ex: ``mongodb://localhost:27017/nest``
+
+
+## Deploy
+To deploy the bot, simply run ``./scripts/deploy``.
+The script includes the utility of setting up the environment, and piping the program output to a log file.
+
+
 ## Slash Commands
 They are how you as a bocal, interact with the bot.
 

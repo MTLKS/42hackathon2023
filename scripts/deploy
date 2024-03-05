@@ -1,9 +1,11 @@
 #!/usr/bin/env bash
 
-dir="$(dirname $0)"
+dir="$(dirname $0)/.."
 
-envfile="$dir/../.env"
+envfile="$dir/.env"
+venvfile="$dir/venv/bin/activate"
+logfile="$dir/logs.log"
 
 [ -f "$envfile" ] && export $(cat "$envfile" | xargs) || echo "No $envfile file found" >&2
-[ -f venv/bin/activate ] && source venv/bin/activate 2> /dev/null || echo "venv not found" >&2
-npm run start >> logs.log 2>&1
+[ -f "$venvfile" ] && source "$venvfile" 2> /dev/null || echo "$venvfile not found" >&2
+npm run start >> "$logfile" 2>&1
