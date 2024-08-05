@@ -1,7 +1,4 @@
 <style>
-  * {
-    font-size: 1.5vw;
-  }
   img {
     height: 50%;
     width: 50%;
@@ -30,9 +27,9 @@ For more info about intra application creation, please refer to [Intra Applicati
 The application uses npm and python3, along with mongodb as it's database.
 These are the version info.
 
-npm: 10.2.0
-python3: 3.10.13
-mongod: 7.0.2
+- npm: 10.2.0
+- python3: 3.10.13
+- mongod: 7.0.2
 
 
 ## Installation
@@ -82,7 +79,7 @@ There are two types of command, they are **ANNOUNCE** and **EPHEMERAL**.
 During the duration of command execution, they will likely also include an ephemeral message to update you their status.
 
 **EPHEMERAL** command on the other hand, is a command designed only for administrator. They serves purposes like exporting the result of rush evaluations and confirming the details during rush evaluation.
-Their response is temporary, only last for the current session (cleared on application closed/webpage reload), and private to the person invoked the command.
+Their response is temporary, and only last for the current session (cleared on application closed/webpage reload), and private to the person invoked the command.
 
 
 After the invocation of any command, a response is expected from the bot.
@@ -112,7 +109,7 @@ More details will be covered in [Administration](#administration)
 Each cadet can open maximum 2 sessions.
 ![Cadet Select Two Session](<doc-assets/cadet-select-two-sessions.png>)
 
-On successful registration, the bot will response with the created sessions.
+On successful registration, the bot will respond with the created sessions.
 ![Cadet Create Session](<doc-assets/cadet-create-session.png>)
 
 
@@ -133,7 +130,7 @@ The options pisciner received is based on the sessions cadets created, excluding
 In the event where a team member is fetching for available session, instead of their leader, a **bolded** warning message will be included.
 ![Pisciner Fetch Session](<doc-assets/pisciner-fetch-session.png>)
 
-On successful registration, the bot will response with the selected sessions.
+On successful registration, the bot will respond with the selected sessions.
 ![Pisciner Select Session](<doc-assets/pisciner-select-session.png>)
 
 
@@ -159,9 +156,9 @@ In the event where there's rush team with missing evaluator, the bot will abort 
 This feature can be disabled by invoking the command with ``force: True``, in which it will pretend like nothing is wrong with it.
 
 This command could be reinvoked as many time in a **private** channel prior announcing it in a public channel, to confirm that the algorithm is working as intended.
-Once a result is announced, it is still strongly advised against rematch, as it could break promises and screw with people planned schedules.
+Once a result is announced, it is still strongly advised against rematch, as it could break promises and screw with students' planned schedules.
 
-The bot will always follow the latest generated result.
+**The bot will always follow the latest generated result.**
 Here's a successful example for 2024 January rush-00.
 ![Match Result](<doc-assets/match-result.png>)
 
@@ -226,7 +223,7 @@ db.timeslots.find() # show the updated collection
 In the event where an evaluator notified you that they could not attend their session, a substitution needs to be arranged.
 
 The first step should be finding a candidate, starting with confirming it with those who did not get chosen in the match result, asking in rush eval discord channel, or anything you could think of.
-(Once again, even if there's already suitable candidate in the database, it is strongly recommend against matching again.)
+(Once again, even if there's already suitable candidate in the database, it is strongly recommended against matching again.)
 
 After the candidate has been decided, they first needs to be added in the database.
 This can be done by simply letting them click on the cadet button and authorize their data if they haven't already.
