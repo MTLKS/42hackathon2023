@@ -10,7 +10,7 @@
 
 # THILA Bot
 
-**THILA Bot** - __Task Helper Intra Linked Automater__ is a discord bot designed to automate the rush evaluation process.
+**THILA Bot** - __Task Helper Intra Linked Automater__, named after out beloved bocal Thila, is a discord bot designed to automate the rush evaluation process.
 
 Before the introduction of **THILA Bot**, the bocal has always been the one manually managing the rush evaluation,
 like creating google docs and form for matching the pisciner and cadet, and collecting the internal feedback afterward.
@@ -22,6 +22,7 @@ Now, instead of creating google docs and form for matching the pisciner and cade
 
 ## Setup
 For more info about bot creation, please refer to [Bot Creation](BotCreation.md). (WIP)
+
 For more info about intra application creation, please refer to [Intra Application Creation](IntraApplicationCreation.md). (WIP)
 
 
