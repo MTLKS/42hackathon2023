@@ -88,13 +88,13 @@ The time it takes for the command to finish it's task could vary, therefore they
 If the bot did not respond anywhere near in the expected response time, the bot may very likely has crashed.
 Following that will be troubleshooting and rebooting. [Administration](#administration)
 
-[rusheval cadet](#rusheval-cadet)
-[rusheval pisciner](#rusheval-pisciner)
-[rusheval info](#rusheval-info)
-[rusheval match](#rusheval-match)
-[rusheval feedback](#rusheval-feedback)
-[rusheval export](#rusheval-export)
-[clean](#clean)
+- [rusheval cadet](#rusheval-cadet)
+- [rusheval pisciner](#rusheval-pisciner)
+- [rusheval info](#rusheval-info)
+- [rusheval match](#rusheval-match)
+- [rusheval feedback](#rusheval-feedback)
+- [rusheval export](#rusheval-export)
+- [clean](#clean)
 
 
 ### rusheval cadet
